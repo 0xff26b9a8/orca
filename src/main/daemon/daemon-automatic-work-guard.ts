@@ -8,10 +8,13 @@ import type { ProcessGrowthTrip } from '../../shared/process-growth-breaker'
 import { AutomaticWorkRunMarker } from './automatic-work-run-marker-store'
 import type { AutomaticWorkRequestType } from './daemon-automatic-work-protocol'
 import { DaemonProcessGrowthMonitor } from './daemon-process-growth-monitor'
+import { HostTerminalLedger, resolveMaxHostTerminals } from './host-terminal-ledger'
 import { TerminalSpawnGate, type TerminalSpawnAdmissionMode } from './terminal-spawn-gate'
 
 type DaemonAutomaticWorkGuardOptions = {
   markerPath: string | undefined
+  /** Where every daemon on this host shares its terminal count; undefined caps this one alone. */
+  hostTerminalLedgerDir?: string | undefined
   mode: TerminalSpawnAdmissionMode
   log: { log: (event: string, details: Record<string, unknown>) => void }
   listSessions: () => readonly { sessionId: string; pid: number | null }[]
@@ -46,7 +49,12 @@ export class DaemonAutomaticWorkGuard {
       mode: options.mode,
       pressure: () => this.monitor.level,
       automaticWorkMode: () => this.automaticWorkMode(),
-      armAutomaticWork: () => this.marker.arm()
+      armAutomaticWork: () => this.marker.arm(),
+      hostTerminals: new HostTerminalLedger({
+        dir: options.hostTerminalLedgerDir ?? null,
+        maxTerminals: resolveMaxHostTerminals(),
+        log: (event, details) => options.log.log(event, details)
+      })
     })
   }
 
@@ -54,17 +62,20 @@ export class DaemonAutomaticWorkGuard {
   start(): void {
     this.marker.open()
     this.monitor.start()
+    this.gate.startHostTerminals()
   }
 
   /** Called after every session was disposed on an orderly shutdown. */
   stop(): void {
     this.monitor.stop()
+    this.gate.stopHostTerminals()
     this.marker.markCleanExit()
   }
 
   /** An exit on purpose that skips teardown (macOS login-session retirement). */
   recordOrderlyExit(): void {
     this.monitor.stop()
+    this.gate.stopHostTerminals()
     this.marker.markCleanExit()
   }
 

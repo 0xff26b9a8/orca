@@ -54,6 +54,7 @@ export class DaemonServer {
     this.log = options.log ?? createNoopDaemonFileLog()
     this.automaticWork = new DaemonAutomaticWorkGuard({
       markerPath: options.automaticWorkMarkerPath,
+      hostTerminalLedgerDir: options.hostTerminalLedgerDir,
       mode: options.spawnAdmission ?? 'observe',
       log: this.log,
       listSessions: () => this.host.listSessions(),
