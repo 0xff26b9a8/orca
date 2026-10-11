@@ -47,7 +47,7 @@ import { createRelayReadiness } from './relay-readiness.js'
 import { createRelayTokenVerifier, readBearer } from './relay-token-verifier.js'
 import { closeRelayWebSocket } from './relay-websocket-close.js'
 import { ShadowDirectoryCompare } from './shadow-directory-compare.js'
-import { startShadowSeatPoller } from './shadow-seat-directory.js'
+import { type ShadowSeatPoller, startShadowSeatPoller } from './shadow-seat-directory.js'
 import { CellReserveClient } from './cell-reserve-client.js'
 import { googleMetadataIdentityToken, reusedIdentityToken } from './google-metadata-identity-token.js'
 import { ReserveAssignment } from './reserve-assignment.js'
@@ -161,6 +161,8 @@ export function createRelayServer(
   const relayJwks = createRemoteJWKSet(new URL(config.jwksUrl))
   const verifyRelayToken = createRelayTokenVerifier(config, relayJwks)
   const store = new RelayCredentialStore(observedDatabase, options.now)
+  // Bound once the poller below exists; without one, no poll ever reads as dead.
+  const pollEvidence: { deadCellVerdict?: ShadowSeatPoller['deadCellVerdict'] } = {}
   const assignments = new RelayAssignmentStore(observedDatabase, options.now, {
     requireLiveCells: config.role === 'director',
     placementLoadBand: config.role === 'director' ? new PlacementLoadBand(options.random) : undefined,
@@ -169,7 +171,8 @@ export function createRelayServer(
     regionalRehomeDirectorRegion:
       config.role === 'director' ? (config.region ?? RELAY_DEFAULT_REGION) : undefined,
     recordControlRenewal: (durationMs, outcome) =>
-      observability.recordControlRenewal?.(durationMs, outcome)
+      observability.recordControlRenewal?.(durationMs, outcome),
+    deadCellVerdict: (cellId, now) => pollEvidence.deadCellVerdict?.(cellId, now) ?? null
   })
   const readiness = createRelayReadiness(observedDatabase, config.jwksUrl, {
     jwksGraceMs: config.readinessJwksGraceMs,
@@ -185,6 +188,7 @@ export function createRelayServer(
     listCells: () => assignments.seatFeedCells(),
     reserver: () => placing.on
   })
+  pollEvidence.deadCellVerdict = shadowSeatPoller?.deadCellVerdict
   const shadowCompare = shadowSeatPoller
     ? new ShadowDirectoryCompare(shadowSeatPoller.directory, options.now)
     : undefined
