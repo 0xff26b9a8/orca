@@ -8,7 +8,7 @@ import type { AuthenticatedMobileSocket } from '../rpc/mobile-socket-wiring'
 import type { RpcRequest, RpcResponse } from '../rpc/core'
 import type { WebSocketTransport } from '../rpc/ws-transport'
 import type { DeviceScope } from '../device-registry'
-import { RuntimeRpcRequestAdmission } from './runtime-rpc-request-admission'
+import { RuntimeRpcMobileDevices } from './runtime-rpc-mobile-devices'
 import { classifyRuntimeLongPoll } from './runtime-rpc-long-poll'
 import type { RpcCallerScope } from '../rpc/rpc-caller-scope'
 import { limitRuntimeRpcReplySize } from './runtime-rpc-reply-size-limit'
@@ -27,7 +27,7 @@ function injectDeviceScope(response: string, scope: DeviceScope): string {
   }
 }
 
-export class RuntimeRpcWebSocketDispatch extends RuntimeRpcRequestAdmission {
+export class RuntimeRpcWebSocketDispatch extends RuntimeRpcMobileDevices {
   // Why: WebSocket dispatch is streaming (multiple responses) and auths via per-device tokens, not the shared token.
   protected async handleWebSocketMessage(
     rawMessage: string,
@@ -77,7 +77,7 @@ export class RuntimeRpcWebSocketDispatch extends RuntimeRpcRequestAdmission {
     // Why: the dispatcher enforces this scope's permissions; it never trusts a request field.
     const callerScope: RpcCallerScope =
       device.scope === 'mobile'
-        ? { kind: 'mobile' }
+        ? { kind: 'mobile', delegated: device.parentDeviceId !== undefined }
         : { kind: 'runtime-paired', grants: device.grants ?? [] }
 
     // Why: bind deviceToken to this socket so ws.on('close') knows which mobile client disconnected.
@@ -146,6 +146,10 @@ export class RuntimeRpcWebSocketDispatch extends RuntimeRpcRequestAdmission {
               }
             : undefined,
         pairing: pairingContext,
+        delegatedMobileDevices:
+          device.scope === 'runtime'
+            ? { sync: (phones) => this.syncDelegatedMobileDevices(device.deviceId, phones) }
+            : undefined,
         signal: abortRegistration?.signal,
         sendBinary,
         registerBinaryStreamHandler: (streamId, handler) =>
