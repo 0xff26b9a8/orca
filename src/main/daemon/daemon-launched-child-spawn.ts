@@ -10,6 +10,7 @@ import {
 } from './daemon-appimage-launch'
 import { buildDurableDaemonScopeCommand } from './daemon-cgroup-scope'
 import { daemonLogArgs } from './daemon-launch-paths'
+import { TERMINAL_SPAWN_ADMISSION_ARG } from './terminal-spawn-gate'
 
 export type DaemonChildSpawnOptions = {
   entryPath: string
@@ -23,6 +24,7 @@ export type DaemonChildSpawnOptions = {
   pidPath: string
   launchNonce: string
   macosLoginSessionWatch: boolean
+  spawnAdmission?: 'observe' | 'enforce'
   /** Defaults to 10 s; a cold first exec on Windows can need longer. */
   startupTimeoutMs?: number
 }
@@ -53,6 +55,7 @@ function buildDaemonScriptArgs(options: DaemonChildSpawnOptions): string[] {
     '--spawner-exec-path',
     process.execPath,
     ...(macosLoginSessionWatch ? ['--login-session-watch'] : []),
+    ...(options.spawnAdmission === 'enforce' ? [TERMINAL_SPAWN_ADMISSION_ARG, 'enforce'] : []),
     ...daemonLogArgs()
   ]
 }

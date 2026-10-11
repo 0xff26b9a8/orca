@@ -14,6 +14,7 @@ import type { DaemonStreamDataBatcher } from './daemon-stream-data-batcher'
 import type { TerminalHistorySeedTransferRegistry } from './terminal-history-seed-transfer-registry'
 import type { CreateOrAttachOptions, CreateOrAttachResult, TerminalHost } from './terminal-host'
 import { isTuiAgent } from '../../shared/tui-agent-config'
+import { isSpawnIntent } from '../../shared/host-spawn-admission'
 import { parsePtyStartupIngressIntent } from '../../shared/pty-startup-ingress'
 import {
   isAgentSessionExecutionClaim,
@@ -23,14 +24,15 @@ import { type DaemonRequest, TerminalAttachCanceledError } from './types'
 
 type CreateOrAttachRequest = Extract<DaemonRequest, { type: 'createOrAttach' }>
 
-const DEFAULT_SPAWN_ADMISSION_WINDOW_MS = 15_000
+const MAX_SPAWN_ADMISSION_WINDOW_MS = 12_000
 
-// Why half: a paced fork must still finish before the caller's own cancellation fires.
+// Why half, capped: a paced fork must finish before the caller's own cancellation fires,
+// and remote clients give up on a terminal create after 15 s.
 function resolveSpawnAdmissionDeadline(cancelAfterMs: unknown): number {
   const windowMs =
     Number.isSafeInteger(cancelAfterMs) && Number(cancelAfterMs) > 0
-      ? Math.min(Number(cancelAfterMs), 300_000) / 2
-      : DEFAULT_SPAWN_ADMISSION_WINDOW_MS
+      ? Math.min(Number(cancelAfterMs) / 2, MAX_SPAWN_ADMISSION_WINDOW_MS)
+      : MAX_SPAWN_ADMISSION_WINDOW_MS
   return Date.now() + windowMs
 }
 
@@ -128,7 +130,7 @@ export class DaemonTerminalAdmission {
         ...(payload.agentSessionEnsure ? { agentSessionEnsure: payload.agentSessionEnsure } : {}),
         spawnAdmission: {
           clientId,
-          declaredIntent: null,
+          declaredIntent: isSpawnIntent(payload.spawnIntent) ? payload.spawnIntent : null,
           deadlineAt: resolveSpawnAdmissionDeadline(payload.cancelAfterMs)
         },
         isCanceled: () => spawnPreparation?.canceled === true,
