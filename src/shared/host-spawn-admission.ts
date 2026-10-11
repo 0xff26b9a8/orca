@@ -72,6 +72,13 @@ export function parseTerminalSpawnDeferral(message: string): SpawnDeferralReason
     : null
 }
 
+/** Finds a deferral in a spawn error, whether an RPC failure or the local IPC's wrapped message. */
+export function readTerminalSpawnDeferral(error: unknown): SpawnDeferralReason | null {
+  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+  const index = message.indexOf(TERMINAL_SPAWN_DEFERRED_PREFIX)
+  return index === -1 ? null : parseTerminalSpawnDeferral(message.slice(index).split(/\s/)[0])
+}
+
 export type SpawnAdmissionDecision =
   | { kind: 'admit'; charge: SpawnCharge }
   /** `retryAt` null means "until a slot is released". */
