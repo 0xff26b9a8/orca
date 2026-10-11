@@ -55,7 +55,14 @@ function setup() {
   const onError = vi.fn()
   const resolveAuthenticatedDevice = vi.fn((token: string) =>
     token === 'valid-token'
-      ? { deviceId: 'device-1', deviceToken: token, scope: 'mobile' as const, clientId: token, callerFingerprint: 'test-fingerprint', credentialRevision: 0 }
+      ? {
+          deviceId: 'device-1',
+          deviceToken: token,
+          scope: 'mobile' as const,
+          clientId: token,
+          callerFingerprint: 'test-fingerprint',
+          credentialRevision: 0
+        }
       : null
   )
   const channel = new E2EEChannel(ws as unknown as WebSocket, {
