@@ -60,6 +60,8 @@ export type RpcRequest = {
   orchestrationCompatibilityEvidence?: OrchestrationCompatibilityEvidence
   // Why unknown: untrusted wire input; runtime-source-admission.ts validates it.
   expectedRuntimeSource?: unknown
+  // Why unknown: phone-supplied routing target (`runtime:<env>`), validated where it is read.
+  executionHost?: unknown
 }
 
 export type LegacyCoordinatorAuthorityProof = Readonly<{
