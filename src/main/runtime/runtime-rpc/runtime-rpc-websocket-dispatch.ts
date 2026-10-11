@@ -10,6 +10,7 @@ import type { WebSocketTransport } from '../rpc/ws-transport'
 import type { DeviceScope } from '../device-registry'
 import { RuntimeRpcMobileDevices } from './runtime-rpc-mobile-devices'
 import { classifyRuntimeLongPoll } from './runtime-rpc-long-poll'
+import type { RpcBinarySender } from '../rpc/rpc-binary-sender'
 import type { RpcCallerScope } from '../rpc/rpc-caller-scope'
 import { limitRuntimeRpcReplySize } from './runtime-rpc-reply-size-limit'
 
@@ -32,7 +33,7 @@ export class RuntimeRpcWebSocketDispatch extends RuntimeRpcMobileDevices {
   protected async handleWebSocketMessage(
     rawMessage: string,
     reply: (response: string) => void,
-    sendBinary: (response: Uint8Array<ArrayBufferLike>) => boolean | void,
+    sendBinary: RpcBinarySender,
     wsTransport?: WebSocketTransport,
     ws?: WebSocket,
     authenticatedDeviceToken?: string | null,

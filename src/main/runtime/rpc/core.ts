@@ -16,6 +16,7 @@ import type {
 import type { OrchestrationCompatibilityEvidence } from '../../../shared/orchestration-compatibility-evidence'
 import type { OrchestrationSessionCaller } from '../orchestration/orchestration-caller-identity'
 import type { RpcCallerIdentity } from './rpc-caller-identity'
+import type { RpcBinarySender } from './rpc-binary-sender'
 import type { RpcMethodPermission } from './rpc-method-permission'
 
 export type PairingRpcContext = {
@@ -123,7 +124,7 @@ export type RpcContext = {
     sync(phones: readonly DelegatedPhone[]): DelegatedMobileDeviceSyncResult
   }
   // Why: mobile terminal traffic bypasses JSON streaming; undefined on Unix/socket and non-E2EE WebSocket paths.
-  sendBinary?: (bytes: Uint8Array<ArrayBufferLike>) => boolean | void
+  sendBinary?: RpcBinarySender
   // Why: binary terminal frames arrive outside JSON-RPC once a stream is established; handlers register only the stream IDs they created.
   registerBinaryStreamHandler?: (
     streamId: number,
