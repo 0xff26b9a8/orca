@@ -113,7 +113,8 @@ async function callWebRuntimeSessionTabMethod(
   if (isLifecycleClose && (!args.publicationEpoch || !args.terminalHandle)) {
     // Why: missing host-generation or terminal-incarnation evidence means keep;
     // a tab id alone can be stale or reused after reconnect.
-    const { acceptReplayedWebSessionTabsSnapshot } = await import('./web-session-tabs-sync')
+    const { acceptReplayedWebSessionTabsSnapshot } =
+      await import('./web-session-tabs-sync/tracking-lifecycle')
     acceptReplayedWebSessionTabsSnapshot(environmentId, args.worktreeId)
     await refreshWebRuntimeSessionTabsSnapshot(environmentId, args.worktreeId)
     console.warn('[web-runtime-session] suppressed lifecycle close without incarnation evidence', {
@@ -130,7 +131,8 @@ async function callWebRuntimeSessionTabMethod(
   }
 
   try {
-    const { resolveHostSessionTabIdForWebSessionTab } = await import('./web-session-tabs-sync')
+    const { resolveHostSessionTabIdForWebSessionTab } =
+      await import('./web-session-tabs-sync/tracking-mappings')
     const state = useAppStore.getState()
     const hostTabId =
       resolveHostSessionTabIdForWebSessionTab(state, {
@@ -191,7 +193,8 @@ async function callWebRuntimeSessionTabMethod(
         // only when it republished; dead-leaf refusals must stay suppressed.
         clearWebSessionCloseIntent(intentOwner, args.worktreeId, immediateHostTabId)
         clearWebSessionCloseIntent(intentOwner, args.worktreeId, hostTabId)
-        const { acceptReplayedWebSessionTabsSnapshot } = await import('./web-session-tabs-sync')
+        const { acceptReplayedWebSessionTabsSnapshot } =
+          await import('./web-session-tabs-sync/tracking-lifecycle')
         acceptReplayedWebSessionTabsSnapshot(environmentId, args.worktreeId)
       }
       await refreshWebRuntimeSessionTabsSnapshot(environmentId, args.worktreeId, {
@@ -220,7 +223,8 @@ async function callWebRuntimeSessionTabMethod(
       }
     }
     if (isLifecycleClose) {
-      const { acceptReplayedWebSessionTabsSnapshot } = await import('./web-session-tabs-sync')
+      const { acceptReplayedWebSessionTabsSnapshot } =
+        await import('./web-session-tabs-sync/tracking-lifecycle')
       acceptReplayedWebSessionTabsSnapshot(environmentId, args.worktreeId)
       await refreshWebRuntimeSessionTabsSnapshot(environmentId, args.worktreeId, {
         expectedEnvironmentPairingRevision: intentOwner.pairingRevision
