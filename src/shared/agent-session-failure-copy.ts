@@ -76,8 +76,8 @@ export const AGENT_SESSION_FAILURE_COPY = {
   providerExitedRow:
     '{{agent}} stopped while this response was in progress. You can continue in this conversation.',
   providerExitedRejection: '{{agent}} stopped before this message was sent.',
-  providerRejected: 'The provider did not accept this message.',
-  providerRejectedQuoted: 'The provider did not accept this message: {{detail}}.',
+  providerRejected: "{{agent}} didn't accept this message.",
+  providerRejectedQuoted: "{{agent}} didn't accept this message: {{detail}}.",
   attachmentEmpty: 'An image on this message is empty, so the message was not sent.',
   attachmentTooLarge: 'An image on this message is too large, so the message was not sent.',
   attachmentLargerThan:

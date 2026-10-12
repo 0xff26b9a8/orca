@@ -237,8 +237,14 @@ const FAILURE_SENTENCES = {
   providerExited: (context, _fact, surface, say) =>
     say(surface === 'row' ? 'providerExitedRow' : 'providerExitedRejection', agent(say, context)),
   restartFailed: couldNot('couldNotRestart'),
-  providerRejected: (_context, fact, _surface, say) =>
-    quotingPersonDetail(say, 'providerRejected', 'providerRejectedQuoted', fact.detail),
+  providerRejected: (context, fact, _surface, say) =>
+    quotingPersonDetail(
+      say,
+      'providerRejected',
+      'providerRejectedQuoted',
+      fact.detail,
+      agent(say, context)
+    ),
   attachmentInvalid: (context, fact, _surface, say) =>
     fact.attachment
       ? ATTACHMENT_SENTENCES[fact.attachment.reason](say, context, fact.attachment)
