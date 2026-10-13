@@ -15746,8 +15746,16 @@
           "7b458e0b7f": "Choose a Markdown template.",
           "1829437fce": "New Markdown"
         },
+        "DiagramViewerModal": {
+          "title": "Diagram",
+          "zoomOut": "Zoom out",
+          "zoomIn": "Zoom in",
+          "fit": "Fit to screen",
+          "close": "Close"
+        },
         "MermaidBlock": {
-          "dcc132e691": "Diagram error:"
+          "dcc132e691": "Diagram error:",
+          "expand": "Expand diagram"
         },
         "MonacoEditor": {
           "68cb83f4a7": "Add note on selected text",

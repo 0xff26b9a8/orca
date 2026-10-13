@@ -15488,8 +15488,16 @@
           "7b458e0b7f": "Choisissez un modèle Markdown.",
           "1829437fce": "Nouveau Markdown"
         },
+        "DiagramViewerModal": {
+          "title": "Diagramme",
+          "zoomOut": "Zoom arrière",
+          "zoomIn": "Zoom avant",
+          "fit": "Ajuster à l'écran",
+          "close": "Fermer"
+        },
         "MermaidBlock": {
-          "dcc132e691": "Erreur de diagramme :"
+          "dcc132e691": "Erreur de diagramme :",
+          "expand": "Agrandir le diagramme"
         },
         "MonacoEditor": {
           "68cb83f4a7": "Ajouter une note sur le texte sélectionné",

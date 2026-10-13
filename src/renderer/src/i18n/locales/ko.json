@@ -15412,8 +15412,16 @@
           "7b458e0b7f": "Markdown 템플릿을 선택하세요.",
           "1829437fce": "새로운 Markdown"
         },
+        "DiagramViewerModal": {
+          "title": "다이어그램",
+          "zoomOut": "축소",
+          "zoomIn": "확대",
+          "fit": "화면에 맞추기",
+          "close": "닫기"
+        },
         "MermaidBlock": {
-          "dcc132e691": "다이어그램 오류:"
+          "dcc132e691": "다이어그램 오류:",
+          "expand": "다이어그램 확대"
         },
         "MonacoEditor": {
           "68cb83f4a7": "선택한 텍스트에 메모 추가",
