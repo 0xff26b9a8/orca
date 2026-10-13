@@ -39,6 +39,8 @@ import {
   observeWslOrcadHostResponse,
   wslOrcadHostSupports
 } from '../wsl/wsl-orcad-host-environments'
+import { getWslHostService } from '../wsl/wsl-host-service-instance'
+import { assertWslHostReachable, isGatedOffWslHost } from '../wsl/wsl-host-gate'
 
 function manuallyDisconnectedResponse(
   environment: ReturnType<typeof resolveEnvironment>
@@ -71,7 +73,9 @@ export function registerRuntimeEnvironmentConnectivityHandlers({
     getRuntimeEnvironmentStatusSnapshots()
   )
   ipcMain.handle('runtimeEnvironments:list', () => {
-    const environments = listEnvironments(getUserDataPath())
+    const environments = listEnvironments(getUserDataPath()).filter(
+      (environment) => !isGatedOffWslHost(environment)
+    )
     readSettingsWithRuntimeEnvironmentPreference(store, getUserDataPath())
     return environments.map(publicRuntimeEnvironmentWithHostKey)
   })
@@ -107,12 +111,26 @@ export function registerRuntimeEnvironmentConnectivityHandlers({
   )
   ipcMain.handle(
     'runtimeEnvironments:remove',
-    (_event, args: { selector: string }): { removed: PublicKnownRuntimeEnvironment } => {
+    (
+      _event,
+      args: { selector: string }
+    ):
+      | { removed: PublicKnownRuntimeEnvironment }
+      | Promise<{ removed: PublicKnownRuntimeEnvironment }> => {
       const environment = resolveEnvironment(getUserDataPath(), args.selector)
       if (store.getSettings().activeRuntimeEnvironmentId === environment.id) {
         throw new Error(
           'This server is the default host for new projects. Choose another one in Advanced before removing it.'
         )
+      }
+      // A closed gate leaves persisted WSL hosts untouched on disk.
+      assertWslHostReachable(environment)
+      const wsl = environment.orcadDeployment?.kind === 'wsl' ? getWslHostService() : null
+      if (wsl) {
+        // Also releases the distro's holder and drops the WSL record.
+        return wsl
+          .remove(environment.id)
+          .then(() => ({ removed: redactRuntimeEnvironment(environment) }))
       }
       const removed = removeEnvironment(getUserDataPath(), args.selector)
       void retireRemovedRuntimeEnvironment(removed.id, invalidateTransport, store)
@@ -139,7 +157,12 @@ export function registerRuntimeEnvironmentConnectivityHandlers({
       args: { selector: string; timeoutMs?: number }
     ): Promise<RuntimeRpcResponse<RuntimeStatus>> => {
       const environment = resolveEnvironment(getUserDataPath(), args.selector)
+      assertWslHostReachable(environment)
       clearRuntimeEnvironmentManualDisconnect(environment.id)
+      if (environment.orcadDeployment?.kind === 'wsl') {
+        // An explicit connect may boot the distro.
+        await getWslHostService()?.connect(environment.id)
+      }
       return getRuntimeEnvironmentStatus(getUserDataPath(), environment.id, args.timeoutMs, {
         reconnect: true
       })
