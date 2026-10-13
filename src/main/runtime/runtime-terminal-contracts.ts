@@ -81,7 +81,6 @@ export type TerminalCreateOptions = {
   launchSource?: string
   title?: string
   focus?: boolean
-  rendererBacked?: boolean
   activate?: boolean
   presentation?: RuntimeTerminalPresentation
   surfaceOwner?: false
