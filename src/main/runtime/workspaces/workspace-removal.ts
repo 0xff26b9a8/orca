@@ -61,12 +61,12 @@ export abstract class OrcaRuntimeWithRemoveManagedWorktree extends OrcaRuntimeWi
     repoId: string,
     removalHostId?: ExecutionHostId
   ): void
-  protected abstract retryFailedLocalRemoval(
+  protected abstract retryFailedRemoval(
     route: { kind: string },
     target: { id: string; path: string },
     registeredWorktrees: readonly GitWorktreeInfo[],
     options: RemoveManagedWorktreeOptions
-  ): boolean
+  ): Promise<boolean>
 
   async removeManagedWorktree(
     worktreeSelector: string,
@@ -167,7 +167,7 @@ export abstract class OrcaRuntimeWithRemoveManagedWorktree extends OrcaRuntimeWi
           registeredWorktrees,
           removalHome
         )
-        if (this.retryFailedLocalRemoval(route, removalTarget, registeredWorktrees, options)) {
+        if (await this.retryFailedRemoval(route, removalTarget, registeredWorktrees, options)) {
           return { removing: true }
         }
         if (!registeredWorktree) {
