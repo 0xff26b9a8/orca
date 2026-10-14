@@ -21,7 +21,13 @@ describe('worktree no-op notifications', () => {
     before.setActivePendingWorktreeCreation('missing')
     before.remountTerminalTabForRecovery('missing')
     before.settleTerminalTabRecovery('missing', 1, 'success')
-    before.markWorktreeUnread('missing')
+    before.markAgentAttentionUnread({
+      workspaceId: 'missing',
+      subjectKey: null,
+      groupId: null,
+      reason: 'agent-completion'
+    })
+    before.readTerminalPaneOnInput({ worktreeId: 'missing', tabId: 'missing', paneKey: null })
     before.bumpWorktreeActivity('missing')
     before.clearWorktreeDeleteState('missing')
     before.seedActiveWorktreeLastVisitedIfMissing()

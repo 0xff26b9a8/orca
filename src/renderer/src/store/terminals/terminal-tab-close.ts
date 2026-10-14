@@ -16,6 +16,7 @@ import { startTerminalTabProviderRetirement } from './terminal-tab-close-provide
 import { commitTerminalSurfaceClose } from './terminal-surface-close-intent'
 import { omitUnverifiedPtyLossTabIds } from './terminal-unverified-pty-loss'
 import { removePaneKeysByTabPrefix } from '../slices/agent-status-pane-keyed-records'
+import { removeTabsAttention } from '../slices/workspace-attention/subject-attention-transitions'
 import { omitRecordKeys } from '../slices/worktrees/teardown/record-key-omission'
 import { deleteNativeChatComposerDraftsForTab } from '@/components/native-chat/native-chat-composer-draft-store'
 import { dropNativeChatPendingAttachmentsForTab } from '@/components/native-chat/native-chat-pending-attachment-cache'
@@ -126,13 +127,8 @@ export function createTerminalTabCloseActions(
         const nextUnverifiedPtyLossTabIds = omitUnverifiedPtyLossTabIds(s.unverifiedPtyLossTabIds, [
           tabId
         ])
-        // Why: keep the same reference when the closing tab had no unread flag, so unrelated closes don't force full-state selector re-eval.
-        const nextUnreadTerminalTabs = omitByTabId(s.unreadTerminalTabs)
-        const nextUnreadTerminalPanes = removePaneKeysByTabPrefix(s.unreadTerminalPanes, tabId)
-        const nextUnreadAgentCompletionPanes = removePaneKeysByTabPrefix(
-          s.unreadAgentCompletionPanes,
-          tabId
-        )
+        // Why: unchanged marker records keep their reference, so unrelated closes don't force full-state selector re-eval.
+        const attentionPatch = removeTabsAttention(s, closingTabIds)
         const nextLastTerminalInputAtByPaneKey = removePaneKeysByTabPrefix(
           s.lastTerminalInputAtByPaneKey,
           tabId
@@ -211,16 +207,7 @@ export function createTerminalTabCloseActions(
           ...(nextClosedTombstones !== s.closedTerminalTabTombstonesByTabId
             ? { closedTerminalTabTombstonesByTabId: nextClosedTombstones }
             : {}),
-          // Why: skip writing unreadTerminalTabs when unchanged to avoid a no-op state allocation that re-evaluates full-state selectors. Mirrors tabs.ts.
-          ...(nextUnreadTerminalTabs !== s.unreadTerminalTabs
-            ? { unreadTerminalTabs: nextUnreadTerminalTabs }
-            : {}),
-          ...(nextUnreadTerminalPanes !== s.unreadTerminalPanes
-            ? { unreadTerminalPanes: nextUnreadTerminalPanes }
-            : {}),
-          ...(nextUnreadAgentCompletionPanes !== s.unreadAgentCompletionPanes
-            ? { unreadAgentCompletionPanes: nextUnreadAgentCompletionPanes }
-            : {}),
+          ...attentionPatch,
           lastTerminalInputAtByPaneKey: nextLastTerminalInputAtByPaneKey,
           expandedPaneByTabId: nextExpanded,
           canExpandPaneByTabId: nextCanExpand,

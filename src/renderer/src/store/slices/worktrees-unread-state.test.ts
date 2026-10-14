@@ -28,14 +28,14 @@ vi.mock('@/components/worktree-base-fallback-notice', () => ({
 
 beforeEach(resetWorktreeSliceModuleMemory)
 
-// Why: ghostty "show until interact" — BEL raises the dot even on the active worktree; only clearWorktreeUnread clears it.
+// Why: ghostty "show until interact" — attention raises the dot even on the active worktree; only engagement clears it.
 describe('worktree unread (show-until-interact)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     resetRemoteRuntimeMocks()
   })
 
-  it('markWorktreeUnread sets isUnread even when the worktree is active', async () => {
+  it('marking sets isUnread even when the worktree is active', async () => {
     const store = createTestStore()
     const wt = makeWorktree({ id: 'repo1::/path/wt1', repoId: 'repo1', path: '/path/wt1' })
     store.setState({
@@ -43,7 +43,12 @@ describe('worktree unread (show-until-interact)', () => {
       activeWorktreeId: wt.id
     } as Partial<AppState>)
 
-    store.getState().markWorktreeUnread(wt.id)
+    store.getState().markAgentAttentionUnread({
+      workspaceId: wt.id,
+      subjectKey: null,
+      groupId: null,
+      reason: 'agent-completion'
+    })
 
     const after = store.getState().worktreesByRepo.repo1[0]
     expect(after.isUnread).toBe(true)
@@ -78,7 +83,14 @@ describe('worktree unread (show-until-interact)', () => {
       worktreesByRepo: { 'repo-shared': [wt] }
     } as Partial<AppState>)
 
-    expect(() => store.getState().markWorktreeUnread(wt.id)).not.toThrow()
+    expect(() =>
+      store.getState().markAgentAttentionUnread({
+        workspaceId: wt.id,
+        subjectKey: null,
+        groupId: null,
+        reason: 'agent-completion'
+      })
+    ).not.toThrow()
 
     expect(store.getState().worktreesByRepo['repo-shared'][0].isUnread).toBe(true)
     expect(mockApi.worktrees.updateMeta).toHaveBeenCalledWith(
@@ -112,7 +124,14 @@ describe('worktree unread (show-until-interact)', () => {
       }
     } as Partial<AppState>)
 
-    expect(() => store.getState().markWorktreeUnread(worktreeId)).not.toThrow()
+    expect(() =>
+      store.getState().markAgentAttentionUnread({
+        workspaceId: worktreeId,
+        subjectKey: null,
+        groupId: null,
+        reason: 'agent-completion'
+      })
+    ).not.toThrow()
 
     expect(store.getState().worktreesByRepo['repo-shared'][0].isUnread).toBe(true)
     expect(mockApi.worktrees.updateMeta).not.toHaveBeenCalled()
@@ -120,7 +139,7 @@ describe('worktree unread (show-until-interact)', () => {
   })
 
   it('never throws from any passive path for a genuinely ambiguous owner (#10634)', () => {
-    // Why every passive path, not just markWorktreeUnread: each one runs from a background
+    // Why every passive path, not just marking: each one runs from a background
     // notification, so any that still throws reproduces the uncaught renderer error.
     const worktreeId = 'repo-shared::/same/path'
     const ambiguousState = (): Partial<AppState> =>
@@ -147,7 +166,10 @@ describe('worktree unread (show-until-interact)', () => {
       }) as Partial<AppState>
 
     for (const [label, run] of [
-      ['clearWorktreeUnread', (s: AppState) => s.clearWorktreeUnread(worktreeId)],
+      [
+        'readTerminalPaneOnInput',
+        (s: AppState) => s.readTerminalPaneOnInput({ worktreeId, tabId: 'no-tab', paneKey: null })
+      ],
       ['bumpWorktreeActivity', (s: AppState) => s.bumpWorktreeActivity(worktreeId)]
     ] as const) {
       const store = createTestStore()
@@ -189,7 +211,7 @@ describe('worktree unread (show-until-interact)', () => {
     }
   })
 
-  it('clearWorktreeUnread clears isUnread and persists the change', async () => {
+  it('reading clears isUnread and persists the change', async () => {
     const store = createTestStore()
     const wt = makeWorktree({
       id: 'repo1::/path/wt1',
@@ -202,7 +224,7 @@ describe('worktree unread (show-until-interact)', () => {
       activeWorktreeId: wt.id
     } as Partial<AppState>)
 
-    store.getState().clearWorktreeUnread(wt.id)
+    store.getState().readTerminalPaneOnInput({ worktreeId: wt.id, tabId: '', paneKey: null })
 
     const after = store.getState().worktreesByRepo.repo1[0]
     expect(after.isUnread).toBe(false)
@@ -214,13 +236,13 @@ describe('worktree unread (show-until-interact)', () => {
     )
   })
 
-  it('clearWorktreeUnread is a no-op when already cleared', () => {
+  it('reading is a no-op when already cleared', () => {
     const store = createTestStore()
     const wt = makeWorktree({ id: 'repo1::/path/wt1', repoId: 'repo1', path: '/path/wt1' })
     const initial = { repo1: [wt] }
     store.setState({ worktreesByRepo: initial } as Partial<AppState>)
 
-    store.getState().clearWorktreeUnread(wt.id)
+    store.getState().readTerminalPaneOnInput({ worktreeId: wt.id, tabId: '', paneKey: null })
 
     expect(store.getState().worktreesByRepo).toBe(initial)
     expect(mockApi.worktrees.updateMeta).not.toHaveBeenCalled()
@@ -240,10 +262,15 @@ describe('worktree unread (show-until-interact)', () => {
       detectedWorktreesByRepo: { repo1: detected }
     } as Partial<AppState>)
 
-    store.getState().markWorktreeUnread(hidden.id)
+    store.getState().markAgentAttentionUnread({
+      workspaceId: hidden.id,
+      subjectKey: null,
+      groupId: null,
+      reason: 'agent-completion'
+    })
     expect(store.getState().detectedWorktreesByRepo.repo1.worktrees[0].isUnread).toBe(true)
 
-    store.getState().clearWorktreeUnread(hidden.id)
+    store.getState().readTerminalPaneOnInput({ worktreeId: hidden.id, tabId: '', paneKey: null })
     expect(store.getState().detectedWorktreesByRepo.repo1.worktrees[0].isUnread).toBe(false)
     expect(mockApi.worktrees.updateMeta).toHaveBeenCalledTimes(2)
   })
