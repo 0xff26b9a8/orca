@@ -168,8 +168,8 @@
         "remoteUnsupported": "Orca CLI を使用して、リモートホスト上のブラウザ ID を管理します。",
         "loading": "読み込み中…",
         "resetRequired": "ID データは変更する前に明示的にリセットする必要があります。",
-        "resetRequiredCommand": "コマンドラインからリセットします: orca Browser Identity set --mode <mode> --reset",
-        "optionClean": "掃除済み",
+        "resetRequiredCommand": "コマンドラインからリセットします: orca browser identity set --mode <mode> --reset",
+        "optionClean": "クリーン",
         "optionCleanTooltip": "インポートされた Chrome セッションと一致するように Orca トークンと Electron トークンを削除します。",
         "optionNative": "ネイティブ",
         "optionNativeTooltip": "クリーンアップされた ID を拒否するサイトのために Electron の組み込み ID を保持します。 Google サインインはネイティブモードでは利用できません。",
@@ -9568,7 +9568,7 @@
               "identity": "身元",
               "userAgent": "ユーザー Agent",
               "native": "ネイティブ",
-              "cleaned": "掃除された",
+              "cleaned": "クリーン",
               "restart": "再起動"
             }
           },
