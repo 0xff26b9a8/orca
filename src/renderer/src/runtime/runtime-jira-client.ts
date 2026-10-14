@@ -23,6 +23,7 @@ import type {
 import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
 import { searchLocalJiraIssues } from './local-jira-search-cancellation'
 import { assertRuntimeEnvironmentCapability, callRuntimeRpc } from './runtime-rpc-client'
+import { clearJiraImageCache } from './runtime-jira-image-cache'
 import { isRuntimeProviderSearchQueryWithinLimit } from './runtime-provider-search-bounds'
 import { getJiraRuntimeTarget, type RuntimeJiraSettings } from './runtime-jira-target'
 import { parseJiraConnectionStatus } from './runtime-jira-connection-status'
@@ -85,6 +86,7 @@ export async function jiraDisconnect(
   settings: RuntimeJiraSettings,
   siteId?: string | null
 ): Promise<void> {
+  clearJiraImageCache()
   const target = getJiraRuntimeTarget(settings)
   if (target.kind === 'environment') {
     await callRuntimeRpc<{ ok: true }>(target, 'jira.disconnect', siteId ? { siteId } : undefined, {
