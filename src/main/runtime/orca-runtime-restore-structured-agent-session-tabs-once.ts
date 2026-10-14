@@ -3,7 +3,12 @@ import { defaultAgentChatLabel } from '../../shared/agent-session-chat-label'
 import { OrcaRuntimeWithGetStructuredAgentSessionCreateSupport } from './orca-runtime-get-structured-agent-session-create-support'
 import { getStructuredAgentSessionHost } from '../native-chat/agent-session-wire/structured-agent-session-registry'
 import { collectSavedStructuredAgentSessionIds } from './saved-structured-agent-session-restoration'
-import { seedStructuredAgentSessionTabIndex } from './structured-agent-session-tab-index-seed'
+import {
+  chatTabChangesMatchingIndex,
+  seedStructuredAgentSessionTabIndex
+} from './structured-agent-session-tab-index-seed'
+import { chatTabId } from './agent-session-tab-layout'
+import { structuredSessionTabRetired } from './structured-worker-custody'
 import { LOCAL_EXECUTION_HOST_ID } from '../../shared/execution-host'
 import type {
   RuntimeMobileSessionAgentTab,
@@ -68,7 +73,25 @@ export class OrcaRuntimeWithRestoreStructuredAgentSessionTabsOnce extends OrcaRu
       targets,
       restored.map((session) => session.sessionId)
     )
-    // Past the seed, projecting records nothing.
+    const changes = chatTabChangesMatchingIndex(
+      this.store?.getWorkspaceSession?.(LOCAL_EXECUTION_HOST_ID)?.unifiedTabs ?? {},
+      restored.map((session) => ({
+        worktreeId: session.workspaceId,
+        open: {
+          sessionId: session.sessionId,
+          agent: session.agent,
+          tabId: chatTabId(session.sessionId)
+        }
+      })),
+      // A chat a newer Orca wrote is only unreadable here, so it keeps its tab.
+      (sessionId) =>
+        !!host &&
+        structuredSessionTabRetired(host, sessionId) &&
+        !host.deps?.store?.isSessionUnreadable?.(sessionId)
+    )
+    for (const [worktreeId, worktreeChanges] of changes) {
+      this.changeWindowlessChatTabs(worktreeId, worktreeChanges)
+    }
     for (const session of restored) {
       this.projectStructuredAgentSessionTab({ ...session, activate: false, notify: false })
     }
@@ -105,6 +128,7 @@ export class OrcaRuntimeWithRestoreStructuredAgentSessionTabsOnce extends OrcaRu
           })
         })
     }
+    this.saveWindowlessAgentSessionTab(input.workspaceId, input)
     this.projectStructuredAgentSessionTab(input)
   }
 
