@@ -12283,9 +12283,9 @@
           }
         },
         "EphemeralVmCleanupStopDialog": {
-          "title": "掃除をやめますか？",
+          "title": "クリーンアップを停止しますか？",
           "description": "VM は実行されたままになり、料金が発生する可能性があります。後でクリーンアップを再試行できます。",
-          "cancel": "掃除を続ける",
+          "cancel": "クリーンアップを続ける",
           "stopping": "停止中…",
           "confirm": "クリーンアップを停止する"
         },
