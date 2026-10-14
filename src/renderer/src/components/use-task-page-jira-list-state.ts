@@ -10,11 +10,36 @@ import type {
   JiraIssueSortDirection,
   JiraPrioritiesBySite
 } from './jira-issue-sorter'
-import { jiraListPriorities } from '@/runtime/runtime-jira-client'
+import { jiraListPrioritiesForTarget } from '@/runtime/runtime-jira-client'
 import { loadJiraLinkedView, saveJiraLinkedView } from './jira-linked-view-storage'
-import { defaultScopeSource } from '@/lib/default-creation-host'
+import {
+  fallbackJiraSortColumn,
+  loadJiraListColumnIds,
+  saveJiraListColumnIds,
+  visibleJiraListColumns,
+  type JiraListColumnId
+} from './jira-list-columns'
+import {
+  ipcOrRuntimeTargetForHostId,
+  runtimeTargetEnvironmentId
+} from '@/runtime/runtime-client-target'
+import { getEnvironmentRuntimeContextKey } from '@/lib/provider-runtime-context'
+import { getTaskSourceCacheScope } from '../../../shared/task-source-context'
+const EMPTY_JIRA_PRIORITIES: JiraPrioritiesBySite = new Map()
+
 export function useTaskPageJiraListState(model: TaskPageLinearViewStateModel) {
-  const { settings, jiraConnected, selectedJiraSiteId, taskSource, jiraTaskSourceContext } = model
+  const {
+    jiraConnected,
+    selectedJiraSiteId,
+    taskSource,
+    jiraTaskSourceContext,
+    accountBackedTaskSourceHostId
+  } = model
+  const owner = useMemo(
+    () =>
+      ipcOrRuntimeTargetForHostId(jiraTaskSourceContext?.hostId ?? accountBackedTaskSourceHostId),
+    [accountBackedTaskSourceHostId, jiraTaskSourceContext]
+  )
   // Jira tab state
   const [jiraIssues, setJiraIssues] = useState<JiraIssue[]>([])
   const [jiraLoading, setJiraLoading] = useState(false)
@@ -39,10 +64,39 @@ export function useTaskPageJiraListState(model: TaskPageLinearViewStateModel) {
     order: JiraProjectStatusOrder
     scopeKey: string
   } | null>(null)
-  const [jiraOrderBy, setJiraOrderBy] = useState<JiraIssueSortColumn>('updated')
-  const [jiraOrderDirection, setJiraOrderDirection] = useState<JiraIssueSortDirection>('desc')
-  const [jiraPrioritiesBySite, setJiraPrioritiesBySite] = useState<JiraPrioritiesBySite>(
-    () => new Map()
+  const [jiraColumnIds, setJiraColumnIds] =
+    useState<ReadonlySet<JiraListColumnId>>(loadJiraListColumnIds)
+  const jiraColumns = useMemo(() => visibleJiraListColumns(jiraColumnIds), [jiraColumnIds])
+  const [jiraOrderBy, setJiraOrderBy] = useState<JiraIssueSortColumn>(() =>
+    fallbackJiraSortColumn(jiraColumnIds)
+  )
+  const [jiraOrderDirection, setJiraOrderDirection] = useState<JiraIssueSortDirection>(() =>
+    jiraOrderBy === 'updated' ? 'desc' : 'asc'
+  )
+  const [prioritySnapshot, setPrioritySnapshot] = useState<{
+    scopeKey: string
+    priorities: JiraPrioritiesBySite
+  } | null>(null)
+  const toggleJiraColumn = useCallback(
+    (column: JiraListColumnId) => {
+      if (column === 'key' || column === 'title') {
+        return
+      }
+      const next = new Set(jiraColumnIds)
+      if (next.has(column)) {
+        next.delete(column)
+      } else {
+        next.add(column)
+      }
+      if (!next.has(jiraOrderBy)) {
+        const fallback = fallbackJiraSortColumn(next)
+        setJiraOrderBy(fallback)
+        setJiraOrderDirection(fallback === 'updated' ? 'desc' : 'asc')
+      }
+      saveJiraListColumnIds(next)
+      setJiraColumnIds(next)
+    },
+    [jiraColumnIds, jiraOrderBy]
   )
   const jiraPrioritySiteIdsKey = useMemo(() => {
     const siteIds =
@@ -52,40 +106,42 @@ export function useTaskPageJiraListState(model: TaskPageLinearViewStateModel) {
     // Why: result refreshes replace the issue array; depend on the represented sites, not identity.
     return JSON.stringify([...new Set(siteIds)].sort())
   }, [jiraIssues, selectedJiraSiteId])
+  const priorityScopeKey = JSON.stringify([
+    owner ? getEnvironmentRuntimeContextKey(runtimeTargetEnvironmentId(owner)) : null,
+    jiraTaskSourceContext ? getTaskSourceCacheScope(jiraTaskSourceContext) : null,
+    jiraPrioritySiteIdsKey
+  ])
+  const prioritiesEnabled = taskSource === 'jira' && jiraConnected && jiraOrderBy === 'priority'
+  const jiraPrioritiesBySite: JiraPrioritiesBySite =
+    prioritiesEnabled && owner && prioritySnapshot?.scopeKey === priorityScopeKey
+      ? prioritySnapshot.priorities
+      : EMPTY_JIRA_PRIORITIES
   useEffect(() => {
-    if (taskSource !== 'jira' || !jiraConnected || jiraOrderBy !== 'priority') {
-      setJiraPrioritiesBySite((current) => (current.size === 0 ? current : new Map()))
+    if (!prioritiesEnabled || !owner) {
       return
     }
     let cancelled = false
-    const jiraPrioritySiteIds = JSON.parse(jiraPrioritySiteIdsKey) as string[]
+    const decodedSiteIds: unknown = JSON.parse(jiraPrioritySiteIdsKey)
+    const jiraPrioritySiteIds = Array.isArray(decodedSiteIds)
+      ? decodedSiteIds.filter((siteId): siteId is string => typeof siteId === 'string')
+      : []
     void Promise.all(
       jiraPrioritySiteIds.map(async (siteId) => {
         try {
-          return [
-            siteId,
-            await jiraListPriorities(jiraTaskSourceContext ?? defaultScopeSource(settings), siteId)
-          ] as const
+          return [siteId, await jiraListPrioritiesForTarget(owner, siteId)] as const
         } catch {
           return [siteId, [] as JiraPriority[]] as const
         }
       })
     ).then((prioritiesBySite) => {
       if (!cancelled) {
-        setJiraPrioritiesBySite(new Map(prioritiesBySite))
+        setPrioritySnapshot({ scopeKey: priorityScopeKey, priorities: new Map(prioritiesBySite) })
       }
     })
     return () => {
       cancelled = true
     }
-  }, [
-    jiraConnected,
-    jiraOrderBy,
-    jiraPrioritySiteIdsKey,
-    jiraTaskSourceContext,
-    settings,
-    taskSource
-  ])
+  }, [prioritiesEnabled, jiraPrioritySiteIdsKey, priorityScopeKey, owner])
   const handleJiraSort = useCallback(
     (column: JiraIssueSortColumn) => {
       if (jiraOrderBy === column) {
@@ -126,9 +182,11 @@ export function useTaskPageJiraListState(model: TaskPageLinearViewStateModel) {
     jiraOrderDirection,
     setJiraOrderDirection,
     jiraPrioritiesBySite,
-    setJiraPrioritiesBySite,
     jiraPrioritySiteIdsKey,
-    handleJiraSort
+    handleJiraSort,
+    jiraColumnIds,
+    jiraColumns,
+    toggleJiraColumn
   })
 }
 export type TaskPageJiraListStateModel = ReturnType<typeof useTaskPageJiraListState>
