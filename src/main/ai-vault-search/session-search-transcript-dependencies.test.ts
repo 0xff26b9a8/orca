@@ -24,17 +24,17 @@ import {
 } from '../ai-vault/session-transcript-consumers'
 import { SELF_CONTAINED_TRANSCRIPT_AGENTS } from './session-search-index-consumer'
 
-// Spying on every fs export also mocks ReadStream internals and stalls real reads.
 vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof fs>()
-  return {
-    ...actual,
-    readFile: vi.fn(actual.readFile),
-    readFileSync: vi.fn(actual.readFileSync),
-    open: vi.fn(actual.open),
-    openSync: vi.fn(actual.openSync),
-    createReadStream: vi.fn(actual.createReadStream)
+  const original = await importOriginal<typeof fs & { default: typeof fs }>()
+  // Recursive spies alter native stream prototypes and prevent readers from finishing.
+  const tracked = {
+    readFile: vi.fn(original.readFile),
+    readFileSync: vi.fn(original.readFileSync),
+    open: vi.fn(original.open),
+    openSync: vi.fn(original.openSync),
+    createReadStream: vi.fn(original.createReadStream)
   }
+  return { ...original, ...tracked, default: { ...original.default, ...tracked } }
 })
 vi.mock('node:fs/promises', { spy: true })
 vi.mock('../native-chat/wsl-transcript-fs-access', { spy: true })

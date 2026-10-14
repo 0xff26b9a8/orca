@@ -46,7 +46,10 @@ vi.mock('@/runtime/local-runtime-capabilities', async (importOriginal) => ({
 vi.mock('@/runtime/host-structured-agents', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   readHostStructuredAgents: () =>
-    ['claude', 'codex', 'grok', 'omp', 'opencode', 'pi'].map((agent) => ({ agent, capabilities: {} }))
+    ['claude', 'codex', 'grok', 'omp', 'opencode', 'pi'].map((agent) => ({
+      agent,
+      capabilities: {}
+    }))
 }))
 vi.mock('@/lib/renderer-app-platform', () => ({ getRendererAppPlatform: () => mocks.platform }))
 
