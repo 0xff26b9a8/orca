@@ -1,4 +1,5 @@
 // @ts-nocheck -- mechanically split declarations.
+import type { RuntimeFileOpenPosition } from '../../shared/runtime-file-contracts'
 import type { Store } from '../persistence'
 import type {
   ResolvedRuntimeFileTarget,
@@ -54,7 +55,8 @@ export type RuntimeFileCommandHost = {
     filePath: string,
     relativePath: string,
     runtimeEnvironmentId?: string | null,
-    navigation?: RuntimeNavigationTarget
+    navigation?: RuntimeNavigationTarget,
+    position?: RuntimeFileOpenPosition
   ): void
   openDiff(
     worktreeId: string,
