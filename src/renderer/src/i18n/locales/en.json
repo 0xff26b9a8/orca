@@ -19299,6 +19299,9 @@
     "newWorkspace": {
       "agentOptional": "Agent [Optional]",
       "createDescription": "Choose the project and workspace name. Select an agent if you want to start one."
+    },
+    "JiraIssueWorkspace": {
+      "pendingChange": "Another issue change is in progress."
     }
   },
   "dashboardPopout": {
@@ -20065,6 +20068,19 @@
       "jql": "Status filter JQL",
       "editJql": "Edit as JQL",
       "catalogHint": "Statuses come from loaded issues. Clear statuses to discover others in this view."
+    },
+    "transitions": {
+      "changeStatus": "Change status: {{status}}",
+      "loadError": "Could not load status changes.",
+      "retry": "Retry",
+      "loading": "Loading status changes…",
+      "completeInJira": "Complete “{{name}}” in Jira",
+      "unsupported": "Jira requires fields Orca cannot collect yet: {{fields}}.",
+      "chooseResolution": "Choose a resolution",
+      "comment": "Comment",
+      "back": "Back",
+      "apply": "Change status",
+      "empty": "No status changes available."
     }
   }
 }

@@ -17,7 +17,13 @@ import {
   jiraListPrioritiesForTarget,
   jiraUpdateIssueForTarget
 } from '@/runtime/runtime-jira-client'
-import type { JiraComment, JiraIssue, JiraPriority, JiraUser } from '../../../shared/jira-types'
+import type {
+  JiraComment,
+  JiraIssue,
+  JiraMutationResult,
+  JiraPriority,
+  JiraUser
+} from '../../../shared/jira-types'
 import type { TaskSourceContext } from '../../../shared/task-source-context'
 import { translate } from '@/i18n/i18n'
 import { JiraIssueMetadataBar, JiraIssueWorkspaceHeader } from './jira-issue-workspace-chrome'
@@ -32,9 +38,9 @@ import {
   type EditableJiraIssueField
 } from './jira-issue-workspace-hydration'
 import { enqueueJiraIssueMutation, jiraIssueRequestScope } from './jira-issue-mutation-queue'
-import { useJiraIssueComments } from './use-jira-issue-comments'
+import { useJiraIssueRemoteDetails } from './use-jira-issue-remote-details'
 import { useJiraIssueMutationState } from './use-jira-issue-mutation-state'
-import { useJiraIssueTransitions } from './use-jira-issue-transitions'
+import { getTaskSourceCacheScope } from '../../../shared/task-source-context'
 
 type JiraIssueWorkspaceProps = {
   issue: JiraIssue | null
@@ -66,6 +72,7 @@ export default function JiraIssueWorkspace({
   const [commentDraft, setCommentDraft] = useState('')
   const [commentSubmitting, setCommentSubmitting] = useState(false)
   const requestIdRef = useRef(0)
+  const optimisticCommentsRef = useRef<JiraComment[]>([])
   const {
     comments,
     setComments,
@@ -73,16 +80,23 @@ export default function JiraIssueWorkspace({
     setCommentsLoading,
     commentsError,
     setCommentsError,
-    optimisticCommentsRef,
-    loadComments
-  } = useJiraIssueComments(owner, requestIdRef)
-  const { transitions, setTransitions, loadTransitions } = useJiraIssueTransitions(
-    owner,
-    requestIdRef
-  )
+    loadComments,
+    transitions,
+    setTransitions,
+    transitionsLoading,
+    setTransitionsLoading,
+    transitionsError,
+    setTransitionsError,
+    loadTransitions
+  } = useJiraIssueRemoteDetails(owner, requestIdRef, optimisticCommentsRef)
 
   const displayed = fullIssue ?? issue
   const siteId = displayed?.siteId ?? undefined
+  const metadataKey = JSON.stringify([
+    sourceContext ? getTaskSourceCacheScope(sourceContext) : owner,
+    siteId,
+    displayed?.key
+  ])
   // Cache patches replace the issue object without opening a different issue.
   const requestKey = jiraIssueRequestScope(issue, sourceContext, settings)
   const loadedRequestKeyRef = useRef<string | null>(null)
@@ -105,6 +119,8 @@ export default function JiraIssueWorkspace({
       setCommentsLoading(false)
       setCommentsError(null)
       setTransitions([])
+      setTransitionsError(null)
+      setTransitionsLoading(false)
       setPriorities([])
       setUsers([])
       optimisticCommentsRef.current = []
@@ -120,6 +136,7 @@ export default function JiraIssueWorkspace({
     setComments([])
     setCommentsError(null)
     setTransitions([])
+    setTransitionsError(null)
     setIssueLoading(true)
 
     void jiraGetIssueForTarget(owner, issue.key, issue.siteId)
@@ -170,8 +187,18 @@ export default function JiraIssueWorkspace({
     setCommentsError,
     setCommentsLoading,
     setTransitions,
+    setTransitionsError,
+    setTransitionsLoading,
     optimisticCommentsRef
   ])
+
+  useEffect(
+    () => () => {
+      requestIdRef.current += 1
+      loadedRequestKeyRef.current = null
+    },
+    []
+  )
 
   useJiraIssueMutationState({
     scope: requestKey,
@@ -181,7 +208,8 @@ export default function JiraIssueWorkspace({
     setFullIssue,
     setTitleDraft,
     setLabelsDraft,
-    onStatusSettled: () => displayed && void loadTransitions(displayed, requestIdRef.current)
+    onStatusSettled: () => displayed && void loadTransitions(displayed, requestIdRef.current),
+    onCommentsChanged: () => displayed && void loadComments(displayed, requestIdRef.current)
   })
 
   const mutateIssue = useCallback(
@@ -189,9 +217,15 @@ export default function JiraIssueWorkspace({
       field: string,
       updates: Parameters<typeof jiraUpdateIssueForTarget>[2],
       optimistic?: Partial<JiraIssue>
-    ): Promise<void> => {
+    ): Promise<JiraMutationResult> => {
       if (!displayed || pendingField || !requestKey) {
-        return
+        return {
+          ok: false,
+          error: translate(
+            'components.JiraIssueWorkspace.pendingChange',
+            'Another issue change is in progress.'
+          )
+        }
       }
       setPendingField(field)
       const previous = displayed
@@ -204,6 +238,7 @@ export default function JiraIssueWorkspace({
           scope: requestKey,
           previous,
           optimistic: optimistic ?? {},
+          commentsChanged: Boolean(updates.transitionComment?.trim()),
           update: () => jiraUpdateIssueForTarget(owner, previous.key, updates, siteId),
           refresh: () => jiraGetIssueForTarget(owner, previous.key, previous.siteId),
           patchIssue: (patch) =>
@@ -213,15 +248,19 @@ export default function JiraIssueWorkspace({
               contextKey: mutationContextKey
             })
         })
+        return { ok: true }
       } catch (error) {
-        toast.error(
+        const message =
           error instanceof Error
             ? error.message
             : translate(
                 'auto.components.JiraIssueWorkspace.ea21952aa3',
                 'Failed to update Jira issue.'
               )
-        )
+        if (field !== 'transition') {
+          toast.error(message)
+        }
+        return { ok: false, error: message }
       } finally {
         if (requestId === requestIdRef.current) {
           setPendingField(null)
@@ -355,9 +394,13 @@ export default function JiraIssueWorkspace({
             />
 
             <JiraIssueMetadataBar
+              key={metadataKey}
               displayed={displayed}
               pendingField={pendingField}
               transitions={transitions}
+              transitionsLoading={transitionsLoading}
+              transitionsError={transitionsError}
+              reloadTransitions={() => void loadTransitions(displayed, requestIdRef.current)}
               priorities={priorities}
               users={users}
               mutateIssue={mutateIssue}

@@ -46,7 +46,8 @@ vi.mock('@/store', () => ({
 }))
 vi.mock('@/i18n/i18n', async (importOriginal) => ({
   ...(await importOriginal<typeof I18n>()),
-  translate: (_key: string, fallback: string) => fallback
+  translate: (_key: string, fallback: string, options?: Parameters<typeof I18n.translate>[2]) =>
+    fallback.replace(/\{\{(\w+)\}\}/g, (match, key: string) => String(options?.[key] ?? match))
 }))
 vi.mock('@/components/sidebar/CommentMarkdown', () => ({
   default: ({ content }: { content: string }) => <div>{content}</div>
@@ -356,10 +357,13 @@ describe('JiraIssueWorkspace optimistic edits', () => {
       .mockResolvedValueOnce([{ id: '11', name: 'Start progress', to: inProgress }])
       .mockResolvedValue([{ id: '21', name: 'Finish', to: done }])
     runtimeMocks.jiraUpdateIssueForTarget.mockResolvedValue({ ok: true })
+    runtimeMocks.jiraGetIssueForTarget
+      .mockResolvedValueOnce(jiraIssue('Old title'))
+      .mockResolvedValue(jiraIssue('Old title', { status: inProgress }))
     render(<StoreBackedWorkspace initial={jiraIssue('Old title')} />)
     await flushPromises()
 
-    fireEvent.click(screen.getByRole('button', { name: 'To Do' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change status: To Do' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Start progress' }))
     await flushPromises()
 
@@ -369,7 +373,7 @@ describe('JiraIssueWorkspace optimistic edits', () => {
       { transitionId: '11' },
       'site-1'
     )
-    // The menu stays open after picking a transition, so it must now list the new ones.
+    fireEvent.click(screen.getByRole('button', { name: 'Change status: In Progress' }))
     expect(screen.queryByRole('button', { name: 'Start progress' })).toBeNull()
     expect(await screen.findByRole('button', { name: 'Finish' })).toBeDefined()
   })
@@ -759,7 +763,7 @@ describe('JiraIssueWorkspace optimistic edits', () => {
       .mockResolvedValue(jiraIssue('Old title', { status: inProgress }))
     render(<StoreBackedWorkspace initial={jiraIssue('Old title')} />)
     await flushPromises()
-    fireEvent.click(screen.getByRole('button', { name: 'To Do' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change status: To Do' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Start progress' }))
     await act(async () => selectIssue(otherIssue))
     await flushPromises()
@@ -771,7 +775,7 @@ describe('JiraIssueWorkspace optimistic edits', () => {
     await act(async () => reopenedTransitions.resolve([start]))
     await flushPromises()
     if (!screen.queryByRole('button', { name: 'Finish' })) {
-      fireEvent.click(screen.getByRole('button', { name: 'In Progress' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Change status: In Progress' }))
     }
     expect(await screen.findByRole('button', { name: 'Finish' })).toBeDefined()
     expect(screen.queryByRole('button', { name: 'Start progress' })).toBeNull()
@@ -840,14 +844,14 @@ describe('JiraIssueWorkspace optimistic edits', () => {
       .mockResolvedValue(jiraIssue('Old title', { status: inProgress }))
     render(<StoreBackedWorkspace initial={jiraIssue('Old title')} />)
     await flushPromises()
-    fireEvent.click(screen.getByRole('button', { name: 'To Do' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change status: To Do' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Start progress' }))
     await act(async () => selectIssue(otherIssue))
     await flushPromises()
     await act(async () => selectIssue(jiraIssue('Old title')))
     await flushPromises()
     if (!screen.queryByRole('button', { name: 'Finish' })) {
-      fireEvent.click(screen.getByRole('button', { name: 'In Progress' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Change status: In Progress' }))
     }
     fireEvent.click(await screen.findByRole('button', { name: 'Finish' }))
     await act(async () => oldSave.resolve({ ok: true }))

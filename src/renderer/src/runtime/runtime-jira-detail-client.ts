@@ -7,7 +7,8 @@ import type {
   JiraTransition
 } from '../../../shared/jira-types'
 import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
-import { callRuntimeRpc } from './runtime-rpc-client'
+import { assertRuntimeEnvironmentCapability, callRuntimeRpc } from './runtime-rpc-client'
+import { JIRA_TRANSITION_FIELDS_RUNTIME_CAPABILITY } from '../../../shared/protocol-version'
 import { RuntimeRpcCallError } from './runtime-rpc-result'
 import { readRuntimeJiraPayload } from './runtime-jira-payload-stream'
 
@@ -48,6 +49,16 @@ export async function jiraUpdateIssueForTarget(
   updates: JiraIssueUpdate,
   siteId?: string | null
 ): Promise<JiraMutationResult> {
+  if (
+    target.kind === 'environment' &&
+    (updates.transitionFields || updates.transitionComment !== undefined)
+  ) {
+    await assertRuntimeEnvironmentCapability(
+      target.environmentId,
+      JIRA_TRANSITION_FIELDS_RUNTIME_CAPABILITY,
+      'Update the remote Orca server to submit required transition fields, or complete the transition in Jira.'
+    )
+  }
   const args = { key, updates, siteId: siteId ?? undefined }
   return target.kind === 'environment'
     ? callRuntimeRpc<JiraMutationResult>(target, 'jira.updateIssue', args, { timeoutMs: 30_000 })
@@ -103,7 +114,7 @@ export async function jiraListTransitionsForTarget(
   key: string,
   siteId?: string | null
 ): Promise<JiraTransition[]> {
-  const args = { key, siteId: siteId ?? undefined }
+  const args = { key, siteId: siteId ?? undefined, strict: true }
   return target.kind === 'environment'
     ? callRuntimeRpc<JiraTransition[]>(target, 'jira.listTransitions', args, { timeoutMs: 30_000 })
     : window.api.jira.listTransitions(args)

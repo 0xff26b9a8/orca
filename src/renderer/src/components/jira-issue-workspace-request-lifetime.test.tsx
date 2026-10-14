@@ -287,6 +287,51 @@ describe('Jira issue workspace request lifetime', () => {
     expect(text('transitions')).toBe('existing-transition')
   })
 
+  it.each([false, true])(
+    'refreshes required transition comments without accepting older hydration (reopened: %s)',
+    async (reopened) => {
+      await render(issue())
+      await act(async () => take(boundary.issues).resolve(issue()))
+      const oldComments = take(boundary.comments)
+      await act(async () => {
+        if (!boundary.metadata) {
+          throw new Error('Missing issue metadata')
+        }
+        void boundary.metadata.mutateIssue(
+          'transition',
+          { transitionId: 'close', transitionComment: 'Verified fix' },
+          { status: { ...issue().status, id: 'done', name: 'Done' } }
+        )
+      })
+      const saveRefresh = take(boundary.issues)
+      if (reopened) {
+        await render(issue('JIR-2'))
+        await render(issue())
+        const currentIssue = boundary.issues.find((pending) => pending.key === 'JIR-1')
+        if (!currentIssue) {
+          throw new Error('Missing reopened issue read')
+        }
+        await act(async () => currentIssue.resolve(issue()))
+      }
+      await act(async () => saveRefresh.resolve(issue()))
+      const commentsRefresh = boundary.comments.at(-1)
+      if (!commentsRefresh || commentsRefresh.key !== 'JIR-1') {
+        throw new Error('Missing transition comments refresh')
+      }
+      await act(async () => commentsRefresh.resolve([comment('transition-comment')]))
+      await act(async () => {
+        oldComments.resolve([])
+        for (const pending of boundary.comments) {
+          if (pending !== commentsRefresh) {
+            pending.resolve([])
+          }
+        }
+      })
+      expect(text('comments')).toBe('transition-comment')
+      expect(text('comments-loading')).toBe('false')
+    }
+  )
+
   it('clears old issue transitions even when the new issue transition read fails', async () => {
     await render(issue())
     await act(async () =>

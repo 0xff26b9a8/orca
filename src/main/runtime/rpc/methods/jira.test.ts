@@ -260,7 +260,7 @@ describe('jira RPC methods', () => {
     )
     await dispatcher.dispatch(makeRequest('jira.searchUsers', { query: 'Grace', siteId: 'site-1' }))
     await dispatcher.dispatch(
-      makeRequest('jira.listTransitions', { key: 'ABC-3', siteId: 'site-1' })
+      makeRequest('jira.listTransitions', { key: 'ABC-3', siteId: 'site-1', strict: true })
     )
     await dispatcher.dispatch(
       makeRequest('jira.getProjectStatusOrder', { projectKey: 'ALP', siteId: 'site-1' })
@@ -282,7 +282,7 @@ describe('jira RPC methods', () => {
       undefined
     )
     expect(runtime.jiraSearchUsers).toHaveBeenCalledWith('Grace', 'site-1')
-    expect(runtime.jiraListTransitions).toHaveBeenCalledWith('ABC-3', 'site-1', undefined)
+    expect(runtime.jiraListTransitions).toHaveBeenCalledWith('ABC-3', 'site-1', true)
     expect(runtime.jiraGetProjectStatusOrder).toHaveBeenCalledWith('ALP', 'site-1')
   })
 })

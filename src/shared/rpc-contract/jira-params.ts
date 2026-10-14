@@ -77,7 +77,9 @@ export const IssueUpdate = z.object({
         .optional(),
       assigneeAccountId: z.union([z.string(), z.null()]).optional(),
       priorityId: z.union([z.string(), z.null()]).optional(),
-      transitionId: OptionalString
+      transitionId: OptionalString,
+      transitionFields: z.record(z.string(), z.unknown()).optional(),
+      transitionComment: z.string().optional()
     })
     .refine((updates) => !(updates.labels && updates.labelOperations), {
       message: 'Pass labels or labelOperations, not both'
