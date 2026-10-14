@@ -18417,7 +18417,6 @@
         "fastMode": "Fast mode",
         "speed": "Speed",
         "thinking": "Thinking",
-        "options": "Options",
         "sessionOptions": "Session options",
         "chooseInAgentPicker": "Choose in agent picker…",
         "searchModels": "Search models…",
@@ -18465,7 +18464,12 @@
         "permissionFullAccessCodexDescription": "Never asks; can edit any file and use the network",
         "permissionFullAccessSharedDescription": "Never asks before edits or commands",
         "pasteFailed": "Paste failed.",
-        "commandAttachmentsUnsupported": "Remove attachments before using a chat-session command."
+        "commandAttachmentsUnsupported": "Remove attachments before using a chat-session command.",
+        "optionValueShort": {
+          "minimal": "Min",
+          "medium": "Med",
+          "xhigh": "XHigh"
+        }
       },
       "tool": {
         "exitCode": "exit {{value0}}",
