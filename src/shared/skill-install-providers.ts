@@ -1,31 +1,22 @@
+import type { TuiAgent } from './tui-agent'
+
 /**
  * Agents Orca can place an installed skill for.
  *
  * `null` segments mean the agent reads the canonical `.agents/skills` root at
- * that scope, so it needs no placement of its own. Ids match the detection ids
- * in `tui-agent-config.ts` so a detected agent maps straight to a destination.
+ * that scope, so it needs no placement of its own. Ids are Orca agent ids so a
+ * detected agent maps straight to a destination.
  */
-export type SkillInstallProviderId =
-  | 'codex'
-  | 'claude'
-  | 'cursor'
-  | 'gemini'
-  | 'droid'
-  | 'continue'
-  | 'trae'
-  | 'grok'
-  | 'aug'
-  | 'muse'
-  | 'zcode'
-
-export type SkillInstallProviderDefinition = {
-  id: SkillInstallProviderId
+type SkillInstallProviderEntry = {
+  id: TuiAgent
   displayName: string
   globalSegments: readonly string[] | null
   workspaceSegments: readonly string[] | null
+  /** Env var relocating the agent's home (skills in `<home>/skills`); the WSL probe is still Grok-only. */
+  homeEnv?: string
 }
 
-export const SKILL_INSTALL_PROVIDERS: readonly SkillInstallProviderDefinition[] = [
+export const SKILL_INSTALL_PROVIDERS = Object.freeze([
   // Why: Codex reads the canonical .agents/skills root at both scopes.
   {
     id: 'codex',
@@ -37,7 +28,8 @@ export const SKILL_INSTALL_PROVIDERS: readonly SkillInstallProviderDefinition[] 
     id: 'claude',
     displayName: 'Claude Code',
     globalSegments: ['.claude', 'skills'],
-    workspaceSegments: ['.claude', 'skills']
+    workspaceSegments: ['.claude', 'skills'],
+    homeEnv: 'CLAUDE_CONFIG_DIR'
   },
   // Why: Cursor and Gemini read the canonical root inside a project but keep
   // their own home directory, so they only need a placement at global scope.
@@ -75,7 +67,8 @@ export const SKILL_INSTALL_PROVIDERS: readonly SkillInstallProviderDefinition[] 
     id: 'grok',
     displayName: 'Grok',
     globalSegments: ['.grok', 'skills'],
-    workspaceSegments: ['.grok', 'skills']
+    workspaceSegments: ['.grok', 'skills'],
+    homeEnv: 'GROK_HOME'
   },
   {
     id: 'aug',
@@ -98,12 +91,13 @@ export const SKILL_INSTALL_PROVIDERS: readonly SkillInstallProviderDefinition[] 
     globalSegments: ['.zcode', 'skills'],
     workspaceSegments: null
   }
-]
+] satisfies SkillInstallProviderEntry[])
 
-const PROVIDERS_BY_ID = new Map(SKILL_INSTALL_PROVIDERS.map((provider) => [provider.id, provider]))
+export type SkillInstallProviderDefinition = (typeof SKILL_INSTALL_PROVIDERS)[number]
+export type SkillInstallProviderId = SkillInstallProviderDefinition['id']
 
 export function isSkillInstallProviderId(value: string): value is SkillInstallProviderId {
-  return PROVIDERS_BY_ID.has(value as SkillInstallProviderId)
+  return SKILL_INSTALL_PROVIDERS.some((provider) => provider.id === value)
 }
 
 /**
