@@ -1,16 +1,16 @@
-import type { RuntimeStatus } from '../../../../shared/runtime-types'
-import type { PublicKnownRuntimeEnvironment } from '../../../../shared/runtime-environments'
-import type { FolderWorkspace } from '../../../../shared/folder-workspace-types'
-import type { Worktree } from '../../../../shared/worktree/types'
-import { folderWorkspaceToWorktree } from '../../../../shared/folder-workspace-worktree'
-import { normalizeWorkspaceCreatorProvenance } from '../../../../shared/workspace-creator-provenance'
+import type { RuntimeStatus } from './runtime-types'
+import type { PublicKnownRuntimeEnvironment } from './runtime-environments'
+import type { FolderWorkspace } from './folder-workspace-types'
+import { folderWorkspaceToWorktree } from './folder-workspace-worktree'
+import { normalizeWorkspaceCreatorProvenance } from './workspace-creator-provenance'
 
-type RuntimeStatusEntry = { status: RuntimeStatus | null }
+type RuntimeStatusEntry = { status: Pick<RuntimeStatus, 'pairedDeviceId'> | null }
 
 export const EMPTY_PAIRED_DEVICE_IDS_BY_ENVIRONMENT: ReadonlyMap<string, string> = new Map()
 
+/** This client's own device id on each paired server. */
 export function getPairedDeviceIdsByEnvironment(
-  environments: readonly PublicKnownRuntimeEnvironment[],
+  environments: readonly Pick<PublicKnownRuntimeEnvironment, 'id' | 'pairedDeviceId'>[],
   statuses: ReadonlyMap<string, RuntimeStatusEntry>
 ): ReadonlyMap<string, string> {
   const result = new Map<string, string>()
@@ -24,8 +24,13 @@ export function getPairedDeviceIdsByEnvironment(
   return result
 }
 
-export function isWorkspaceFromOtherDevice(
-  worktree: Worktree,
+/**
+ * The "Hide other-client workspaces" rule: a workspace this client did not create is someone
+ * else's, including one created on the server itself. Phones record the owner they act for as the
+ * creator (workspace-creator-context.ts). No creator, or an unnamed pairing, stays visible.
+ */
+export function isWorkspaceOwnedBySomeoneElse(
+  worktree: { creatorProvenance?: unknown; runtimeOwnerEnvironmentId?: string },
   pairedDeviceIdsByEnvironment: ReadonlyMap<string, string>
 ): boolean {
   const creator = normalizeWorkspaceCreatorProvenance(worktree.creatorProvenance)
@@ -47,7 +52,7 @@ export function isFolderWorkspaceFromOtherDevice(
   workspace: FolderWorkspace,
   pairedDeviceIdsByEnvironment: ReadonlyMap<string, string>
 ): boolean {
-  return isWorkspaceFromOtherDevice(
+  return isWorkspaceOwnedBySomeoneElse(
     folderWorkspaceToWorktree(workspace),
     pairedDeviceIdsByEnvironment
   )
