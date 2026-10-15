@@ -1,14 +1,14 @@
 import type {
   AgentJournalRenderItem,
   AgentJournalQuestionItem
-} from '../../../../shared/agent-session-journal-types'
-import { isAskUserQuestionTool } from '../../../../shared/agent-question-answered-intent'
-import { parseAskFromToolInput } from '../../../../shared/native-chat-ask'
-import { agentJournalItemRowOrigin } from '../../../../shared/agent-session-journal-position'
-import { agentJournalLinkageFields } from '../../../../shared/agent-session-journal-producer'
-import type { NativeChatMessage } from '../../../../shared/native-chat-types'
-import { projectStructuredItemToNativeChat } from '../../../../shared/structured-agent-session-projection'
-import { readAgentJournalTurn } from '../../../../shared/agent-session-turn-record'
+} from './agent-session-journal-types'
+import { isAskUserQuestionTool } from './agent-question-answered-intent'
+import { parseAskFromToolInput } from './native-chat-ask'
+import { agentJournalItemRowOrigin } from './agent-session-journal-position'
+import { agentJournalLinkageFields } from './agent-session-journal-producer'
+import type { NativeChatMessage } from './native-chat-types'
+import { projectStructuredItemToNativeChat } from './structured-agent-session-projection'
+import { readAgentJournalTurn } from './agent-session-turn-record'
 import type { NativeChatResolvedPrompt } from './native-chat-resolution-receipt'
 
 type Projection = { message: NativeChatMessage | null; questionKey: string | null }

@@ -1,11 +1,22 @@
 import type {
   AgentJournalApprovalItem,
   AgentJournalQuestionItem
-} from '../../../../shared/agent-session-journal-types'
+} from './agent-session-journal-types'
 import {
   agentSessionPromptQuestions,
   legacyAgentSessionQuestionAnswers
-} from '../../../../shared/agent-session-question-answer'
+} from './agent-session-question-answer'
+import type { NativeChatAskRowSubject } from './native-chat-ask-row'
+
+/** Desktop's fallbacks for its translations; the phone's words. */
+export const NATIVE_CHAT_RECEIPT_COPY = {
+  emptyAnswer: 'Empty answer',
+  unavailable: 'Selected answer unavailable',
+  resolved: 'Resolved',
+  cancelled: 'Cancelled',
+  resolver: 'Answered on {{device}}',
+  cancelledBy: 'Cancelled on {{device}}'
+} as const
 
 export type NativeChatResolvedPrompt = AgentJournalApprovalItem | AgentJournalQuestionItem
 /** `answer` is '' for an explicitly empty text answer and null when the answer cannot be read. */
@@ -44,4 +55,37 @@ export function nativeChatReceiptAnswers(
   }
   const option = body.options.find((option) => option.id === selected)
   return [{ question: null, answer: option?.label ?? null }]
+}
+
+/** Null for an approval, which shows its title instead. */
+export function nativeChatReceiptSubject(
+  body: NativeChatResolvedPrompt
+): NativeChatAskRowSubject | null {
+  if (body.kind !== 'question') {
+    return null
+  }
+  if (body.questions && body.questions.length > 1) {
+    return { kind: 'questions', questions: body.questions.map((entry) => entry.question) }
+  }
+  // Claude keeps a generic grouped label for a single multi-select question. Use it after
+  // resolution so the answer's question line is not repeated in the heading.
+  return {
+    kind: 'question',
+    text:
+      body.resolution.state !== 'pending' &&
+      body.questions?.length === 1 &&
+      body.questions[0]?.question !== body.question
+        ? body.question
+        : (body.questions?.[0]?.question ?? body.question)
+  }
+}
+
+/** The question line above an answer, or null where the ask row already says it. */
+export function nativeChatReceiptAnswerHeading(
+  subject: NativeChatAskRowSubject | null,
+  answer: NativeChatReceiptAnswer
+): string | null {
+  return answer.question && !(subject?.kind === 'question' && answer.question === subject.text)
+    ? answer.question
+    : null
 }

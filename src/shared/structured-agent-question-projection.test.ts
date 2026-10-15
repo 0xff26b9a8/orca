@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { AgentJournalRenderItem } from '../../../../shared/agent-session-journal-types'
-import { projectStructuredItemToNativeChat } from '../../../../shared/structured-agent-session-projection'
+import type { AgentJournalRenderItem } from './agent-session-journal-types'
+import { projectStructuredItemToNativeChat } from './structured-agent-session-projection'
 import {
   projectStructuredQuestionMessages,
   structuredQuestionTranscript
