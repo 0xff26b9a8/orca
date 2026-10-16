@@ -2,14 +2,16 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnProcess } from '@orca/process-host'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { readAgentProcess } from '../../shared/agent-process-presence-probe'
 import type { LinuxStatEvidence } from '../daemon/daemon-incarnation-evidence-types'
 import { DaemonEndpointOwnershipError } from '../daemon/daemon-endpoint-adoption'
 import { cleanupDaemonForProtocol } from '../daemon/daemon-protocol-cleanup'
 import {
+  __setDaemonProcessTableReaderForTests,
   killAndAwaitExit,
   killProfileDaemons,
+  recordProfileDaemons,
   waitForProcessExit
 } from './orcad-daemon-teardown-fixture'
 
@@ -202,6 +204,10 @@ describe('profile daemon cleanup after loss of contact', () => {
       'Daemon cleanup aborted: the expected daemon could not be verified'
     )
 
+  // Why: the real Windows table read never settles under the fake timers some cases install.
+  beforeEach(() => __setDaemonProcessTableReaderForTests(async () => null))
+  afterEach(() => __setDaemonProcessTableReaderForTests())
+
   async function exitedChildPid(): Promise<number> {
     const child = spawnProcess({ program: process.execPath, args: ['-e', ''], timeoutMs: null })
     const pid = child.pid
@@ -252,6 +258,65 @@ describe('profile daemon cleanup after loss of contact', () => {
     } finally {
       vi.useRealTimers()
       signal.mockRestore()
+    }
+  })
+
+  it('waits for a recorded daemon that deleted its pid record before exiting', async ({
+    onTestFinished
+  }) => {
+    const retiring = spawnProcess({
+      program: process.execPath,
+      args: ['-e', 'setTimeout(() => {}, 1_000)'],
+      timeoutMs: null
+    })
+    const closed = new Promise<void>((resolve, reject) => {
+      retiring.once('error', reject)
+      retiring.once('close', () => resolve())
+    })
+    onTestFinished(() => closed)
+    const root = profile(retiring.pid!, onTestFinished)
+    await recordProfileDaemons(root)
+    rmSync(join(root, 'daemon', 'daemon-v1.pid'))
+    vi.mocked(cleanupDaemonForProtocol).mockClear()
+    await killProfileDaemons(root)
+    expect(() => process.kill(retiring.pid!, 0)).toThrow(expect.objectContaining({ code: 'ESRCH' }))
+    expect(cleanupDaemonForProtocol).not.toHaveBeenCalled()
+  })
+
+  it('waits for a daemon child that outlives the daemon in the profile directory', async ({
+    onTestFinished
+  }) => {
+    const daemonPid = await exitedChildPid()
+    const child = { pid: 77, ppid: daemonPid, name: 'OpenConsole.exe', creationTimeMs: 1 }
+    let childReads = 3
+    const reader = vi.fn(async () => (childReads-- > 0 ? [child] : []))
+    __setDaemonProcessTableReaderForTests(reader)
+    vi.mocked(cleanupDaemonForProtocol).mockResolvedValueOnce({ cleaned: true, killedCount: 1 })
+    await killProfileDaemons(profile(daemonPid, onTestFinished))
+    expect(childReads).toBeLessThan(0)
+  })
+
+  it('names a daemon child still alive at the exit deadline', async ({ onTestFinished }) => {
+    const daemonPid = await exitedChildPid()
+    const child = { pid: 77, ppid: daemonPid, name: 'OpenConsole.exe', creationTimeMs: 1 }
+    __setDaemonProcessTableReaderForTests(async () => [child])
+    vi.mocked(cleanupDaemonForProtocol).mockResolvedValueOnce({ cleaned: true, killedCount: 1 })
+    vi.useFakeTimers()
+    try {
+      const result = killProfileDaemons(profile(daemonPid, onTestFinished)).then(
+        () => null,
+        (error: unknown) => error
+      )
+      await vi.advanceTimersByTimeAsync(10_100)
+      expect(await result).toMatchObject({
+        errors: [
+          expect.objectContaining({
+            message: 'Daemon descendants did not exit: OpenConsole.exe 77'
+          })
+        ]
+      })
+    } finally {
+      vi.useRealTimers()
     }
   })
 
