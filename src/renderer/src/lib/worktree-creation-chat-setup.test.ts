@@ -5,8 +5,8 @@ import { launchStructuredWorktreeSession } from './worktree-creation-structured-
 import {
   makeCreatedAgentWorktree,
   seedEmptyActivatableWorktree
-} from './worktree-activation-created-agent-test-state'
-import { registerWorktreeActivationReset } from './worktree-activation-test-harness'
+} from './worktree-activation-created-agent.test-fixture'
+import { registerWorktreeActivationReset } from './worktree-activation.test-fixture'
 import type { WorktreeCreationRequest } from './pending-worktree-creation'
 
 vi.mock('./worktree-creation-structured-session', () => ({

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { getDefaultWorkspaceSession } from '../../../shared/constants'
 import { WorktreeCreate } from '../../../shared/rpc-contract/worktree-create-params'
-import type { SetupScriptLaunchMode } from '../../../shared/worktree/launch-types'
 import {
   buildRuntimeWorktreeCreateParams,
   type WorktreeCreateRequest
@@ -24,18 +23,20 @@ const SETUP_ENV = { ORCA_WORKTREE_PATH: WORKTREE_PATH, SETUP_INPUT: 'preserved' 
 
 async function createFromRendererPayload(options: {
   agent?: WorktreeCreateRequest['createdWithAgent']
-  mode?: SetupScriptLaunchMode
+  mode?: 'new-tab' | 'split-horizontal' | 'split-vertical'
   activate?: boolean
   runHooks?: boolean
   withSetup?: boolean
   defaultTabs?: boolean
   startup?: boolean
 }) {
-  const mode = options.mode ?? 'new-tab'
   const { runtimeStore } = makeRuntimeStoreWithWorkspaceSession(getDefaultWorkspaceSession())
   const runtime = new OrcaRuntimeService({
     ...runtimeStore,
-    getSettings: () => ({ ...store.getSettings(), setupScriptLaunchMode: mode })
+    getSettings: () => ({
+      ...store.getSettings(),
+      ...(options.mode ? { setupScriptLaunchMode: options.mode } : {})
+    })
   })
   const spawn = vi.fn(async (_args: { command?: string; env?: Record<string, string> }) => ({
     id: `pty-native-chat-${spawn.mock.calls.length}`
@@ -92,10 +93,17 @@ async function createFromRendererPayload(options: {
 }
 
 describe('native-chat setup through renderer payload, RPC and execution host', () => {
-  it.each(['claude', 'codex'] as const)(
-    'creates only Setup for a background %s chat in new-tab mode',
-    async (agent) => {
-      const { result, spawn } = await createFromRendererPayload({ agent })
+  it.each(
+    (['claude', 'codex'] as const).flatMap((agent) =>
+      (['new-tab', 'split-horizontal', 'split-vertical', undefined] as const).map((mode) => ({
+        agent,
+        mode
+      }))
+    )
+  )(
+    'creates only Setup for a background $agent chat with retired location $mode',
+    async ({ agent, mode }) => {
+      const { result, spawn } = await createFromRendererPayload({ agent, mode })
       expect(spawn.mock.calls.map(([args]) => args.command)).toEqual([`bash ${RUNNER}`])
       expect(spawn.mock.calls[0][0].env).toMatchObject(SETUP_ENV)
       expect(result.setup).toBeUndefined()
@@ -122,13 +130,15 @@ describe('native-chat setup through renderer payload, RPC and execution host', (
   })
 
   it.each(['split-horizontal', 'split-vertical'] as const)(
-    'keeps the primary shell needed by %s setup',
+    'gives the requested startup and Setup separate tabs despite retired location %s',
     async (mode) => {
-      const { spawn } = await createFromRendererPayload({ agent: 'codex', mode })
-      expect(spawn.mock.calls.map(([args]) => args.command)).toEqual([undefined, `bash ${RUNNER}`])
+      const { spawn } = await createFromRendererPayload({ agent: 'codex', mode, startup: true })
+      expect(spawn.mock.calls.map(([args]) => args.command)).toEqual(['codex', `bash ${RUNNER}`])
       expect(spawn.mock.calls[0][0].env?.ORCA_TAB_ID).toEqual(expect.any(String))
       expect(spawn.mock.calls[0][0].env?.ORCA_TAB_ID).not.toBe('')
-      expect(spawn.mock.calls[0][0].env?.ORCA_TAB_ID).toBe(spawn.mock.calls[1][0].env?.ORCA_TAB_ID)
+      expect(spawn.mock.calls[0][0].env?.ORCA_TAB_ID).not.toBe(
+        spawn.mock.calls[1][0].env?.ORCA_TAB_ID
+      )
     }
   )
 
