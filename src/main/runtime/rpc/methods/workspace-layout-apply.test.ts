@@ -478,9 +478,47 @@ describe('layout.apply', () => {
 
     await expect(runtime.applyLayoutCommand(SPLIT)).resolves.toEqual({
       ok: true,
-      result: { leafId: 'minted' }
+      result: { leafId: 'minted' },
+      // No one subscribes, so the stream has sent nothing.
+      frameSeq: 0
     })
     expect(applyLayoutCommand).toHaveBeenCalledWith(SPLIT, ['ssh:target-1'])
+  })
+
+  it('names the stream position of the frame its write produced, sent before the reply', async () => {
+    let session = sessionListing('tab-1')
+    const written = new Set<(hostId: string | null) => void>()
+    const order: string[] = []
+    const store = {
+      getRepo: () => undefined,
+      getWorkspaceSessionHostIds: () => ['local'],
+      getWorkspaceSession: () => session,
+      onWorkspaceSessionWritten: (listener: (hostId: string | null) => void) => {
+        written.add(listener)
+        return () => written.delete(listener)
+      },
+      applyLayoutCommand: vi.fn(async () => {
+        session = { ...session, activeTabId: null, tabsByWorktree: {} }
+        written.forEach((listener) => listener('local'))
+        return { ok: true, result: { leafId: 'minted' } }
+      })
+    }
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: the apply and stream paths read only these store methods.
+    const runtime = new OrcaRuntimeService(store as never)
+    const sent: number[] = []
+    const { seq } = runtime.subscribeWorkspaceLayouts((event) => {
+      order.push('frame')
+      sent.push(event.seq!)
+    })
+
+    const reply = await runtime.applyLayoutCommand(SPLIT).then((value) => {
+      order.push('reply')
+      return value
+    })
+
+    expect(sent).toEqual([seq + 1])
+    expect(reply.frameSeq).toBe(seq + 1)
+    expect(order).toEqual(['frame', 'reply'])
   })
 
   it('refuses a paired server’s workspace, which keeps its mirrored layout', async () => {
@@ -488,7 +526,8 @@ describe('layout.apply', () => {
 
     await expect(runtime.applyLayoutCommand(SPLIT)).resolves.toEqual({
       ok: false,
-      code: 'host_not_owned'
+      code: 'host_not_owned',
+      frameSeq: 0
     })
     expect(applyLayoutCommand).not.toHaveBeenCalled()
   })
