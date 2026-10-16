@@ -1,6 +1,5 @@
 {
   "extends": "./tsconfig.cli.json",
-  // Shared tests are checked by tsconfig.node.json; shared production code stays in every project.
   "exclude": [
     "../src/shared/**/*.test.ts",
     "../src/shared/**/*.test.tsx",
