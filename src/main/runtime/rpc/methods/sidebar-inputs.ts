@@ -2,6 +2,7 @@ import { defineMethod } from '../core'
 import { getRegisteredSshState, listRegisteredSshTargets } from '../../../ssh/ssh-target-registry'
 import { getWslHostService } from '../../../wsl/wsl-host-service-instance'
 import { readDesktopSidebarFacts } from '../../sidebar-inputs/desktop-sidebar-facts'
+import { RepoIconDataUrlsParams } from '../../../../shared/sidebar-list/repo-icon-data-urls-contract'
 import { SetCollapsedParams } from '../../../../shared/rpc-contract/workspace-view-collapse-params'
 import { setCollapsedSection } from '../../workspace-view-collapse-writes'
 
@@ -20,6 +21,12 @@ export const SIDEBAR_INPUT_METHODS = [
     params: null,
     handler: async (_params, { runtime }) =>
       requireSwitchedOn(runtime.sidebarFacts).getWorkspaceActivityFacts()
+  }),
+  defineMethod({
+    name: 'sidebarInputs.repoIcons',
+    permission: 'workspace',
+    params: RepoIconDataUrlsParams,
+    handler: async ({ ids }, { runtime }) => requireSwitchedOn(runtime.repoIconDataUrls).read(ids)
   }),
   defineMethod({
     name: 'sidebarInputs.desktopFacts',

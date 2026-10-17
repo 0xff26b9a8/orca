@@ -623,6 +623,7 @@ import {
   WorktreeTeardownMissingTerminalsParams
 } from './worktree-params'
 import { WorktreeAdoptProvisionedRoot } from './worktree-provisioned-root-params'
+import { RepoIconDataUrlsParams } from '../sidebar-list/repo-icon-data-urls-contract'
 import { SkillBundleInstallRequestSchema } from '../skill-bundle-install-contract'
 import { SkillDeleteRequestSchema } from '../skill-delete-contract'
 import {
@@ -1252,6 +1253,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'sidebarInputs.activityFacts': null,
   'sidebarInputs.desktopFacts': null,
   'sidebarInputs.pairedServerRows': null,
+  'sidebarInputs.repoIcons': RepoIconDataUrlsParams,
   'sidebarInputs.reviewFacts': null,
   'sidebarInputs.workspaceCreations': null,
   'skills.beginUpload': SkillUploadBeginRequestSchema,
