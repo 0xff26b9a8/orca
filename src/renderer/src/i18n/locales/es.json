@@ -17987,6 +17987,9 @@
   },
   "components": {
     "native-chat": {
+      "install": {
+        "checking": "Comprobando si {{agent}} está listo en este host…"
+      },
       "reasoning": "Razonamiento",
       "contextMenu": {
         "copyOrcaSessionId": "Copiar ID de sesión de Orca",
