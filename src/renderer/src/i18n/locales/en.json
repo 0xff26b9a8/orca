@@ -19375,6 +19375,30 @@
       "keywordJira": "jira",
       "keywordDefaultProject": "default project",
       "keywordIssuePicker": "issue picker"
+    },
+    "managed-runtime": {
+      "cancel": "Cancel installation",
+      "cancelled": "Installation cancelled.",
+      "cancelling": "Cancelling…",
+      "chatTitle": "Install {{agent}} to start chatting.",
+      "damaged": "This copy of {{agent}} is damaged.",
+      "downloading": "Downloading {{done}} MB.",
+      "downloadingOf": "Downloading {{done}} MB of {{total}} MB.",
+      "external": "Uses the copy of {{agent}} found on this host.",
+      "extracting": "Extracting {{agent}}.",
+      "failed": "Installation failed. Try again.",
+      "cancelFailed": "Couldn't cancel the installation. Try again.",
+      "install": "Install {{agent}}",
+      "installManaged": "Install Orca's copy",
+      "installed": "Installed.",
+      "notInstalled": "Not installed.",
+      "progress": "{{agent}} download",
+      "readFailed": "Could not check {{agent}} on this host. Retrying.",
+      "reinstall": "Reinstall {{agent}}",
+      "retry": "Retry installation",
+      "unavailable": "{{agent}} is not available on this host.",
+      "update": "Update {{agent}}",
+      "verifying": "Checking the downloaded runtime."
     }
   },
   "dashboardPopout": {

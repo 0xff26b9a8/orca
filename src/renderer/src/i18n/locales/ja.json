@@ -19171,6 +19171,30 @@
       "keywordJira": "Jira",
       "keywordDefaultProject": "デフォルトプロジェクト",
       "keywordIssuePicker": "Issue ピッカー"
+    },
+    "managed-runtime": {
+      "cancel": "インストールをキャンセル",
+      "cancelled": "インストールをキャンセルしました。",
+      "cancelling": "キャンセルしています…",
+      "chatTitle": "チャットを始めるには {{agent}} をインストールしてください。",
+      "damaged": "この {{agent}} のコピーは破損しています。",
+      "downloading": "{{done}} MB をダウンロード中です。",
+      "downloadingOf": "{{total}} MB 中 {{done}} MB をダウンロード中です。",
+      "external": "このホストで見つかった {{agent}} のコピーを使用しています。",
+      "extracting": "{{agent}} を展開しています。",
+      "failed": "インストールに失敗しました。もう一度お試しください。",
+      "cancelFailed": "インストールをキャンセルできませんでした。もう一度お試しください。",
+      "install": "{{agent}} をインストール",
+      "installManaged": "Orca のコピーをインストール",
+      "installed": "インストール済みです。",
+      "notInstalled": "インストールされていません。",
+      "progress": "{{agent}} のダウンロード",
+      "readFailed": "このホストの {{agent}} を確認できませんでした。再試行しています。",
+      "reinstall": "{{agent}} を再インストール",
+      "retry": "インストールを再試行",
+      "unavailable": "{{agent}} はこのホストでは利用できません。",
+      "update": "{{agent}} を更新",
+      "verifying": "ダウンロードしたランタイムを確認しています。"
     }
   },
   "dashboardPopout": {
