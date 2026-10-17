@@ -85,6 +85,7 @@ export type WindowLayoutCommand =
       file?: LayoutEditorFile
       groupId?: string
       preview?: true
+      createdAt: number
       split?: NewGroupSplit
     }
   | { type: 'promotePreviewTab'; tabId: string }
@@ -96,8 +97,17 @@ export type WindowLayoutCommand =
       file?: LayoutEditorFile
     }
   | { type: 'renameEditorFiles'; renames: EditorFileRename[] }
-  | { type: 'sleep'; tabId: string; paneKeys: string[]; records: SleepingAgentSessionRecord[] }
+  | {
+      type: 'sleep'
+      tabId: string
+      paneKeys: string[]
+      records: SleepingAgentSessionRecord[]
+      /** Records how the panes' agents resume without stopping them (a live or quit capture). */
+      recordOnly?: true
+    }
   | { type: 'wake'; tabId: string; paneKeys: [string] }
+  /** Drops the panes' resume records without starting them. */
+  | { type: 'wake'; tabId: string; paneKeys: string[]; recordOnly: true }
 
 export type LayoutApplyHandlers = {
   apply: (result: LayoutCommandResult) => void
