@@ -12,7 +12,7 @@ import {
   MobileNativeChatReplyRevealsContext,
   useMobileNativeChatReplyReveals
 } from './mobile-native-chat-reply-reveals'
-import { MobileNativeChatImageViewerHost } from './MobileNativeChatImageViewer'
+import { MobileNativeChatRowOverlaysHost } from './MobileNativeChatRowOverlaysHost'
 
 type Props = {
   controller: MobileNativeChatController
@@ -98,7 +98,7 @@ export function MobileNativeChatOverlay({
     return null
   }
   return (
-    <MobileNativeChatImageViewerHost conversation={{ surfaceId: sendSurfaceId, sessionId }}>
+    <MobileNativeChatRowOverlaysHost conversation={{ surfaceId: sendSurfaceId, sessionId }}>
       <View style={styles.overlay}>
         <MobileNativeChatVisualContext.Provider value={visuals}>
           <MobileNativeChatReplyRevealsContext.Provider value={replyReveals}>
@@ -171,7 +171,7 @@ export function MobileNativeChatOverlay({
           </MobileNativeChatReplyRevealsContext.Provider>
         </MobileNativeChatVisualContext.Provider>
       </View>
-    </MobileNativeChatImageViewerHost>
+    </MobileNativeChatRowOverlaysHost>
   )
 }
 
