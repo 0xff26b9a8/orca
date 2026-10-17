@@ -70,7 +70,8 @@ export class AcpStructuredSessionAdapter implements StructuredAgentSessionAdapte
 
   async acquire(input: StructuredAgentSessionAcquireInput): Promise<AgentSessionAcquisition> {
     const sessionId = input.identity.sessionId
-    const attempt = this.starts.begin(input.signal)
+    const gate = this.deps.spec.launchGate?.enter(input.signal)
+    const attempt = this.starts.begin(gate?.signal ?? input.signal)
     try {
       if (!(await this.stop(sessionId))) {
         throw new AgentSessionAcquisitionExitUnprovenError(
@@ -79,9 +80,10 @@ export class AcpStructuredSessionAdapter implements StructuredAgentSessionAdapte
           )
         )
       }
-      return await this.start(input, attempt)
+      return await this.start({ ...input, signal: attempt.signal }, attempt)
     } finally {
       this.starts.end(attempt)
+      gate?.leave()
     }
   }
 
@@ -97,7 +99,10 @@ export class AcpStructuredSessionAdapter implements StructuredAgentSessionAdapte
         deps: this.deps,
         generation,
         abandoned: () => attempt.signal.aborted,
-        track: (connection) => this.starts.track(attempt, connection),
+        track: (connection) => {
+          this.starts.track(attempt, connection)
+          this.deps.spec.launchGate?.retain(connection)
+        },
         onExit: (session) => {
           if (session && this.sessions.get(sessionId) === session) {
             this.finish(session, this.now())
