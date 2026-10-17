@@ -136,12 +136,10 @@ export async function prepareStructuredChatCliFork(
       throw new Error('The saved conversation does not match this chat.')
     }
   } else {
-    filePath = await importer.findTranscript({
-      providerSessionId,
-      accountHome: record.accountHome,
-      launchEnv,
-      workspaceCwd: cwd
-    })
+    const store = importer.conversationStore({ accountHome: record.accountHome, launchEnv })
+    filePath = store
+      ? await importer.findTranscript({ providerSessionId, store, launchEnv, workspaceCwd: cwd })
+      : null
   }
   if (!filePath || !isAbsolute(filePath) || isWslUncPath(filePath)) {
     throw new Error('This chat has no saved conversation to copy.')
