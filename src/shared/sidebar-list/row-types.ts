@@ -1,10 +1,10 @@
-import type React from 'react'
-import type { WorktreeOccurrence } from '../../../../../../shared/worktree-occurrence-plan'
-import type { FolderWorkspace } from '../../../../../../shared/folder-workspace-types'
-import type { ProjectGroup } from '../../../../../../shared/project-group-types'
-import type { Repo } from '../../../../../../shared/repo-types'
-import type { DetectedWorktree, Worktree } from '../../../../../../shared/worktree/types'
-import type { ExecutionHostId } from '../../../../../../shared/execution-host'
+import type { WorktreeOccurrence } from '../worktree-occurrence-plan'
+import type { FolderWorkspace } from '../folder-workspace-types'
+import type { ProjectGroup } from '../project-group-types'
+import type { Repo } from '../repo-types'
+import type { DetectedWorktree, WorkspaceStatus, Worktree } from '../worktree/types'
+import type { ExecutionHostId } from '../execution-host'
+import type { PRGroupKey } from '../workspace-view/workspace-pr-groups'
 
 export type WorktreeGroupBy = 'none' | 'workspace-status' | 'repo' | 'pr-status'
 export type PinnedWorktreeDisplayPolicy = 'single-location' | 'duplicate-in-groups'
@@ -15,14 +15,25 @@ export function getPinnedWorktreeDisplayPolicy(
   return settings?.showPinnedWorktreesInGroups === true ? 'duplicate-in-groups' : 'single-location'
 }
 
+/** Which glyph a group header draws; each client maps it to its own icon and tone. */
+export type SidebarHeaderIcon =
+  | { kind: 'pinned' }
+  | { kind: 'all' }
+  | { kind: 'project' }
+  | { kind: 'pr-status'; prGroup: PRGroupKey }
+  | { kind: 'workspace-status'; status: WorkspaceStatus }
+
+/** A worktree's PR lane, read by each client from its own PR facts. */
+export type SidebarPRGroupReader = (worktree: Worktree) => PRGroupKey
+
 export type GroupHeaderRow = {
   type: 'header'
   collapseKey?: string
   key: string
-  label: string
+  /** Data label (project, project group, status); absent when the client names the header from its icon. */
+  label?: string
   count: number
-  tone: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon: SidebarHeaderIcon
   repo?: Repo
   projectGroup?: ProjectGroup | { id: null; name: 'Ungrouped'; tabOrder: number }
   projectGroupDepth?: number
@@ -96,7 +107,7 @@ export type FolderWorkspaceRow = {
   groupDepth: number
 }
 
-/** Minimal shape buildRows needs for an in-flight create. Deliberately not the
+/** Minimal shape planSidebarRows needs for an in-flight create. Deliberately not the
  *  full PendingWorktreeCreation: row identity depends only on which creates
  *  exist and their repo, so callers can subscribe on this stable shape and keep
  *  progress-field churn (phase/loaderVisible) from rebuilding the whole list. */

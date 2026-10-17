@@ -1,24 +1,23 @@
-import type { ProjectGroup } from '../../../../../../shared/project-group-types'
-import type { Repo } from '../../../../../../shared/repo-types'
-import type { WorkspaceStatusDefinition, Worktree } from '../../../../../../shared/worktree/types'
-import { getWorkspaceStatus, getWorkspaceStatusGroupKey } from '../../workspace-status'
-import { cloneDefaultWorkspaceStatuses } from '../../../../../../shared/workspace-statuses'
-import type { AppState } from '../../../../store/types'
-import { ALL_GROUP_KEY, getPRGroupKey, getProjectGroupHeaderKey } from './group-keys'
+import type { ProjectGroup } from '../project-group-types'
+import type { Repo } from '../repo-types'
+import type { WorkspaceStatusDefinition, Worktree } from '../worktree/types'
 import {
-  buildProjectGroupingIndex,
-  getProjectGroupingForRepo
-} from '../../../../../../shared/project-section-grouping'
-import type { ProjectGroupingModel } from '../../../../../../shared/project-section-grouping'
-import type { WorktreeGroupBy } from './row-types'
+  cloneDefaultWorkspaceStatuses,
+  getWorkspaceStatus,
+  getWorkspaceStatusGroupKey
+} from '../workspace-statuses'
+import { ALL_GROUP_KEY, getPRLaneKey, getProjectGroupHeaderKey } from './group-keys'
+import { buildProjectGroupingIndex, getProjectGroupingForRepo } from '../project-section-grouping'
+import type { ProjectGroupingModel } from '../project-section-grouping'
+import type { SidebarPRGroupReader, WorktreeGroupBy } from './row-types'
 
 export function getGroupKeyForWorktree(
   groupBy: WorktreeGroupBy,
   worktree: Worktree,
   repoMap: Map<string, Repo>,
-  prCache: Record<string, unknown> | null,
+  /** Null reads every worktree as having no PR, which is the in-progress lane. */
+  prGroupOf: SidebarPRGroupReader | null,
   workspaceStatuses: readonly WorkspaceStatusDefinition[] = cloneDefaultWorkspaceStatuses(),
-  settings?: AppState['settings'],
   projectGrouping?: ProjectGroupingModel
 ): string | null {
   if (groupBy === 'none') {
@@ -34,16 +33,15 @@ export function getGroupKeyForWorktree(
       buildProjectGroupingIndex(projectGrouping)
     ).key
   }
-  return `pr:${getPRGroupKey(worktree, repoMap, prCache, settings)}`
+  return getPRLaneKey(prGroupOf?.(worktree) ?? 'in-progress')
 }
 
 export function getGroupKeysForWorktree(
   groupBy: WorktreeGroupBy,
   worktree: Worktree,
   repoMap: Map<string, Repo>,
-  prCache: Record<string, unknown> | null,
+  prGroupOf: SidebarPRGroupReader | null,
   workspaceStatuses: readonly WorkspaceStatusDefinition[] = cloneDefaultWorkspaceStatuses(),
-  settings?: AppState['settings'],
   projectGroups: readonly ProjectGroup[] = [],
   projectGrouping?: ProjectGroupingModel
 ): string[] {
@@ -51,9 +49,8 @@ export function getGroupKeysForWorktree(
     groupBy,
     worktree,
     repoMap,
-    prCache,
+    prGroupOf,
     workspaceStatuses,
-    settings,
     projectGrouping
   )
   if (!groupKey) {
@@ -71,7 +68,7 @@ export function getGroupKeysForWorktree(
     const group = groupsById.get(currentGroupId)
     if (!group) {
       // Why: repos can arrive before their remote Project Group metadata; reveal
-      // keys must match the top-level fallback rows buildRows actually renders.
+      // keys must match the top-level fallback rows planSidebarRows actually renders.
       break
     }
     visited.add(currentGroupId)

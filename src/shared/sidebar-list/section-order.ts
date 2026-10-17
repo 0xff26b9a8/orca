@@ -1,28 +1,25 @@
-import type { Repo } from '../../../../../../shared/repo-types'
-import type { WorkspaceStatusDefinition, Worktree } from '../../../../../../shared/worktree/types'
-import type { AppState } from '../../../../store/types'
-import type { ProjectGroupingModel } from '../../../../../../shared/project-section-grouping'
+import type { Repo } from '../repo-types'
+import type { WorkspaceStatusDefinition, Worktree } from '../worktree/types'
+import type { ProjectGroupingModel } from '../project-section-grouping'
 import { ALL_GROUP_KEY } from './group-keys'
-import type { WorktreeGroupBy } from './row-types'
+import type { SidebarPRGroupReader, WorktreeGroupBy } from './row-types'
 import { getGroupKeyForWorktree } from './worktree-group-keys'
 
 export function getRenderedNaturalAnchorRepoIds({
   groupBy,
   worktrees,
   repoMap,
-  prCache,
+  prGroupOf,
   collapsedGroups,
   workspaceStatuses,
-  settings,
   projectGrouping
 }: {
   groupBy: WorktreeGroupBy
   worktrees: readonly Worktree[]
   repoMap: Map<string, Repo>
-  prCache: Record<string, unknown> | null
+  prGroupOf: SidebarPRGroupReader
   collapsedGroups: ReadonlySet<string>
   workspaceStatuses: readonly WorkspaceStatusDefinition[]
-  settings?: AppState['settings']
   projectGrouping?: ProjectGroupingModel
 }): Set<string> {
   const renderedRepoIds = new Set<string>()
@@ -45,9 +42,8 @@ export function getRenderedNaturalAnchorRepoIds({
       groupBy,
       worktree,
       repoMap,
-      prCache,
+      prGroupOf,
       workspaceStatuses,
-      settings,
       projectGrouping
     )
     if (groupKey && !collapsedGroups.has(groupKey)) {
