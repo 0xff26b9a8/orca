@@ -43,5 +43,12 @@ export const SIDEBAR_INPUT_METHODS = [
     params: null,
     handler: async (_params, { runtime }) =>
       requireSwitchedOn(runtime.sidebarFacts).getWorkspaceReviewFacts()
+  }),
+  defineMethod({
+    name: 'sidebarInputs.workspaceCreations',
+    permission: 'workspace',
+    params: null,
+    handler: async (_params, { runtime }) =>
+      requireSwitchedOn(runtime.workspaceCreations).snapshot()
   })
 ]
