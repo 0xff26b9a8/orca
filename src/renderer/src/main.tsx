@@ -27,6 +27,10 @@ import { installBrowserClientPageRenderer } from './components/browser-pane/brow
 import { installOsFileDropCancellationGuard } from './lib/os-file-drop-cancellation-guard'
 import { installSidebarShadowComparison } from './lib/sidebar-shadow/sidebar-shadow-comparison'
 import { workspaceActivityShadow } from './lib/sidebar-shadow/workspace-activity-shadow'
+import {
+  pairedServerHostsShadow,
+  pairedServerRowsShadow
+} from './lib/sidebar-shadow/paired-server-rows-shadow'
 import { desktopFactsShadow } from './lib/sidebar-shadow/desktop-facts-shadow'
 
 const disposeOsFileDropGuard = installOsFileDropCancellationGuard()
@@ -37,6 +41,8 @@ installTypingLatencyDiagnostic()
 installAutomationHostDiagnostic()
 const disposeSidebarShadow = installSidebarShadowComparison([
   workspaceActivityShadow,
+  pairedServerRowsShadow,
+  pairedServerHostsShadow,
   desktopFactsShadow
 ])
 import.meta.hot?.dispose(disposeSidebarShadow)
