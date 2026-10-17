@@ -2,6 +2,7 @@ import { defineMethod } from '../core'
 import { getRegisteredSshState, listRegisteredSshTargets } from '../../../ssh/ssh-target-registry'
 import { getWslHostService } from '../../../wsl/wsl-host-service-instance'
 import { readDesktopSidebarFacts } from '../../sidebar-inputs/desktop-sidebar-facts'
+import { SidebarSessionBeginParams } from '../../../../shared/rpc-contract/sidebar-session-params'
 import { RepoIconDataUrlsParams } from '../../../../shared/sidebar-list/repo-icon-data-urls-contract'
 import { SetCollapsedParams } from '../../../../shared/rpc-contract/workspace-view-collapse-params'
 import { setCollapsedSection } from '../../workspace-view-collapse-writes'
@@ -52,6 +53,22 @@ export const SIDEBAR_INPUT_METHODS = [
     params: null,
     handler: async (_params, { runtime }) =>
       requireSwitchedOn(runtime.sidebarFacts).getWorkspaceReviewFacts()
+  }),
+  defineMethod({
+    name: 'sidebarInputs.temporal',
+    permission: 'workspace',
+    params: null,
+    handler: async (_params, { runtime }) =>
+      requireSwitchedOn(runtime.sidebarFacts).getSidebarTemporalSnapshot()
+  }),
+  defineMethod({
+    name: 'sidebarSession.begin',
+    permission: 'workspace',
+    params: SidebarSessionBeginParams,
+    handler: async ({ sessionId }, { runtime }) => {
+      requireSwitchedOn(runtime.sidebarFacts).beginSidebarListSession(sessionId)
+      return { ok: true }
+    }
   }),
   defineMethod({
     name: 'sidebarInputs.workspaceCreations',

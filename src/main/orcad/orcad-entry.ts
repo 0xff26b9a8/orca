@@ -295,9 +295,7 @@ async function startOrcadRuntime(
     () => runtime
   )
   if (runtime.sidebarFacts) {
-    registerCleanup(
-      runtime.sidebarFacts.workspaceActivityFacts.attachAgentStatusStore(agentHookServer)
-    )
+    registerCleanup(runtime.sidebarFacts.attachSidebarAgentStatusStore(agentHookServer))
   }
 
   // Why the headless entry point rather than registerPtyHandlers directly: this is the

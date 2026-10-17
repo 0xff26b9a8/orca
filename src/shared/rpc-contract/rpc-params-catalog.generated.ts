@@ -505,6 +505,7 @@ import {
   UpdatePaneLayout,
   WorktreeTabSelector
 } from './session-tabs-schemas-params'
+import { SidebarSessionBeginParams } from './sidebar-session-params'
 import {
   SkillsCancelInstallParams,
   SkillsDiscoverParams,
@@ -1255,7 +1256,9 @@ export const RPC_PARAMS_BY_METHOD = {
   'sidebarInputs.pairedServerRows': null,
   'sidebarInputs.repoIcons': RepoIconDataUrlsParams,
   'sidebarInputs.reviewFacts': null,
+  'sidebarInputs.temporal': null,
   'sidebarInputs.workspaceCreations': null,
+  'sidebarSession.begin': SidebarSessionBeginParams,
   'skills.beginUpload': SkillUploadBeginRequestSchema,
   'skills.cancelInstall': SkillsCancelInstallParams,
   'skills.cancelUpload': SkillUploadCommitRequestSchema,

@@ -34,6 +34,7 @@ import {
 } from './lib/sidebar-shadow/paired-server-rows-shadow'
 import { desktopFactsShadow } from './lib/sidebar-shadow/desktop-facts-shadow'
 import { workspaceReviewShadow } from './lib/sidebar-shadow/workspace-review-shadow'
+import { sidebarTemporalShadow } from './lib/sidebar-shadow/sidebar-temporal-shadow'
 import { workspaceCreationsShadow } from './lib/sidebar-shadow/workspace-creations-shadow'
 
 const disposeOsFileDropGuard = installOsFileDropCancellationGuard()
@@ -50,6 +51,7 @@ if (ORCA_SIDEBAR_INPUTS_IS_MAIN) {
     pairedServerHostsShadow,
     desktopFactsShadow,
     workspaceReviewShadow,
+    sidebarTemporalShadow,
     workspaceCreationsShadow
   ])
   import.meta.hot?.dispose(disposeSidebarShadow)
