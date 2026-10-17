@@ -29,11 +29,7 @@ import {
   type StructuredAgentSessionMutationContext
 } from './structured-agent-session-host-mutations'
 import { flushStructuredAgentSessionHost } from './structured-agent-session-host-teardown'
-import type {
-  StructuredAgentSessionCaller,
-  StructuredAgentSessionHostDeps,
-  StructuredAgentSessionReveal
-} from './structured-agent-session-host-types'
+import type * as HostTypes from './structured-agent-session-host-types'
 import { StructuredAgentSessionEventRecovery } from './structured-agent-session-event-recovery'
 import { StructuredAgentSessionBackgroundTaskChannel } from './structured-agent-session-background-task-channel'
 import { StructuredAgentSessionClientDelivery } from './structured-agent-session-client-delivery'
@@ -88,7 +84,7 @@ export class StructuredAgentSessionHost {
   /** Public because the RPC surface addresses it directly; see the restart-resume collaborator. */
   readonly restartResume: StructuredAgentSessionRestartResume
 
-  constructor(readonly deps: StructuredAgentSessionHostDeps) {
+  constructor(readonly deps: HostTypes.StructuredAgentSessionHostDeps) {
     // Every collaborator reads this copy, so a logger that throws cannot fail what it reports.
     this.deps = deps = sessionLogger.withNeverThrowingLogger(deps)
     this.clientDelivery.watchAtRestCommands(deps.adapter)
@@ -239,7 +235,7 @@ export class StructuredAgentSessionHost {
     this.restore.restoreReadableSessions(sessionIds)
 
   /** Make one persisted session addressable again; see `structured-agent-session-reveal`. */
-  revealSession = (sessionId: string): Promise<StructuredAgentSessionReveal> =>
+  revealSession = (sessionId: string): Promise<HostTypes.StructuredAgentSessionReveal> =>
     reveal.revealStructuredAgentSession(this.deps, sessionId, this.lifetime.conversation)
 
   private serialize = this.tasks.serialize.bind(this.tasks)
@@ -313,7 +309,7 @@ export class StructuredAgentSessionHost {
   changeThreadGoal = this.mutations.changeThreadGoal
   readOptions = this.mutations.readOptions
 
-  rewind = (caller: StructuredAgentSessionCaller, params: AgentSessionRewindParams) =>
+  rewind = (caller: HostTypes.StructuredAgentSessionCaller, params: AgentSessionRewindParams) =>
     rewindStructuredAgentSession(this.mutationContext(), this.attachContext(), caller, params)
 
   conversationCommand = (...args: Parameters<StructuredConversationCommandController['run']>) =>
