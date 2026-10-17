@@ -157,6 +157,7 @@ export class StructuredAgentSessionHost {
     this.restartResume = createStructuredAgentSessionRestartResume(deps, this.sessions, {
       ...structuredAgentSessionRestartResumeSurfaces(this, this.now),
       readChildWork: this.clientDelivery.readChildWork,
+      childWorkOpen: this.clientDelivery.childWorkOpen,
       publishStatus: this.clientDelivery.publishStatusAndSettlement
     })
     this.lifetime = createStructuredAgentSessionConversationLifetime({
@@ -166,7 +167,7 @@ export class StructuredAgentSessionHost {
       open: (sessionId) => this.conversationDelivery.open(sessionId),
       deliveryActive: (sessionId) => this.conversationDelivery.loop.isRunning(sessionId),
       closeStatus: (sessionId, options) => this.clientDelivery.closeSession(sessionId, options),
-      readChildWork: this.clientDelivery.readChildWork
+      childWorkOpen: this.clientDelivery.childWorkOpen
     })
     this.runtimeState.startLeaseRenewal()
     this.lifetime.idleSweep.start()
@@ -277,6 +278,8 @@ export class StructuredAgentSessionHost {
       conversation: this.lifetime.conversation,
       readChildWork: this.clientDelivery.readChildWork,
       publishChildWork: this.clientDelivery.publishChildWork,
+      captureChildWorkStops: this.clientDelivery.captureChildWorkStops,
+      childWorkOpen: this.clientDelivery.childWorkOpen,
       childWorkIncomplete: this.clientDelivery.childWorkIncomplete,
       serialize: (sessionId, task) => this.serialize(sessionId, task),
       openConversation: this.conversationDelivery.open,
