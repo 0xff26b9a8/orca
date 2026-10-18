@@ -40,6 +40,47 @@ export function recordOpenedEditorTabInLayoutOwner(state: EditorOwnerState, tab:
   })
 }
 
+/**
+ * An open the window drew in a tab it already had, read off the store before and after. A record
+ * it rewrote in place (View Log made writable, a conflict open) reaches main, which keeps the tab.
+ */
+export function recordReopenedEditorFileInLayoutOwner(
+  before: EditorOwnerState,
+  after: EditorOwnerState,
+  worktreeId: string,
+  tabId: string
+): void {
+  const tab = after.unifiedTabsByWorktree[worktreeId]?.find((entry) => entry.id === tabId)
+  const reused = before.unifiedTabsByWorktree[worktreeId]?.some((entry) => entry.id === tabId)
+  if (!tab || !reused || !isEditorTabContentType(tab.contentType)) {
+    return
+  }
+  const fileIn = (state: EditorOwnerState): OpenFile | undefined =>
+    state.openFiles.find(
+      (candidate) => candidate.id === tab.entityId && candidate.worktreeId === worktreeId
+    )
+  const now = fileIn(after)
+  if (now?.mode !== 'edit') {
+    return
+  }
+  const was = fileIn(before)
+  const file = restorableEditorFile(now)
+  // One builder makes both records, so their key order matches.
+  if (was?.mode === 'edit' && JSON.stringify(restorableEditorFile(was)) === JSON.stringify(file)) {
+    return
+  }
+  recordLayoutApply(after, worktreeId, {
+    type: 'openEditorTab',
+    tabId: tab.id,
+    fileId: tab.entityId,
+    contentType: tab.contentType,
+    groupId: tab.groupId,
+    ...(tab.isPreview ? { preview: true } : {}),
+    createdAt: tab.createdAt,
+    file
+  })
+}
+
 /** Preview tabs the window just made permanent (activation, an edit, a pin). */
 export function recordPromotedEditorTabsInLayoutOwner(
   state: EditorOwnerState,
