@@ -762,7 +762,8 @@
             "76deec8f58": "Failed to switch organization",
             "7d4bc516ee": "Failed to switch profile",
             "f518e89aa5": "Project already exists in that profile",
-            "f03ae7f27b": "Failed to transfer project"
+            "f03ae7f27b": "Failed to transfer project",
+            "signInTimedOut": "Sign-in timed out"
           }
         },
         "runtime": {
@@ -18165,6 +18166,14 @@
         "a62f9db53d": "Cancel",
         "c77189bc0c": "Update filter",
         "19af906d12": "Save filter"
+      },
+      "OrcaSignInProgress": {
+        "waiting": "Waiting for sign-in in your browser",
+        "copyLink": "Copy sign-in link",
+        "copied": "Sign-in link copied",
+        "copyFailed": "Could not copy the link.",
+        "signingIn": "Signing in…",
+        "cancel": "Cancel"
       }
     },
     "i18n": {
