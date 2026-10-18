@@ -10,14 +10,18 @@ vi.mock('../../../shared/sidebar-inputs-switch', () => ({ ORCA_SIDEBAR_INPUTS_IS
 
 const WT = 'repo-1::/tmp/worktree-a'
 
-function createHeadlessRuntime() {
+function createHeadlessRuntime(
+  stored: Pick<WorktreeMeta, 'lastActivityAt' | 'smartTier' | 'smartAt'> = { lastActivityAt: 0 }
+) {
   const meta: Record<string, Pick<WorktreeMeta, 'lastActivityAt' | 'smartTier' | 'smartAt'>> = {
-    [WT]: { lastActivityAt: 0 }
+    [WT]: stored
   }
   const store = {
     getRepos: () => [],
+    getRepo: (id: string) => (id === 'repo-1' ? { id, connectionId: null } : undefined),
     getSettings: () => ({}),
     getWorktreeMeta: (id: string) => meta[id],
+    getAllWorktreeMeta: () => meta,
     setWorktreeMeta: (id: string, updates: Partial<WorktreeMeta>) => {
       meta[id] = { ...meta[id], ...updates }
       return meta[id]
@@ -83,5 +87,19 @@ describe('host sort stamps on a headless runtime', () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+
+  it('reconciles stored tiers once the provider can answer for the workspace’s terminals', async () => {
+    const live = createHeadlessRuntime({ lastActivityAt: 5, smartTier: 'done', smartAt: 4 })
+    live.runtime.sidebarFacts?.attachSidebarAgentStatusStore(new AgentHookServer())
+    await live.runtime.sidebarFacts?.reconcileSortStampTiers({ probePtyLiveness: async () => true })
+    expect(live.meta[WT]).toEqual({ lastActivityAt: 5, smartTier: 'done', smartAt: 4 })
+
+    const gone = createHeadlessRuntime({ lastActivityAt: 5, smartTier: 'done', smartAt: 4 })
+    gone.runtime.sidebarFacts?.attachSidebarAgentStatusStore(new AgentHookServer())
+    await gone.runtime.sidebarFacts?.reconcileSortStampTiers({
+      probePtyLiveness: async () => false
+    })
+    expect(gone.meta[WT]).toEqual({ lastActivityAt: 5, smartTier: undefined, smartAt: undefined })
   })
 })

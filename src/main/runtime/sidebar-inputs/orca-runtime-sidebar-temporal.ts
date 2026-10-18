@@ -2,7 +2,11 @@ import { OrcaRuntimeWithWorkspaceReviewFacts } from './orca-runtime-workspace-re
 import type { OrcaRuntimeWithMigrationCatalog } from '../orca-runtime-migration-catalog'
 import { ORCA_SIDEBAR_INPUTS_IS_MAIN } from '../../../shared/sidebar-inputs-switch'
 import { DEFAULT_HIDE_SLEEPING_WORKSPACES } from '../../../shared/constants'
-import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../../shared/execution-host'
+import {
+  getRepoExecutionHostId,
+  isLocalExecutionHost,
+  LOCAL_EXECUTION_HOST_ID
+} from '../../../shared/execution-host'
 import { detectAgentStatusFromTitle } from '../../../shared/agent-detection'
 import type { SidebarTemporalSnapshot } from '../../../shared/sidebar-list/sidebar-temporal-snapshot'
 import type { Worktree } from '../../../shared/worktree/types'
@@ -17,6 +21,7 @@ import { SmartSortAgentEntries } from './smart-sort-agent-entries'
 import { buildRuntimeSmartSortSources } from './runtime-smart-sort-sources'
 import type { AgentStatusStoreView } from './workspace-activity-facts-producer'
 import { SortStampsProducer } from './sort-stamps-producer'
+import { resolveAgentWorkspaceExecutionHostId } from '../../agent-hooks/restored-status-dead-terminal-sweep'
 import {
   isWslMoveProjectBlocked,
   wslMoveProjectRefForWorkspace
@@ -84,6 +89,49 @@ export abstract class OrcaRuntimeWithSidebarTemporal extends OrcaRuntimeWithWork
 
   beginSidebarListSession(sessionId: string): void {
     this.sidebarTemporal.beginSession(sessionId)
+  }
+
+  /** After a restart, once hook rows and the provider's PTYs settle: drop tiers nothing backs. */
+  async reconcileSortStampTiers(provider: {
+    probePtyLiveness?: (ptyId: string) => Promise<boolean | null>
+  }): Promise<void> {
+    const store = this.store
+    await this.sortStamps
+      .reconcileStoredTiers({
+        isLocalWorkspace: (worktreeId) =>
+          !!store &&
+          isLocalExecutionHost(
+            resolveAgentWorkspaceExecutionHostId(worktreeId, {
+              getRepo: (repoId) => store.getRepo(repoId),
+              getWorktreeMeta: (id) => store.getWorktreeMeta(id),
+              getFolderWorkspace: (id) => store.getFolderWorkspace?.(id),
+              getProjectGroups: () => store.getProjectGroups?.() ?? []
+            })
+          ),
+        terminalPtyIds: (worktreeId) => {
+          const session = store?.getWorkspaceSession?.(LOCAL_EXECUTION_HOST_ID)
+          const ptyIds = new Set<string>()
+          for (const tab of session?.tabsByWorktree?.[worktreeId] ?? []) {
+            if (tab.ptyId) {
+              ptyIds.add(tab.ptyId)
+            }
+            for (const ptyId of Object.values(
+              session?.terminalLayoutsByTabId?.[tab.id]?.ptyIdsByLeafId ?? {}
+            )) {
+              ptyIds.add(ptyId)
+            }
+          }
+          for (const pty of this.ptysById.values()) {
+            if (pty.worktreeId === worktreeId) {
+              ptyIds.add(pty.ptyId)
+            }
+          }
+          return [...ptyIds]
+        },
+        // A provider that cannot probe proves nothing absent.
+        probePtyLiveness: async (ptyId) => (await provider.probePtyLiveness?.(ptyId)) ?? null
+      })
+      .catch((error: unknown) => console.warn('[sidebar] sort tier reconcile failed:', error))
   }
 
   /** Attaches every sidebar producer that reads the hook server's store. */
