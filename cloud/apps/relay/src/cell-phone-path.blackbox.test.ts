@@ -385,6 +385,22 @@ describe('the memory phone path', () => {
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(await confirm('confirm-1')).toMatchObject({ type: 'control-error', code: 'confirmation_not_active' })
     expect(reserve.phoneStatements()[0]).toBe('BEGIN')
+    expect(warnings('orca_relay_resume_confirm_failed')).toEqual([
+      {
+        event: 'orca_relay_resume_confirm_failed',
+        code: 'confirmation_not_active',
+        phonePath: 'db',
+        cellId: reserve.config.cellId
+      }
+    ])
+  })
+
+  it('does not count a lease release that failed after a committed confirm as a failed confirm', async () => {
+    const { reserve, confirm } = await splicedPhone('db')
+    vi.spyOn(reserve.relay.assignments, 'releaseActivity').mockRejectedValueOnce(new Error('connection terminated'))
+    // As today, the desktop still hears the release failure.
+    expect(await confirm('confirm-1')).toMatchObject({ type: 'control-error' })
+    expect(warnings('orca_relay_resume_confirm_failed')).toEqual([])
   })
 
   it('keeps the database confirm statement for statement while phonePath is db', async () => {
