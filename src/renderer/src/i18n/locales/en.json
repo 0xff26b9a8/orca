@@ -18398,6 +18398,14 @@
         "providerRetryNumber": "Retry {{attempt}}.",
         "providerRetryNumberOf": "Retry {{attempt}} of {{maxRetries}}.",
         "providerRetryLastError": "Last error: {{detail}}.",
+        "usageLimitReached": "{{agent}} hit its usage limit.",
+        "usageLimitReachedNamed": "{{agent}} hit its {{window}} limit.",
+        "usageLimitWindowSession": "session",
+        "usageLimitWindowWeekly": "weekly",
+        "usageLimitWindowWeeklyModel": "weekly model",
+        "usageLimitWindowCredits": "extra usage",
+        "usageLimitResetsAt": "It resets at {{when}}.",
+        "usageLimitSendAfterReset": "Send a message once it resets to continue.",
         "previousExitUnverifiable": "Couldn't stop {{agent}} from before.",
         "sessionNotRestored": "{{agent}} couldn't reopen its earlier session, so this chat continues in a new one. {{agent}} doesn't remember the earlier messages.",
         "argumentsUnsupportedOption": "Saved Arguments contain an unsupported option ({{option}}).",
@@ -18428,6 +18436,7 @@
         "capacity": "Orca on the computer running this chat has hit a request limit. Update Orca there, then try again.",
         "outcomeUnknown": "Orca couldn't confirm what happened. Check the chat.",
         "sendOutcomeLost": "Orca couldn't confirm your message reached the agent. Check the chat, then send it again if needed.",
+        "continuationSuperseded": "This chat has moved on. Check the latest messages before continuing.",
         "questionChanged": "This question was already answered or has changed.",
         "cancelNotSaved": "Couldn't cancel this question or approval.",
         "historyUnreadable": "Orca couldn't read this chat's saved history.",
@@ -19040,7 +19049,9 @@
       "interruptedContinue": {
         "continue": "Continue",
         "failed": "Couldn't continue this chat. Try again, or send a message.",
-        "explanation": "Continue, and the agent first checks whether its last step finished."
+        "explanation": "Continue, and the agent first checks whether its last step finished.",
+        "unconfirmed": "Couldn't confirm whether {{agent}} received Continue. Check the chat before trying again.",
+        "usageLimitExplanation": "Asks the agent to continue where it left off. Use it once the limit resets."
       },
       "claudeSignIn": {
         "signingIn": "Signing in…"
