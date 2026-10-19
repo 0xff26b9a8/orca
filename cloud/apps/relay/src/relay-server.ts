@@ -874,6 +874,7 @@ export function createRelayServer(
     controls.close()
     clients.close()
     dataSockets.close()
+    store.resumeAudit.stop()
   })
   const runtimeCounts = () => {
     const ledgerCounts = connectionLedger?.counts()

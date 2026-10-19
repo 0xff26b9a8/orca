@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { reserveDeadManWindowMs } from './cell-reserve-dead-man.js'
 import { openRelayDatabase } from './database.js'
-import { nextFrame, startReserveModeCell } from './test-fixtures/reserve-mode-cell.js'
+import { nextFrame, RESERVE_MODE_CELL_ID, startReserveModeCell } from './test-fixtures/reserve-mode-cell.js'
 import { StatementRecordingDatabase } from './test-fixtures/statement-recording-database.js'
 
 // Step 6: a reserve-mode cell with phonePath=memory resumes paired phones without the database.
@@ -62,6 +62,14 @@ const DATABASE_PATH_CONFIRM = [
   'COMMIT'
 ]
 
+async function until(check: () => Promise<boolean>, timeoutMs = 10_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs
+  while (!(await check())) {
+    if (Date.now() > deadline) throw new Error('condition not reached')
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+}
+
 describe('the memory phone path', () => {
   const cleanup: Array<() => Promise<void> | void> = []
 
@@ -97,11 +105,16 @@ describe('the memory phone path', () => {
   }
 
   // A phone resumed and spliced to its desktop, waiting to confirm.
-  async function splicedPhone(phonePath: 'db' | 'memory', device: { expiresAt?: number } = {}) {
-    const reserve = await cell()
+  async function splicedPhone(
+    phonePath: 'db' | 'memory',
+    device: { expiresAt?: number } = {},
+    clock: { now?: () => number; beforeDial?: () => void } = {}
+  ) {
+    const reserve = await cell(clock.now)
     reserve.setAdmitMode('reserve', { phonePath })
     const seated = await reserve.bookedHost(3)
     await reserve.installDevice(seated.identity.hostId, TOKEN, device)
+    clock.beforeDial?.()
     const connOpen = nextFrame(seated.socket, 'conn-open')
     const phone = await reserve.dialPhone(seated.identity.hostId, TOKEN)
     const basisConnId = String((await connOpen).connId)
@@ -266,10 +279,17 @@ describe('the memory phone path', () => {
     expect(answer.resumeExpiresAt).toBe(after)
     expect(reserve.phoneStatements()).toEqual([
       CONFIRM_DEVICE_READ,
-      expect.stringMatching(/^UPDATE relay_devices SET current_expires_at = \?.*RETURNING current_expires_at$/),
-      expect.stringMatching(/^INSERT INTO relay_audit_events/)
+      expect.stringMatching(/^UPDATE relay_devices SET current_expires_at = \?.*RETURNING current_expires_at$/)
     ])
     expect(await reserve.activityLeases()).toEqual([])
+    // Its audit row leaves with the next batch.
+    await reserve.relay.store.resumeAudit.flush()
+    const audits = await reserve.raw.query(
+      `SELECT detail_json FROM relay_audit_events WHERE type = 'resume-confirmed'`
+    )
+    expect(audits.map((row) => JSON.parse(String(row.detail_json)))).toEqual([
+      { reqId: 'confirm-1', basisConnId: expect.any(String), renewed: true }
+    ])
     // A retry of the same request answers from memory; another basis cannot reuse its reqId.
     reserve.database.statements.length = 0
     expect(await confirm('confirm-1')).toEqual(answer)
@@ -284,7 +304,7 @@ describe('the memory phone path', () => {
     const fresh = Date.now() + 29.5 * 24 * 60 * 60 * 1000
     const notDue = await splicedPhone('memory', { expiresAt: fresh })
     expect(await notDue.confirm('confirm-1')).toMatchObject({ renewed: true, resumeExpiresAt: fresh })
-    expect(notDue.reserve.phoneStatements()).toEqual([CONFIRM_DEVICE_READ, expect.stringMatching(/^INSERT INTO relay_audit_events/)])
+    expect(notDue.reserve.phoneStatements()).toEqual([CONFIRM_DEVICE_READ])
 
     const due = Date.now() + 20 * 24 * 60 * 60 * 1000
     const failing = await splicedPhone('memory', { expiresAt: due })
@@ -336,7 +356,7 @@ describe('the memory phone path', () => {
       renewed: false,
       resumeExpiresAt: stored
     })
-    expect(reserve.phoneStatements()).toEqual([CONFIRM_DEVICE_READ, expect.stringMatching(/^INSERT INTO relay_audit_events/)])
+    expect(reserve.phoneStatements()).toEqual([CONFIRM_DEVICE_READ])
   })
 
   it('answers every device change since the accept read as the database confirm does', async () => {
@@ -371,5 +391,65 @@ describe('the memory phone path', () => {
     const { reserve, confirm } = await splicedPhone('db')
     expect(await confirm('confirm-1')).toMatchObject({ type: 'device-resume-confirmed', renewed: true })
     expect(reserve.phoneStatements()).toEqual(DATABASE_PATH_CONFIRM)
+  })
+
+  describe('rolling a memory cell back', () => {
+    // Flip back by the switch, or by the dead-man; either way the confirm finishes from memory.
+    type Cell = Awaited<ReturnType<typeof cell>>
+    type Advance = (ms: number) => void
+    type Rollback = { beforeDial?: (advance: Advance) => void; roll: (reserve: Cell, advance: Advance) => void }
+    // The dead-man trips just after the phone's accept: its window ran from the host's booking.
+    const window = reserveDeadManWindowMs(RESERVE_MODE_CELL_ID)
+    const rollbacks: Record<string, Rollback> = {
+      'admitMode=db': { roll: (reserve) => reserve.setAdmitMode('db', { phonePath: 'memory' }) },
+      'phonePath=db': { roll: (reserve) => reserve.setAdmitMode('reserve', { phonePath: 'db' }) },
+      'a dead-man trip': { beforeDial: (advance) => advance(window - 5_000), roll: (_reserve, advance) => advance(6_000) }
+    }
+
+    for (const [name, rollback] of Object.entries(rollbacks)) {
+      it(`finishes an in-flight confirm on its memory basis after ${name}, writing and leaking no lease`, async () => {
+        let now = Date.now()
+        const advance: Advance = (ms) => {
+          now += ms
+        }
+        const spliced = await splicedPhone('memory', {}, {
+          now: () => now,
+          beforeDial: () => rollback.beforeDial?.(advance)
+        })
+        const { reserve, seated } = spliced
+        // The flag tool records reserve in Postgres before the cell admits from memory.
+        await reserve.relay.assignments.reconcileCells([...reserve.config.cells, OTHER_CELL])
+        await reserve.relay.assignments.setCellAdmitMode(reserve.config.cellId, 'reserve')
+        rollback.roll(reserve, advance)
+        expect(reserve.relay.sessions.phonePathEffective()).toBe('db')
+        reserve.database.statements.length = 0
+        expect(await spliced.confirm('confirm-1')).toMatchObject({ type: 'device-resume-confirmed', renewed: true })
+        expect(reserve.phoneStatements().filter((sql) => !sql.includes('relay_assignment'))).toEqual([
+          CONFIRM_DEVICE_READ,
+          expect.stringMatching(/^UPDATE relay_devices SET current_expires_at/)
+        ])
+        // Only the control lease a flip back re-registers; nothing for the phone.
+        const leases = async () => (await reserve.activityLeases()).map((lease) => lease.activity_kind)
+        expect((await leases()).filter((kind) => kind !== 'control')).toEqual([])
+        // Postgres still records reserve, so evacuation leaves the cell alone.
+        await expect(
+          reserve.relay.assignments.startEvacuation(
+            { userId: 'user-1', relayHostId: seated.identity.hostId },
+            OTHER_CELL.id
+          )
+        ).rejects.toThrow('cell_in_reserve_mode')
+        // The splice still runs, and closing it releases nothing it never took.
+        expect(spliced.phone.socket.readyState).toBe(spliced.phone.socket.OPEN)
+        // Let a flip back finish leasing its control (and fold its relay_cells write) first.
+        await until(async () => reserve.relay.sessions.reregistrationPending() === 0)
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        reserve.database.statements.length = 0
+        spliced.phone.socket.close()
+        await spliced.phone.closed
+        await new Promise((resolve) => setTimeout(resolve, 50))
+        expect(reserve.phoneStatements()).toEqual([])
+        expect((await leases()).filter((kind) => kind !== 'control')).toEqual([])
+      })
+    }
   })
 })
