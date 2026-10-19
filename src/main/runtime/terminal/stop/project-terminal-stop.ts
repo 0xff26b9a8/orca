@@ -170,11 +170,12 @@ export abstract class OrcaRuntimeWithStopTerminalsForProject extends OrcaRuntime
     if (this.projectSiblingSharesFence(repo)) {
       return { stopped: 0, worktreeIds: [] }
     }
-    let stopped = 0
     for (const id of listProjectTerminalWorktreeIds(repo.id, this.leaves, this.ptysById)) {
       projectWorktreeIds.add(id)
     }
-    for (const id of projectWorktreeIds) {
+    // Why all at once: one deadline covers the project, so a slow worktree must not spend the
+    // budget its siblings' stops need; each still holds only its own worktree's lock.
+    const stopWorktree = async (id: string): Promise<number> => {
       const opts = { resolvedWorktreeId: id, ...fence, ...options, requestStopsPastDeadline: true }
       // Why exclusive: it waits out a spawn that holds the shared lease, so its PTY is registered
       // and stopped. Bounded by the deadline so repo.rm still answers; past it PTYs are only asked.
@@ -190,11 +191,32 @@ export abstract class OrcaRuntimeWithStopTerminalsForProject extends OrcaRuntime
           this.stopTerminalsForWorktree(`id:${id}`, opts),
           options.deadline
         )
-        stopped += result?.stopped ?? 0
+        return result?.stopped ?? 0
       } finally {
         release?.()
       }
     }
+    // Why rounds: the inventory refresh may still add workspaces after its own budget gave up.
+    const started = new Set<string>()
+    const stops: PromiseSettledResult<number>[] = []
+    for (;;) {
+      const added = [...projectWorktreeIds].filter((id) => !started.has(id))
+      if (added.length === 0) {
+        break
+      }
+      for (const id of added) {
+        started.add(id)
+      }
+      stops.push(...(await Promise.allSettled(added.map(stopWorktree))))
+    }
+    const failure = stops.find((stop) => stop.status === 'rejected')
+    if (failure) {
+      throw failure.reason
+    }
+    const stopped = stops.reduce(
+      (total, stop) => total + (stop.status === 'fulfilled' ? stop.value : 0),
+      0
+    )
     return { stopped, worktreeIds: [...projectWorktreeIds] }
   }
 
