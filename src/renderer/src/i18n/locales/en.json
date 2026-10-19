@@ -18081,6 +18081,16 @@
           "externalLinkTitle": "Open link to {{host}}?",
           "externalLinkConfirm": "Open link",
           "externalLinkCancel": "Cancel"
+        },
+        "externalApp": {
+          "title": "Open {{app}}?",
+          "schemeTitle": "Open this {{scheme}} link?",
+          "description": "{{origin}} wants to open another application.",
+          "anonymousDescription": "A page in the browser wants to open another application.",
+          "confirm": "Open {{app}}",
+          "confirmLink": "Open link",
+          "cancel": "Cancel",
+          "launchFailed": "Couldn't open an app for this {{scheme}} link. It may not be installed."
         }
       },
       "HostedReviewUnlinkMenuItem": {
