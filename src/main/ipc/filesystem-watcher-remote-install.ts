@@ -17,10 +17,14 @@ import { watcherLifecycleState } from './filesystem-watcher-lifecycle-state'
 import { getRemoteWatcherKey } from './filesystem-watcher-paths'
 import { isCurrentWatcherSender } from './filesystem-watcher-sender-lifetime'
 import {
+  addCancelledInstallWaiter,
   addInFlightRemoteInstallListener,
   addRemoteWatchListener,
-  registerWatcherSenderCleanup
+  registerWatcherSenderCleanup,
+  takeCancelledInstallWaiter
 } from './filesystem-watcher-listener-lifecycle'
+
+const cancelledRemoteInstallWaiters = watcherLifecycleState.cancelledRemoteInstallWaiters
 
 export type RemoteWatcherTerminalErrorHandler = (
   key: string,
@@ -89,8 +93,14 @@ async function installRemoteWatcherWhileRemovalAllowed(
       // Why: a new watcher joining before provider.watch() resolves should revive the install instead of inheriting the stale cancellation.
       addInFlightRemoteInstallListener(inFlight, sender)
     }
+    const waitToken = canJoinInstall
+      ? null
+      : addCancelledInstallWaiter(cancelledRemoteInstallWaiters, key, sender)
     const result = await pendingInstall
-    if (!isCurrentWatcherSender(sender, senderSignal)) {
+    const stillWanted =
+      waitToken === null ||
+      takeCancelledInstallWaiter(cancelledRemoteInstallWaiters, key, sender.id, waitToken)
+    if (!stillWanted || !isCurrentWatcherSender(sender, senderSignal)) {
       return 'cancelled'
     }
     if (
