@@ -3905,7 +3905,11 @@
             "97957ad3a3": "连接 AI 提供商账户，即可实时查看使用量并在账户间快速切换。",
             "9a542f46c7": "从状态栏隐藏",
             "84c3b15dca": "智能体用量限制",
-            "d663430cf9": "设置用量跟踪"
+            "d663430cf9": "设置用量跟踪",
+            "remoteLabel": "{{host}} 上没有用量",
+            "remoteTitle": "{{host}} 上的用量",
+            "remoteBody": "此工作区运行在 {{host}} 上，因此状态栏显示的是该主机的用量。请在该主机上登录智能体，或切换到本地工作区以查看这台电脑的用量。",
+            "remoteOpenAccounts": "打开 {{host}} 的账户"
           },
           "UpdateStatusSegment": {
             "5cd13105a3": "更新失败。单击以展开。",
@@ -4092,7 +4096,11 @@
                 "label": "登录已过期",
                 "message": "Claude 用量已过期。请在此账户中启动 Claude 以刷新。"
               }
-            }
+            },
+            "remoteOwnerNotConfigured": "未在 {{server}} 上配置",
+            "remoteOwnerSignInSavedHere": "其登录信息仅保存在此电脑上。",
+            "claudeNoUsageFromHost": "{{server}} 无用量数据",
+            "claudeUnknownOnHost": "无法从 {{server}} 获取 Claude 用量。可能未在那里登录，或使用的是 API 密钥计费。"
           },
           "SshTargetStatusRow": {
             "sshHost": "SSH 主机"

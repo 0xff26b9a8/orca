@@ -3905,7 +3905,11 @@
             "97957ad3a3": "AI プロバイダーアカウントに接続すると、その使用状況をリアルタイムで確認し、アカウント間を簡単に切り替えることができます。",
             "9a542f46c7": "ステータスバーから隠す",
             "84c3b15dca": "Agent の使用量制限",
-            "d663430cf9": "使用状況の追跡を設定"
+            "d663430cf9": "使用状況の追跡を設定",
+            "remoteLabel": "{{host}} の使用量はありません",
+            "remoteTitle": "{{host}} の使用量",
+            "remoteBody": "このワークスペースは {{host}} で実行されているため、バーにはそのホストの使用量が表示されます。そのホストで Agent にサインインするか、ローカルのワークスペースにフォーカスすると、このコンピュータの使用量が表示されます。",
+            "remoteOpenAccounts": "{{host}} のアカウントを開く"
           },
           "UpdateStatusSegment": {
             "5cd13105a3": "アップデートに失敗しました。クリックして展開します。",
@@ -4092,7 +4096,11 @@
                 "label": "サインインの有効期限切れ",
                 "message": "Claude の使用状況が期限切れです。このアカウントで Claude を起動して更新してください。"
               }
-            }
+            },
+            "remoteOwnerNotConfigured": "{{server}} では未構成",
+            "remoteOwnerSignInSavedHere": "サインイン情報はこのコンピュータにのみ保存されています。",
+            "claudeNoUsageFromHost": "{{server}} から使用状況なし",
+            "claudeUnknownOnHost": "{{server}} から Claude の使用状況を取得できません。そこでサインインしていないか、API キー課金を使用している可能性があります。"
           },
           "SshTargetStatusRow": {
             "sshHost": "SSH ホスト"
