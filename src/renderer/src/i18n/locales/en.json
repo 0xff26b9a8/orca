@@ -18081,6 +18081,16 @@
           "confirmLink": "Open link",
           "cancel": "Cancel",
           "launchFailed": "Couldn't open an app for this {{scheme}} link. It may not be installed."
+        },
+        "httpAuth": {
+          "title": "Sign in",
+          "description": "{{origin}} is asking for a username and password.",
+          "insecure": "Your connection to this site isn't private.",
+          "retry": "That username or password didn't work.",
+          "username": "Username",
+          "password": "Password",
+          "confirm": "Sign in",
+          "cancel": "Cancel"
         }
       },
       "HostedReviewUnlinkMenuItem": {
