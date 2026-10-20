@@ -13,6 +13,7 @@ import { execCommand } from '../../ssh/remote-exec/remote-exec-command'
 import { uploadRelayDirectory } from './remote-install-transfers'
 import { getRemoteHostPlatform } from '../../ssh/ssh-remote-platform'
 import { pinnedNodeRuntimeAsset } from '../../../shared/node-runtime-pin'
+import { DesktopDownloadUnreachableError } from '../../node-runtime/pinned-runtime-materializer'
 import {
   HOST_NODE_DOWNLOAD_FAILED,
   HOST_NODE_DOWNLOAD_OK,
@@ -100,7 +101,28 @@ describe('pinned Node when this computer cannot download it', () => {
     expect(message).toContain('net::ERR_CONNECTION_REFUSED')
     expect(message).toContain('curl: (7) Failed to connect to nodejs.org')
     expect(message).toContain(OFFLINE_PATH)
+    expect(message).toContain('Settings > Advanced > Network > Node.js download mirror')
+    expect(message).toContain("NODEJS_ORG_MIRROR in this computer's environment")
     expect(uploadRelayDirectory).not.toHaveBeenCalled()
+  })
+
+  it("quotes only this computer's short reason, not its standalone advice", async () => {
+    freshHost(`${HOST_NODE_DOWNLOAD_FAILED}\nnodejs.org: curl exit 7`)
+    const desktop = () =>
+      Promise.reject(
+        new DesktopDownloadUnreachableError(
+          "This computer couldn't download Node ... so the host doesn't need internet access",
+          'https://nodejs.org/dist/x: net::ERR_CONNECTION_REFUSED',
+          new Error('net::ERR_CONNECTION_REFUSED')
+        )
+      )
+
+    const message = String(await ensure(desktop).catch((error: unknown) => error))
+
+    expect(message).toContain(
+      'This computer: https://nodejs.org/dist/x: net::ERR_CONNECTION_REFUSED.'
+    )
+    expect(message).not.toContain("the host doesn't need internet access")
   })
 
   it('does not try the host once the connect was cancelled', async () => {
