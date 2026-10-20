@@ -76,7 +76,10 @@ export async function openCodexStructuredSession(
     assertCodexConnectionOpen(connection, sessionId)
   }
   current()
-  await waitForPromiseWithSignal(initializeCodexAppServerConnection(connection), openInput.signal)
+  await waitForPromiseWithSignal(
+    initializeCodexAppServerConnection(connection, null),
+    openInput.signal
+  )
   current()
   const threadLaunch = await waitForPromiseWithSignal(
     withCodexVisualsThreadConfig(connection, launch, {
@@ -94,7 +97,9 @@ export async function openCodexStructuredSession(
     openCodexThread(
       connection,
       { ...threadLaunch, commandEnv },
-      deps.requestTimeoutMs,
+      // No deadline of its own: resuming a long rollout or starting MCP servers takes what it
+      // takes. The host's start ceiling, a close and a Stop end the wait through the signal.
+      deps.requestTimeoutMs ?? null,
       openInput.signal
     ),
     openInput.signal
