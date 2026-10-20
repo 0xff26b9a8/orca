@@ -1,6 +1,6 @@
-// The read-only layout stream (design 2.4) and the server snapshot read (design 6.3). Not
-// advertised as a capability and not on the mobile allowlist: no client calls them until the
-// switch, so they are inert.
+// The read-only layout stream (design 2.4) and the server snapshot read (design 6.3). Paired
+// desktops may call them; a desktop relies on them only on a server advertising
+// `layout.intents.v1` (layout-intents-capability.ts). Not on the mobile allowlist.
 
 import {
   LayoutApplyParams,
