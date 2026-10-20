@@ -3682,6 +3682,8 @@
           },
           "TerminalRemoteRuntimeReconnectBanner": {
             "retryingTitle": "Reconnecting to remote runtime",
+            "pairingRefusedTitle": "This host no longer accepts this computer",
+            "pairingRefusedBody": "Orca couldn't pair with it again over SSH. Nothing on the host was stopped. Reconnect to try again.",
             "disconnectedTitle": "Remote runtime disconnected",
             "retryingBody": "Orca is retrying automatically. This terminal will resume if the connection returns.",
             "disconnectedBody": "Automatic retries stopped. Reconnect to resume this terminal session.",
@@ -4474,6 +4476,8 @@
             "access_revoked": "Access revoked",
             "access_revoked_summary": "This server revoked access for this computer",
             "access_revoked_explanation": "Re-pair with a new pairing link from the server to reconnect.",
+            "managed_access_revoked_explanation": "Orca couldn't pair with it again over SSH. Connect to try again.",
+            "connect_access_revoked_explanation": "Connect to try again.",
             "update_required": "Update required",
             "update_required_summary": "Orca versions are not compatible",
             "update_required_explanation": "Update Orca on this computer or on the server, then connect again.",
@@ -8626,6 +8630,7 @@
           "e57dde9d93": "Unsaved changes"
         },
         "RuntimeAccessGrantList": {
+          "sshAccessCaveat": "Revoking here doesn't stop someone with SSH access to this computer from pairing again. To cut them off, remove their SSH access.",
           "8b82879581": "Anyone with an active grant can connect until you revoke it. Revoking shared access disconnects active clients immediately.",
           "68ec21309f": "Revoke access",
           "6f6d5188ed": "Revoke {{value0}}",
@@ -8736,6 +8741,8 @@
           "cloudVmWorkflow": "Cloud VM",
           "cloudVmWorkflowHelp": "Manage recipe-created cloud machines",
           "accessRevoked": "{{value0}} no longer accepts this computer. Re-pair it with a new access link.",
+          "managedAccessRevoked": "{{value0}} no longer accepts this computer, and Orca couldn't pair with it again over SSH. Connect to try again.",
+          "connectAccessRevoked": "{{value0}} no longer accepts this computer. Connect to try again.",
           "repair": "Re-pair…",
           "serverAccessRevoked": "Access revoked",
           "orcaVersionLastSeen": "Orca v{{value0}} (last seen)"

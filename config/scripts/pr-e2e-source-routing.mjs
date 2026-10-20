@@ -269,6 +269,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     id: 'ssh.orcad-remote-sources',
     specs: [
       'tests/e2e/ssh-orcad-paired-phone-projects.spec.ts',
+      'tests/e2e/ssh-orcad-pairing-repair.spec.ts',
       'tests/e2e/ssh-orcad-retained-upgrade-state.spec.ts',
       'tests/e2e/ssh-orcad-shared-home-machines.spec.ts',
       'tests/e2e/ssh-orcad-shared-login-migration.spec.ts',
@@ -277,7 +278,7 @@ export const PR_E2E_SOURCE_ROUTES = [
     ],
     matches: (file) =>
       isProductSource(file) &&
-      /^src\/(?:main\/(?:ssh|orcad|managed-server)\/|main\/ipc\/(?:ssh|runtime-environment|orcad-)|cli\/runtime\/(?:launch-)?serve|shared\/(?:remote-runtime|orcad-|protocol-version\.ts$|runtime-capability)|renderer\/src\/store\/repos\/(?:repo-removal|runtime-project-terminal-stop)|renderer\/src\/components\/sidebar\/(?:sleep-|SleepTwin|WorkspaceSleep|use-worktree-sleep|ssh-host-remove|host-rename-remove|HostRemove))/.test(
+      /^src\/(?:main\/(?:ssh|orcad|managed-server)\/|main\/ipc\/(?:ssh|runtime-environment|orcad-)|cli\/runtime\/(?:launch-)?serve|shared\/(?:remote-runtime|orcad-|protocol-version\.ts$|runtime-capability)|renderer\/src\/store\/repos\/(?:repo-removal|runtime-project-terminal-stop)|renderer\/src\/components\/sidebar\/(?:sleep-|SleepTwin|WorkspaceSleep|use-worktree-sleep|ssh-host-remove|host-rename-remove|HostRemove)|renderer\/src\/components\/terminal-pane\/(?:TerminalRemoteRuntimeReconnectBanner|use-managed-pairing-refused|TerminalPaneRuntimePortals))/.test(
         file
       )
   },
