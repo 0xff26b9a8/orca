@@ -40,6 +40,8 @@ import { isPageDocumentNavigationStart } from './host-guest/browser-page-webview
 import { BrowserLoadFailureOverlay } from './navigate/browser-load-failure-overlay'
 import { useClientHostedPageUrlSubmission } from './navigate/use-client-hosted-page-url-submission'
 import { convertBrowserPageToWorkspaceDoc } from '@/lib/file-preview'
+import { isBlankBrowserUrl } from '@/lib/browser-palette-search'
+import { BrowserNewTabPage } from './new-tab/BrowserNewTabPage'
 import { useBrowserPageReloadActions } from './navigate/use-browser-page-reload-actions'
 import { resolveActiveBrowserLoadFailure } from './navigate/browser-load-failure-for-url'
 import { consumeBrowserPageDeferredNavigation } from './navigate/browser-page-deferred-navigation'
@@ -428,6 +430,8 @@ export function ClientHostedBrowserPagePane({
             lastCommittedUrl={browserTab.url}
             placementHostClientId={browserHostClientId}
           />
+        ) : isBlankBrowserUrl(browserTab.url) ? (
+          <BrowserNewTabPage worktreeId={worktreeId} onOpenUrl={navigateToUrl} serversElsewhere />
         ) : null}
       </div>
     </div>
