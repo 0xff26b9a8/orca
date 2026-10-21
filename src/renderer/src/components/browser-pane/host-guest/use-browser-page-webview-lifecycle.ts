@@ -59,8 +59,6 @@ export function useBrowserPageWebviewLifecycle({
   setFindOpen,
   focusAddressBarNow,
   focusWebviewNow,
-  paneZoomLevelRef,
-  setBrowserZoomPercent,
   pendingAnnotationPayload,
   inputLocked,
   faviconUrl,
@@ -99,8 +97,6 @@ export function useBrowserPageWebviewLifecycle({
   setFindOpen: Dispatch<SetStateAction<boolean>>
   focusAddressBarNow: () => boolean
   focusWebviewNow: () => boolean
-  paneZoomLevelRef: MutableRefObject<number>
-  setBrowserZoomPercent: Dispatch<SetStateAction<number>>
   pendingAnnotationPayload: BrowserGrabPayload | null
   inputLocked: boolean
   faviconUrl: string | null
@@ -254,11 +250,9 @@ export function useBrowserPageWebviewLifecycle({
       activeLoadFailureRef,
       recoveryNavigationValidationRef,
       keepAddressBarFocusRef,
-      paneZoomLevelRef,
       viewportPresetIdRef,
       onUpdatePageStateRef,
       setGuestRecoveryGeneration,
-      setBrowserZoomPercent,
       focusAddressBarNow,
       syncNavigationState,
       syncBrowserAnnotationViewportBridge,

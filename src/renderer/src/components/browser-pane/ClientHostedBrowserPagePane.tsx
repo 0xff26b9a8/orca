@@ -131,7 +131,7 @@ export function ClientHostedBrowserPagePane({
       addressBarInputRef,
       startAddressBarFocusGrab
     })
-  const zoom = useBrowserPageZoomFeedback(browserTab.id)
+  const zoom = useBrowserPageZoomFeedback()
   const reload = useBrowserPageReloadActions({
     browserTab,
     webviewRef,
@@ -152,8 +152,6 @@ export function ClientHostedBrowserPagePane({
     ...shortcutOwner,
     isActiveRef,
     webviewRef,
-    paneZoomLevelRef: zoom.paneZoomLevelRef,
-    setBrowserDefaultZoomLevel: zoom.setBrowserDefaultZoomLevel,
     showBrowserZoomFeedback: zoom.showBrowserZoomFeedback,
     reloadWebviewOrRecoverGuest: reload.reloadWebviewOrRecoverGuest
   })
@@ -320,8 +318,7 @@ export function ClientHostedBrowserPagePane({
   // browserTab.url here named the previous page and offered it an HTTPS retry it never needed.
   const failedNavigationUrl = browserTab.loadError?.validatedUrl ?? toDisplayUrl(browserTab.url)
   const browserZoomIndicatorState = getBrowserPageZoomIndicatorState({
-    feedbackVisible: zoom.browserZoomFeedbackVisible,
-    isDefaultZoom: zoom.browserZoomPercent === zoom.browserDefaultZoomPercent
+    feedbackVisible: zoom.browserZoomFeedbackVisible
   })
 
   const markup = useClientHostedBrowserMarkup({
@@ -339,7 +336,10 @@ export function ClientHostedBrowserPagePane({
   const loading = !restoredPageUnrecovered && (placement === null || browserTab.loading)
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col bg-background">
+    <div
+      className="relative flex h-full min-h-0 flex-1 flex-col bg-background"
+      data-browser-page-pane-id={browserTab.id}
+    >
       {/* IPC-driven context menu in a Portal so position:fixed escapes ancestor transform/backdrop-filter containing blocks. */}
       <BrowserPageContextMenu
         browserPageId={browserTab.id}
