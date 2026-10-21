@@ -16,6 +16,7 @@ import { useBrowserAddressBarClickSelect } from './use-browser-address-bar-click
 import { useBrowserAddressBarDismissal } from './use-browser-address-bar-dismissal'
 import type { BrowserAddressBarEditSessionBinding } from './use-browser-address-bar-edit-session'
 import BrowserAddressBarSuggestionList from './BrowserAddressBarSuggestionList'
+import { BrowserLoadProgress } from './browser-load-progress'
 
 type BrowserAddressBarProps = {
   /** The page this bar edits; its worktree's other open pages are offered as "Switch to tab". */
@@ -35,6 +36,8 @@ type BrowserAddressBarProps = {
   editSession?: BrowserAddressBarEditSessionBinding | null
   /** Replaces the leading globe (e.g. the SSH egress indicator). */
   leadingIcon?: React.ReactNode
+  loading?: boolean
+  loadFailed?: boolean
 }
 
 export default function BrowserAddressBar({
@@ -47,7 +50,9 @@ export default function BrowserAddressBar({
   inputRef,
   dismissSuggestionsRef,
   editSession,
-  leadingIcon
+  leadingIcon,
+  loading = false,
+  loadFailed = false
 }: BrowserAddressBarProps): React.ReactElement {
   const [open, setOpen] = useState(false)
   const [selectedValueOverride, setSelectedValueOverride] = useState<string | null>(null)
@@ -393,7 +398,7 @@ export default function BrowserAddressBar({
               // pixels the squeezed slot has left.
               overlay
                 ? 'absolute inset-x-3 top-1/2 z-30 -translate-y-1/2 shadow-[0_10px_24px_rgba(0,0,0,0.18)]'
-                : 'min-w-0 flex-1'
+                : 'relative min-w-0 flex-1'
             )}
             // Why: when squeezed the input is zero-width, so clicks land on the
             // form padding — forward them to the input so it expands and edits.
@@ -444,6 +449,7 @@ export default function BrowserAddressBar({
               aria-controls="browser-history-listbox"
               aria-autocomplete="list"
             />
+            <BrowserLoadProgress loading={loading} failed={loadFailed} />
           </form>
         </PopoverTrigger>
         {suggestions.length > 0 && (
