@@ -1,10 +1,10 @@
-// Pure: turn raw composer text into the exact PTY bytes to write. Kept separate
-// from the React composer so the byte rules are unit-testable without a DOM.
+// Pure: turn raw composer text into the exact PTY bytes to write. Shared so the
+// desktop and phone composers deliver a message as the same bytes.
 
 import {
   sanitizeBracketedPasteText,
   wrapTerminalBracketedPasteText
-} from '../terminal-pane/terminal-bracketed-paste'
+} from './terminal-bracketed-paste-text'
 
 // Why: carriage return (not \n) is what xterm/agent composers treat as the
 // submit/Enter key over a PTY.

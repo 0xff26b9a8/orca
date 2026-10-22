@@ -4,7 +4,7 @@ import {
   buildNativeChatPasteBytes,
   isMultilineDraft,
   NATIVE_CHAT_SUBMIT
-} from './native-chat-send'
+} from './native-chat-paste-bytes'
 
 const BEGIN = '\x1b[200~'
 const END = '\x1b[201~'
