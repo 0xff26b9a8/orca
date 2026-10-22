@@ -77,6 +77,9 @@ function makeRuntime(
     rows?: () => AgentStatusIpcPayload[]
     checkHookAgentPresence?: () => Promise<'live' | 'unverifiable' | 'exited' | null>
     listProcesses?: () => Promise<PtyProcessInfo[]>
+    subscribeAgentProviderSessionChanges?: (
+      listener: (sessions: readonly { paneKey: string; sessionId: string }[]) => void
+    ) => () => void
   } = {}
 ) {
   const spawn = vi.fn<(args: unknown) => Promise<{ id: string }>>(
@@ -86,7 +89,10 @@ function makeRuntime(
   const runtime = new OrcaRuntimeService(fixture.runtimeStore as never, undefined, {
     getDesktopWindowStatus: () => 'openable',
     ...(opts.rows ? { getAgentProviderSessionSnapshot: opts.rows } : {}),
-    ...(opts.checkHookAgentPresence ? { checkHookAgentPresence: opts.checkHookAgentPresence } : {})
+    ...(opts.checkHookAgentPresence ? { checkHookAgentPresence: opts.checkHookAgentPresence } : {}),
+    ...(opts.subscribeAgentProviderSessionChanges
+      ? { subscribeAgentProviderSessionChanges: opts.subscribeAgentProviderSessionChanges }
+      : {})
   })
   runtime.setPtyController({
     spawn,
@@ -399,6 +405,56 @@ describe('resumeAgentSessionInWorkspace', () => {
       expect(resumeSpawns(spawn)).toBe(expectedResumes)
     }
   )
+
+  // The resumed agent reports, then quits to its shell (row dropped, PTY alive).
+  it('frees the session once the resumed agent reported, though it then exited to its shell', async () => {
+    const fixture = makeSleptWorkspace()
+    let rows: AgentStatusIpcPayload[] = []
+    const listeners = new Set<
+      (sessions: readonly { paneKey: string; sessionId: string }[]) => void
+    >()
+    const { spawn, resume } = makeRuntime(fixture, {
+      rows: () => rows,
+      subscribeAgentProviderSessionChanges: (listener) => {
+        listeners.add(listener)
+        return () => listeners.delete(listener)
+      }
+    })
+    const first = await resume()
+    if (!first.ok) {
+      throw new Error(first.reason)
+    }
+    rows = [sessionRow(first.paneKey, Date.now())]
+    listeners.forEach((listener) => listener([]))
+    rows = []
+
+    await expect(resume({ mutationId: 'after-exit' })).resolves.toMatchObject({ ok: true })
+    expect(resumeSpawns(spawn)).toBe(2)
+  })
+
+  it('settles a lost-reply attempt once a retry of the same request binds, and frees on its exit', async () => {
+    let calls = 0
+    const { runtime, resume } = makeRuntime(makeSleptWorkspace(), {
+      rows: () => [],
+      spawn: async () => {
+        calls += 1
+        if (calls === 1) {
+          throw new Error('lost reply')
+        }
+        return { id: 'retried-pty' }
+      }
+    })
+    await expect(resume()).resolves.toMatchObject({ ok: false })
+    await expect(resume()).resolves.toMatchObject({ ok: true })
+    await expect(resume({ mutationId: 'next' })).resolves.toEqual({
+      ok: false,
+      reason: 'held_elsewhere'
+    })
+
+    runtime.onPtyExit('retried-pty', 0)
+
+    await expect(resume({ mutationId: 'next' })).resolves.toMatchObject({ ok: true })
+  })
 
   it('lets at most one of two concurrent resumes own the session', async () => {
     const fixture = makeSleptWorkspace()
