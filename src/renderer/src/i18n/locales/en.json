@@ -16622,6 +16622,9 @@
             }
           }
         },
+        "staleViewEdit": {
+          "rejected": "Recent typing in this view was discarded because the file changed in another view."
+        },
         "richMarkdownLargeTextPaste": {
           "tooLarge": "Paste is too large.",
           "stopped": "Large paste stopped before it finished.",

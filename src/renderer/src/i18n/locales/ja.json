@@ -16292,6 +16292,9 @@
             }
           }
         },
+        "staleViewEdit": {
+          "rejected": "ファイルが別のビューで変更されたため、このビューでの最近の入力は破棄されました。"
+        },
         "richMarkdownLargeTextPaste": {
           "tooLarge": "貼り付け内容が大きすぎます。",
           "stopped": "大きなペーストは完成する前に止まりました。",

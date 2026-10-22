@@ -16287,6 +16287,9 @@
             }
           }
         },
+        "staleViewEdit": {
+          "rejected": "Se descartó lo que escribiste recientemente en esta vista porque el archivo cambió en otra vista."
+        },
         "richMarkdownLargeTextPaste": {
           "tooLarge": "El contenido pegado es demasiado grande.",
           "stopped": "El pegado grande se detuvo antes de terminar.",
