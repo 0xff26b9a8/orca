@@ -206,6 +206,7 @@
       "savedEnvironment": "Valor guardado · escribe para reemplazarlo",
       "newEnvironment": "Valor",
       "removeEnvironment": "Eliminar",
+      "environmentUnclosedQuote": "Cierra la comilla para guardar el entorno.",
       "loadingHost": "Cargando la configuración de agentes…",
       "updateHost": "Actualiza este servidor para editar su configuración de inicio de agentes.",
       "readFailed": "No se pudo leer la configuración de agentes. Comprueba la conexión con el host e inténtalo de nuevo.",

@@ -310,6 +310,7 @@
       "savedEnvironment": "Valeur enregistrée · saisir pour remplacer",
       "newEnvironment": "Valeur",
       "removeEnvironment": "Supprimer",
+      "environmentUnclosedQuote": "Fermez le guillemet pour enregistrer l'environnement.",
       "loadingHost": "Chargement des paramètres des agents…",
       "updateHost": "Mettez ce serveur à jour pour modifier ses paramètres de lancement des agents.",
       "readFailed": "Impossible de lire les paramètres des agents. Vérifiez la connexion à l’hôte et réessayez.",

@@ -421,6 +421,7 @@
       "savedEnvironment": "Saved value · enter to replace",
       "newEnvironment": "Value",
       "removeEnvironment": "Remove",
+      "environmentUnclosedQuote": "Close the quote to save the environment.",
       "loadingHost": "Loading agent settings…",
       "updateHost": "Update this server to edit its agent launch settings.",
       "readFailed": "Couldn’t read agent settings. Check the host connection and try again.",
