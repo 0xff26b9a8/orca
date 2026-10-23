@@ -14,11 +14,15 @@ const mocks = vi.hoisted(() => ({
   recordFeatureInteraction: vi.fn()
 }))
 
+// Why: these tests count the freshness plans; the button's own plan is covered elsewhere.
+vi.mock('@/hooks/use-bundled-skill-install-action', () => ({
+  useBundledSkillInstallAction: () => ({ kind: 'run' })
+}))
+
 vi.mock('@/hooks/useActiveProjectSkillRuntime', () => ({
   useActiveProjectSkillRuntime: () => ({
     agentRuntime: undefined,
     discoveryTarget: undefined,
-    terminalShellOverride: undefined,
     installDisabledReason: null,
     canUseSkillFreshness: mocks.canUseSkillFreshness,
     bundledSkillTarget: mocks.canUseSkillFreshness ? { kind: 'local' } : null
@@ -35,17 +39,6 @@ vi.mock('@/hooks/useInstalledAgentSkills', () => ({
   }),
   notifyInstalledAgentSkillsChanged: vi.fn(),
   notifyInstalledAgentSkillsRefreshed: vi.fn()
-}))
-
-vi.mock('@/components/settings/CliSkillRuntimeSetup', () => ({
-  buildSkillCommandForRuntime: (command: string) => command,
-  buildSkillSetupTerminalCommand: (command: string) => command,
-  ensureWslCliAvailableForAgentSkillTerminal: vi.fn(),
-  getWslCliDistroRequest: () => undefined
-}))
-
-vi.mock('@/components/onboarding/OnboardingInlineCommandTerminal', () => ({
-  OnboardingInlineCommandTerminal: () => null
 }))
 
 vi.mock('@/store', () => ({

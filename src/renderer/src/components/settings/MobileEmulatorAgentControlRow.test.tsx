@@ -16,8 +16,7 @@ const mocks = vi.hoisted(
 
 vi.mock('@/hooks/useActiveProjectSkillRuntime', () => ({
   useActiveProjectSkillRuntime: () => ({
-    canUseSkillFreshness: mocks.canUseSkillFreshness,
-    terminalShellOverride: undefined
+    canUseSkillFreshness: mocks.canUseSkillFreshness
   })
 }))
 
@@ -30,7 +29,11 @@ vi.mock('../emulator-pane/use-mobile-emulator-agent-setup-state', () => ({
     refreshCliSkill: vi.fn(),
     setupComplete: true,
     setupRechecking: false,
-    statusReady: true
+    statusReady: true,
+    skillRuntime: {
+      canUseSkillFreshness: mocks.canUseSkillFreshness,
+      bundledSkillTarget: { kind: 'local' }
+    }
   })
 }))
 
@@ -63,6 +66,6 @@ describe('MobileEmulatorAgentControlRow freshness authority', () => {
     renderToStaticMarkup(<MobileEmulatorAgentControlRow />)
     expect(mocks.panelProps.onBeforeOpenTerminal).toBeUndefined()
     expect(mocks.panelProps.preInstallNotice).toBeUndefined()
-    expect(mocks.panelProps.installDisabled).toBeUndefined()
+    expect(mocks.panelProps.installDisabled).toBe(false)
   })
 })

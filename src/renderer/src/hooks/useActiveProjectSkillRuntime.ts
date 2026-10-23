@@ -24,12 +24,14 @@ import {
 } from '@/lib/bundled-skill-target'
 import { getResolvedExecutionHostIdForWorktree } from '@/lib/resolved-worktree-execution-host'
 import { useAppStore } from '@/store'
-import { selectWorktreesByRepo } from '@/store/workspace-record-selectors'
+import { selectFolderWorkspaces, selectWorktreesByRepo } from '@/store/workspace-record-selectors'
 
 type ActiveProjectSkillRuntime = {
   projectRuntime?: ProjectExecutionRuntimeResolution
   discoveryTarget?: SkillDiscoveryTarget
+  discoveryRuntimeTarget: RuntimeClientTarget | null
   agentRuntime?: ProjectAgentSkillRuntime
+  // COMPAT(wsl-bridge): removed when WSL runs as an orcad host.
   terminalShellOverride?: string
   installDisabledReason: string | null
   canUseSkillFreshness: boolean
@@ -82,6 +84,8 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
       activeWorktreeId: state.activeWorktreeId,
       projects: state.projects,
       repos: state.repos,
+      folderWorkspaces: selectFolderWorkspaces(state),
+      projectGroups: state.projectGroups,
       settings: state.settings,
       worktreesByRepo: selectWorktreesByRepo(state)
     }))
@@ -105,45 +109,40 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
       runtimeState.activeWorktreeId && activeWorkspaceHostId === LOCAL_EXECUTION_HOST_ID
         ? LOCAL_RUNTIME_TARGET
         : runtimeTarget
-    const projectRuntime =
-      getLocalProjectExecutionRuntimeContext(
-        runtimeState,
-        undefined,
-        currentPlatform,
-        wslContext
-      ) ??
-      // Global WSL is the only no-project default that changes the install target (#12103).
-      (hasLocalSkillRuntimeAuthority(ownerRuntimeTarget)
-        ? wslOnly(
-            getGlobalWindowsExecutionRuntimeContext(
-              runtimeState,
-              undefined,
-              currentPlatform,
-              wslContext
-            )
+    const localAuthority =
+      hasLocalSkillRuntimeAuthority(ownerRuntimeTarget) &&
+      (!runtimeState.activeWorktreeId || activeWorkspaceHostId === LOCAL_EXECUTION_HOST_ID)
+    const projectRuntime = localAuthority
+      ? (getLocalProjectExecutionRuntimeContext(
+          runtimeState,
+          undefined,
+          currentPlatform,
+          wslContext
+        ) ??
+        // Global WSL is the only no-project default that changes the install target (#12103).
+        wslOnly(
+          getGlobalWindowsExecutionRuntimeContext(
+            runtimeState,
+            undefined,
+            currentPlatform,
+            wslContext
           )
-        : undefined)
+        ))
+      : undefined
     const bundledSkillTarget = resolveBundledSkillTarget(
       ownerRuntimeTarget,
       projectRuntime,
       runtimeState.activeWorktreeId ? activeWorkspaceHostId : undefined
     )
+    const discoveryRuntimeTarget =
+      bundledSkillTarget?.kind === 'ssh'
+        ? null
+        : (bundledSkillTarget ?? (localAuthority && projectRuntime ? ownerRuntimeTarget : null))
     if (!projectRuntime) {
-      // Why: buildSkillCommandForRuntime still builds a Windows host command
-      // without a project runtime, so the terminal has to match that shell.
-      const terminalShellOverride = hasLocalSkillRuntimeAuthority(ownerRuntimeTarget)
-        ? getProjectAgentSkillTerminalShellOverride(
-            currentPlatform,
-            runtimeState.settings,
-            undefined
-          )
-        : undefined
-      const canUseSkillFreshness =
-        bundledSkillTarget !== null && shouldUseSkillFreshness(ownerRuntimeTarget)
       return {
+        discoveryRuntimeTarget,
         installDisabledReason: null,
-        ...(terminalShellOverride ? { terminalShellOverride } : {}),
-        canUseSkillFreshness,
+        canUseSkillFreshness: shouldUseSkillFreshness(discoveryRuntimeTarget),
         bundledSkillTarget
       }
     }
@@ -151,16 +150,17 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
     const agentRuntime = getProjectAgentSkillRuntime(projectRuntime, currentPlatform)
     return {
       projectRuntime,
+      discoveryRuntimeTarget,
       discoveryTarget: getProjectSkillDiscoveryTarget(projectRuntime),
       agentRuntime,
+      // COMPAT(wsl-bridge): removed when WSL runs as an orcad host.
       terminalShellOverride: getProjectAgentSkillTerminalShellOverride(
         currentPlatform,
         runtimeState.settings,
         agentRuntime
       ),
       installDisabledReason: getProjectSkillInstallDisabledReason(projectRuntime),
-      canUseSkillFreshness:
-        bundledSkillTarget !== null && shouldUseSkillFreshness(ownerRuntimeTarget, agentRuntime),
+      canUseSkillFreshness: shouldUseSkillFreshness(discoveryRuntimeTarget, agentRuntime),
       bundledSkillTarget
     }
   }, [activeWorkspaceHostId, currentPlatform, runtimeState, runtimeTarget, windowsCapabilities])
