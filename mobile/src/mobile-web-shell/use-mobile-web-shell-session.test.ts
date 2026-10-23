@@ -156,6 +156,7 @@ function createFakeStore(): {
     abortStagedGeneration: async () => {
       aborted += 1
     },
+    openReusableAssets: async () => ({ has: () => false, check: async () => false }),
     sweepStagedGenerations: async () => undefined,
     deleteHostCache: async () => undefined,
     recordUpdateFailure: async () => undefined,
@@ -326,6 +327,7 @@ describe('the hybrid shell runner', () => {
     inFlight.settle({
       manifest: doubles.manifest,
       assets: new Map(),
+      reused: [],
       totalBytes: 2048,
       elapsedMs: 1
     })
@@ -364,6 +366,7 @@ describe('the hybrid shell runner', () => {
     inFlight.settle({
       manifest: doubles.manifest,
       assets: new Map(),
+      reused: [],
       totalBytes: 2048,
       elapsedMs: 1
     })
@@ -420,7 +423,13 @@ describe('the hybrid shell runner', () => {
       mounted.retry()
     })
     expect(first.signal.aborted).toBe(true)
-    first.settle({ manifest: doubles.manifest, assets: new Map(), totalBytes: 2048, elapsedMs: 1 })
+    first.settle({
+      manifest: doubles.manifest,
+      assets: new Map(),
+      reused: [],
+      totalBytes: 2048,
+      elapsedMs: 1
+    })
     await flush()
     expect(fake.staged()).toBe(0)
     await act(async () => {
