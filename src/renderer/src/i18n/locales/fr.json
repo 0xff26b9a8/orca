@@ -4835,7 +4835,9 @@
           "updatedSkipped": "{{value0}} · {{value1}} ignorées",
           "currentOne": "1 skill est à jour",
           "currentMany": "{{value0}} skills sont à jour",
-          "noUpdates": "Aucune mise à jour disponible"
+          "noUpdates": "Aucune mise à jour disponible",
+          "updateServer": "Mettez à jour Orca sur le serveur pour mettre à jour ses skills Orca.",
+          "connectHost": "Connectez-vous à cet hôte SSH pour vérifier ses skills Orca."
         },
         "SkillUpdateResultRows": {},
         "SkillUpdateRow": {
@@ -4848,7 +4850,9 @@
           "details": "Détails",
           "needsAttention": "Examiner le skill",
           "checking": "Vérification...",
-          "checkFailed": "Échec de la vérification"
+          "checkFailed": "Échec de la vérification",
+          "updateServer": "Mettez à jour Orca sur le serveur",
+          "connectHost": "Connectez l’hôte SSH"
         },
         "SkillShareDialog": {
           "reconnect": "Reconnectez votre compte Orca avant de partager.",

@@ -1,46 +1,56 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react'
 import type { BundledSkillPlan } from '../../../shared/bundled-skill-plan'
 import { summarizeBundledSkillPlan } from '../../../shared/bundled-skill-summary'
+import { bundledSkillTargetKey, type BundledSkillTarget } from '@/lib/bundled-skill-target'
+import {
+  planBundledSkillsOnTarget,
+  type BundledSkillPlanResult,
+  type BundledSkillUnsupportedReason
+} from '@/runtime/runtime-bundled-skills-client'
 import { INSTALLED_AGENT_SKILLS_CHANGED_EVENT } from './installed-agent-skills-change-event'
 
 // Why: window focus fires on every alt-tab, and each plan re-reads and re-hashes every
 // target; a just-completed plan stays authoritative briefly.
 const FOCUS_RESCAN_COOLDOWN_MS = 15_000
-let cachedPlan: BundledSkillPlan | null = null
-let pendingPlan: Promise<BundledSkillPlan> | null = null
+// Why one target: every surface derives it from the same store, so they all plan one host.
+let activeTarget: BundledSkillTarget | null = null
+let cachedPlan: { targetKey: string; result: BundledSkillPlanResult; revision: number } | null =
+  null
+let pendingPlan: {
+  targetKey: string
+  request: Promise<BundledSkillPlanResult>
+} | null = null
 let invalidationRevision = 0
-let completedRevision = -1
 let lastCompletedScanAt = 0
 let refreshSequence = 0
 let scheduledFocusRescan: number | null = null
 
 type SkillFreshnessSnapshot = {
+  /** The host this snapshot describes; a surface on another target never reads it. */
+  targetKey: string | null
   plan: BundledSkillPlan | null
+  /** Why this host can't be planned: an older server, or an SSH host no server serves yet. */
+  unsupported: BundledSkillUnsupportedReason | null
   loading: boolean
   error: string | null
 }
 
-let snapshot: SkillFreshnessSnapshot = {
-  plan: null,
-  loading: false,
-  error: null
-}
-const DISABLED_SNAPSHOT: SkillFreshnessSnapshot = Object.freeze({
-  plan: null,
-  loading: false,
-  error: null
-})
+const IDLE = { plan: null, unsupported: null, loading: false, error: null } as const
+let snapshot: SkillFreshnessSnapshot = { ...IDLE, targetKey: null }
+const DISABLED_SNAPSHOT: SkillFreshnessSnapshot = Object.freeze({ ...IDLE, targetKey: null })
 const REENABLING_SNAPSHOT: SkillFreshnessSnapshot = Object.freeze({
-  plan: null,
-  loading: true,
-  error: null
+  ...IDLE,
+  targetKey: null,
+  loading: true
 })
 const subscribers = new Set<() => void>()
 let pendingReenableRefresh: Promise<void> | null = null
 
 function publishSnapshot(next: SkillFreshnessSnapshot): void {
   if (
+    snapshot.targetKey === next.targetKey &&
     snapshot.plan === next.plan &&
+    snapshot.unsupported === next.unsupported &&
     snapshot.loading === next.loading &&
     snapshot.error === next.error
   ) {
@@ -52,67 +62,100 @@ function publishSnapshot(next: SkillFreshnessSnapshot): void {
   }
 }
 
-async function loadPlan(force: boolean): Promise<BundledSkillPlan> {
+async function loadPlan(
+  target: BundledSkillTarget,
+  force: boolean
+): Promise<BundledSkillPlanResult> {
+  const targetKey = bundledSkillTargetKey(target)
   if (force) {
     invalidationRevision += 1
   }
   const targetRevision = invalidationRevision
   for (;;) {
-    if (cachedPlan && completedRevision >= targetRevision) {
-      return cachedPlan
+    if (cachedPlan?.targetKey === targetKey && cachedPlan.revision >= targetRevision) {
+      return cachedPlan.result
     }
-    if (!pendingPlan) {
+    if (pendingPlan?.targetKey !== targetKey) {
       const requestRevision = invalidationRevision
-      const request = window.api.skills
-        .bundledPlan()
-        .then((plan) => {
-          cachedPlan = plan
-          completedRevision = Math.max(completedRevision, requestRevision)
+      const request = planBundledSkillsOnTarget(target, {})
+        .then((result) => {
+          // Why per target: a late answer from the previous host must not satisfy this one.
+          cachedPlan = {
+            targetKey,
+            result,
+            revision:
+              cachedPlan?.targetKey === targetKey
+                ? Math.max(cachedPlan.revision, requestRevision)
+                : requestRevision
+          }
           lastCompletedScanAt = Date.now()
-          return plan
+          return result
         })
         .finally(() => {
-          if (pendingPlan === request) {
+          if (pendingPlan?.request === request) {
             pendingPlan = null
           }
         })
-      pendingPlan = request
+      pendingPlan = { targetKey, request }
     }
-    await pendingPlan
+    await pendingPlan.request
   }
 }
 
 /** Re-plan without going through the hook, for surfaces whose explicit refresh affordance
  *  must move the shared verdict. */
-export async function refreshSkillFreshness(force = true): Promise<void> {
+export function refreshSkillFreshness(force = true): Promise<void> {
+  return refreshPlan(force)
+}
+
+async function refreshPlan(force: boolean): Promise<void> {
   if (scheduledFocusRescan !== null) {
     window.clearTimeout(scheduledFocusRescan)
     scheduledFocusRescan = null
   }
+  const target = activeTarget
+  if (!target) {
+    return
+  }
+  const targetKey = bundledSkillTargetKey(target)
   const sequence = ++refreshSequence
   // Why: the plan's digest is what Update executes. Once invalidated, a stale plan must
   // stop authorizing UI even if the replacement plan fails.
-  publishSnapshot({ plan: null, loading: true, error: null })
+  publishSnapshot({ ...IDLE, targetKey, loading: true })
   try {
-    const plan = await loadPlan(force)
+    const result = await loadPlan(target, force)
     if (sequence === refreshSequence) {
-      publishSnapshot({ plan, loading: false, error: null })
+      publishSnapshot(
+        result.kind === 'plan'
+          ? { ...IDLE, targetKey, plan: result.plan }
+          : { ...IDLE, targetKey, unsupported: result.reason }
+      )
     }
   } catch (cause) {
     if (sequence === refreshSequence) {
       publishSnapshot({
-        plan: null,
-        loading: false,
+        ...IDLE,
+        targetKey,
         error: cause instanceof Error ? cause.message : 'Could not inspect Orca skills.'
       })
     }
   }
 }
 
+/** Points every surface at `target`; a new host drops the old one's plan and re-plans. */
+function selectSkillFreshnessTarget(target: BundledSkillTarget): boolean {
+  if (activeTarget && bundledSkillTargetKey(activeTarget) === bundledSkillTargetKey(target)) {
+    return false
+  }
+  activeTarget = target
+  void refreshPlan(true)
+  return true
+}
+
 function onWindowFocus(): void {
   const cooldownRemaining = FOCUS_RESCAN_COOLDOWN_MS - (Date.now() - lastCompletedScanAt)
   if (cooldownRemaining <= 0) {
-    void refreshSkillFreshness(true)
+    void refreshPlan(true)
     return
   }
   if (
@@ -124,18 +167,18 @@ function onWindowFocus(): void {
   }
   // Why: a focus event can follow an external edit. Retract stale update
   // authority immediately, but keep rapid alt-tabs to one trailing disk scan.
-  publishSnapshot({ plan: null, loading: true, error: null })
+  publishSnapshot({ ...IDLE, targetKey: snapshot.targetKey, loading: true })
   scheduledFocusRescan = window.setTimeout(
     () => {
       scheduledFocusRescan = null
-      void refreshSkillFreshness(true)
+      void refreshPlan(true)
     },
     Math.min(cooldownRemaining, FOCUS_RESCAN_COOLDOWN_MS)
   )
 }
 
 function onInstalledSkillsChanged(): void {
-  void refreshSkillFreshness(true)
+  void refreshPlan(true)
 }
 
 function subscribe(subscriber: () => void): () => void {
@@ -172,8 +215,8 @@ function getDisabledSnapshot(): SkillFreshnessSnapshot {
 }
 
 function ensurePlanLoaded(): void {
-  if (!snapshot.plan && !snapshot.loading) {
-    void refreshSkillFreshness(false)
+  if (!snapshot.plan && !snapshot.unsupported && !snapshot.loading) {
+    void refreshPlan(false)
   }
 }
 
@@ -184,46 +227,52 @@ export type SkillFreshnessState = SkillFreshnessSnapshot & {
 async function skipSkillFreshnessRefresh(): Promise<void> {}
 
 function refreshSkillFreshnessAfterReenable(): Promise<void> {
-  pendingReenableRefresh ??= refreshSkillFreshness(true).finally(() => {
+  pendingReenableRefresh ??= refreshPlan(true).finally(() => {
     pendingReenableRefresh = null
   })
   return pendingReenableRefresh
 }
 
-export function useSkillFreshness(enabled = true): SkillFreshnessState {
-  const previousEnabledRef = useRef(enabled)
-  const reenabled = enabled && !previousEnabledRef.current
+/** Plans `target`'s Orca skills; null (host unknown or not plannable) plans nothing. */
+export function useSkillFreshness(target: BundledSkillTarget | null): SkillFreshnessState {
+  const targetKey = target ? bundledSkillTargetKey(target) : null
+  const previousKeyRef = useRef(targetKey)
+  const reenabled = targetKey !== null && previousKeyRef.current === null
   const current = useSyncExternalStore(
-    enabled ? subscribe : subscribeDisabled,
-    enabled ? getSnapshot : getDisabledSnapshot,
-    enabled ? getSnapshot : getDisabledSnapshot
+    target ? subscribe : subscribeDisabled,
+    target ? getSnapshot : getDisabledSnapshot,
+    target ? getSnapshot : getDisabledSnapshot
   )
 
   useEffect(() => {
-    const wasEnabled = previousEnabledRef.current
-    previousEnabledRef.current = enabled
-    if (!enabled) {
+    const previousKey = previousKeyRef.current
+    previousKeyRef.current = targetKey
+    if (!target) {
       return
     }
-    if (!wasEnabled) {
+    if (selectSkillFreshnessTarget(target)) {
+      return
+    }
+    if (previousKey === null) {
       void refreshSkillFreshnessAfterReenable()
       return
     }
     ensurePlanLoaded()
-  }, [enabled])
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- `targetKey` is the target's identity.
+  }, [targetKey])
 
   return {
-    ...(reenabled ? REENABLING_SNAPSHOT : current),
-    refresh: enabled ? refreshSkillFreshness : skipSkillFreshnessRefresh
+    ...(reenabled || (target && current.targetKey !== targetKey) ? REENABLING_SNAPSHOT : current),
+    refresh: target ? refreshSkillFreshness : skipSkillFreshnessRefresh
   }
 }
 
 export const _skillFreshnessCacheForTests = {
   reset(): void {
+    activeTarget = null
     cachedPlan = null
     pendingPlan = null
     invalidationRevision = 0
-    completedRevision = -1
     lastCompletedScanAt = 0
     refreshSequence = 0
     pendingReenableRefresh = null
@@ -231,6 +280,6 @@ export const _skillFreshnessCacheForTests = {
       window.clearTimeout(scheduledFocusRescan)
       scheduledFocusRescan = null
     }
-    snapshot = { plan: null, loading: false, error: null }
+    snapshot = { ...IDLE, targetKey: null }
   }
 }

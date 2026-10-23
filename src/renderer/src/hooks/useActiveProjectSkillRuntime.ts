@@ -4,6 +4,7 @@ import type { ProjectExecutionRuntimeResolution } from '../../../shared/project-
 import type { SkillDiscoveryTarget } from '../../../shared/skills'
 import { useActiveSkillDiscoveryRuntimeTarget } from './use-active-skill-discovery-runtime-target'
 import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
+import { LOCAL_EXECUTION_HOST_ID } from '../../../shared/execution-host'
 import {
   getGlobalWindowsExecutionRuntimeContext,
   getLocalProjectExecutionRuntimeContext
@@ -16,6 +17,12 @@ import {
   type ProjectAgentSkillRuntime
 } from '@/lib/project-skill-runtime'
 import { useWindowsTerminalCapabilities } from '@/lib/windows-terminal-capabilities'
+import {
+  resolveBundledSkillTarget,
+  servingExecutionHostId,
+  type BundledSkillTarget
+} from '@/lib/bundled-skill-target'
+import { getResolvedExecutionHostIdForWorktree } from '@/lib/resolved-worktree-execution-host'
 import { useAppStore } from '@/store'
 import { selectWorktreesByRepo } from '@/store/workspace-record-selectors'
 
@@ -25,19 +32,22 @@ type ActiveProjectSkillRuntime = {
   agentRuntime?: ProjectAgentSkillRuntime
   terminalShellOverride?: string
   installDisabledReason: string | null
-  canUseLocalSkillFreshness: boolean
+  canUseSkillFreshness: boolean
+  /** Where Update skills plans Orca's skills; null while that host is unknown. */
+  bundledSkillTarget: BundledSkillTarget | null
 }
 
-const EMPTY_ACTIVE_PROJECT_SKILL_RUNTIME: ActiveProjectSkillRuntime = Object.freeze({
-  installDisabledReason: null,
-  canUseLocalSkillFreshness: false
-})
+const LOCAL_RUNTIME_TARGET = { kind: 'local' } as const
 
-export function shouldUseLocalSkillFreshness(
+/** Whether setup surfaces show the plan's pill: this machine or a paired host, not WSL yet. */
+export function shouldUseSkillFreshness(
   runtimeTarget: RuntimeClientTarget | null,
   agentRuntime?: ProjectAgentSkillRuntime
 ): boolean {
-  return runtimeTarget?.kind === 'local' && agentRuntime?.runtime !== 'wsl'
+  return (
+    runtimeTarget?.kind === 'environment' ||
+    (runtimeTarget?.kind === 'local' && agentRuntime?.runtime !== 'wsl')
+  )
 }
 
 export function hasLocalSkillRuntimeAuthority(runtimeTarget: RuntimeClientTarget | null): boolean {
@@ -76,6 +86,12 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
       worktreesByRepo: selectWorktreesByRepo(state)
     }))
   )
+  const activeWorkspaceHostId = useAppStore((state) =>
+    servingExecutionHostId(
+      getResolvedExecutionHostIdForWorktree(state, state.activeWorktreeId),
+      state.runtimeEnvironments
+    )
+  )
   const currentPlatform = getCurrentPlatform()
   const windowsCapabilities = useWindowsTerminalCapabilities(currentPlatform === 'win32')
   const runtimeTarget = useActiveSkillDiscoveryRuntimeTarget()
@@ -85,6 +101,10 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
       wslAvailable: windowsCapabilities.isLoading ? undefined : windowsCapabilities.wslAvailable,
       availableWslDistros: windowsCapabilities.isLoading ? null : windowsCapabilities.wslDistros
     }
+    const ownerRuntimeTarget =
+      runtimeState.activeWorktreeId && activeWorkspaceHostId === LOCAL_EXECUTION_HOST_ID
+        ? LOCAL_RUNTIME_TARGET
+        : runtimeTarget
     const projectRuntime =
       getLocalProjectExecutionRuntimeContext(
         runtimeState,
@@ -93,7 +113,7 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
         wslContext
       ) ??
       // Global WSL is the only no-project default that changes the install target (#12103).
-      (hasLocalSkillRuntimeAuthority(runtimeTarget)
+      (hasLocalSkillRuntimeAuthority(ownerRuntimeTarget)
         ? wslOnly(
             getGlobalWindowsExecutionRuntimeContext(
               runtimeState,
@@ -103,21 +123,29 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
             )
           )
         : undefined)
+    const bundledSkillTarget = resolveBundledSkillTarget(
+      ownerRuntimeTarget,
+      projectRuntime,
+      runtimeState.activeWorktreeId ? activeWorkspaceHostId : undefined
+    )
     if (!projectRuntime) {
       // Why: buildSkillCommandForRuntime still builds a Windows host command
       // without a project runtime, so the terminal has to match that shell.
-      const terminalShellOverride = hasLocalSkillRuntimeAuthority(runtimeTarget)
+      const terminalShellOverride = hasLocalSkillRuntimeAuthority(ownerRuntimeTarget)
         ? getProjectAgentSkillTerminalShellOverride(
             currentPlatform,
             runtimeState.settings,
             undefined
           )
         : undefined
-      const canUseLocalSkillFreshness = shouldUseLocalSkillFreshness(runtimeTarget)
-      if (!terminalShellOverride && !canUseLocalSkillFreshness) {
-        return EMPTY_ACTIVE_PROJECT_SKILL_RUNTIME
+      const canUseSkillFreshness =
+        bundledSkillTarget !== null && shouldUseSkillFreshness(ownerRuntimeTarget)
+      return {
+        installDisabledReason: null,
+        ...(terminalShellOverride ? { terminalShellOverride } : {}),
+        canUseSkillFreshness,
+        bundledSkillTarget
       }
-      return { installDisabledReason: null, terminalShellOverride, canUseLocalSkillFreshness }
     }
 
     const agentRuntime = getProjectAgentSkillRuntime(projectRuntime, currentPlatform)
@@ -131,9 +159,11 @@ export function useActiveProjectSkillRuntime(): ActiveProjectSkillRuntime {
         agentRuntime
       ),
       installDisabledReason: getProjectSkillInstallDisabledReason(projectRuntime),
-      canUseLocalSkillFreshness: shouldUseLocalSkillFreshness(runtimeTarget, agentRuntime)
+      canUseSkillFreshness:
+        bundledSkillTarget !== null && shouldUseSkillFreshness(ownerRuntimeTarget, agentRuntime),
+      bundledSkillTarget
     }
-  }, [currentPlatform, runtimeState, runtimeTarget, windowsCapabilities])
+  }, [activeWorkspaceHostId, currentPlatform, runtimeState, runtimeTarget, windowsCapabilities])
 
   // Content-equal runtimes keep one reference so effect keys do not thrash.
   // Adjust during render (not a ref write) when serialized identity changes.

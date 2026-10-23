@@ -4,21 +4,19 @@ import { act, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type {
-  BundledSkillExecuteRequest,
   BundledSkillInstallResult,
-  BundledSkillPlan,
-  BundledSkillPlanRequest
+  BundledSkillExecuteRequest,
+  BundledSkillPlanRequest,
+  BundledSkillPlan
 } from '../../../../shared/bundled-skill-plan'
 import { SkillFreshnessUpdateDialog } from './SkillFreshnessUpdateDialog'
 import {
   consumeSkillFreshnessUpdateDialogRequest,
   requestSkillFreshnessUpdateDialog
 } from './skill-freshness-update-dialog'
-import {
-  _resetSkillUpdateRunStore,
-  getSkillUpdateRun,
-  LOCAL_SKILL_UPDATE_TARGET
-} from './skill-update-run-store'
+import { _resetSkillUpdateRunStore, getSkillUpdateRun } from './skill-update-run-store'
+
+const LOCAL_SKILL_UPDATE_TARGET = 'local'
 import {
   doneResult,
   planEntry,
@@ -29,6 +27,7 @@ import {
 
 const mocks = vi.hoisted(() => ({
   plan: ((): BundledSkillPlan | null => null)(),
+  unsupported: ((): string | null => null)(),
   loading: false,
   error: null as string | null,
   refresh: vi.fn(),
@@ -38,6 +37,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/hooks/useSkillFreshness', () => ({
   useSkillFreshness: () => ({
     plan: mocks.plan,
+    unsupported: mocks.unsupported,
     loading: mocks.loading,
     error: mocks.error,
     refresh: mocks.refresh
@@ -45,7 +45,7 @@ vi.mock('@/hooks/useSkillFreshness', () => ({
 }))
 
 vi.mock('@/hooks/useActiveProjectSkillRuntime', () => ({
-  useActiveProjectSkillRuntime: () => ({ canUseLocalSkillFreshness: true })
+  useActiveProjectSkillRuntime: () => ({ bundledSkillTarget: { kind: 'local' } })
 }))
 
 vi.mock('@/hooks/useInstalledAgentSkills', () => ({
@@ -154,6 +154,7 @@ function replaceCheckbox(): HTMLElement {
 
 beforeEach(() => {
   mocks.plan = null
+  mocks.unsupported = null
   mocks.loading = false
   mocks.error = null
   mocks.refresh.mockReset()
@@ -210,6 +211,17 @@ describe('SkillFreshnessUpdateDialog', () => {
     expect(container.textContent).not.toContain('~/.agents/skills/orca-cli')
   })
 
+  it.each([
+    ['update-server', 'Update Orca on the server to update its Orca skills.'],
+    ['connect-host', 'Connect to this SSH host to check its Orca skills.']
+  ])('explains a %s host instead of offering Update', (reason, text) => {
+    mocks.unsupported = reason
+    render()
+
+    expect(container.textContent).toContain(text)
+    expect(container.textContent).not.toMatch(/Update \d+ skills?/)
+  })
+
   it('labels a link-only plan as installing for the agent, not an update', () => {
     mocks.plan = planOf([
       planEntry('orca-cli', [
@@ -256,7 +268,7 @@ describe('SkillFreshnessUpdateDialog', () => {
 
     expect(skillsApi.bundledExecute).toHaveBeenCalledWith({
       planDigest: '2'.repeat(64),
-      force: [EDITED_PATH]
+      request: { force: [EDITED_PATH] }
     })
     expect(container.querySelector('[data-skill-row="orca-cli"]')?.textContent).toBe(
       'orca-cliReplaced · Your copy was saved as a backup'
@@ -308,7 +320,7 @@ describe('SkillFreshnessUpdateDialog', () => {
 
     expect(skillsApi.bundledExecute).toHaveBeenCalledWith({
       planDigest: plan.planDigest,
-      force: []
+      request: { force: [] }
     })
     expect(container.textContent).toContain('Updated 1 skill · 1 skipped')
     const row = container.querySelector('[data-skill-row="orca-cli"]')?.textContent ?? ''
@@ -336,7 +348,7 @@ describe('SkillFreshnessUpdateDialog', () => {
     expect(container.querySelector('.lucide-triangle-alert')?.parentElement?.textContent).toBe(
       'Needs attention'
     )
-    expect(getSkillUpdateRun()).toMatchObject({
+    expect(getSkillUpdateRun(LOCAL_SKILL_UPDATE_TARGET)).toMatchObject({
       state: 'done',
       summary: { ok: true, exitCode: 0, changedCount: mixed ? 1 : 0 }
     })
@@ -354,7 +366,7 @@ describe('SkillFreshnessUpdateDialog', () => {
 
     expect(skillsApi.bundledExecute).toHaveBeenLastCalledWith({
       planDigest: update.planDigest,
-      force: []
+      request: { force: [] }
     })
     expect(container.textContent).toContain('Updated 1 skill')
     expect(button('Done')).toBeTruthy()

@@ -2,7 +2,7 @@ import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { requestSkillFreshnessUpdateDialog } from '../skills/skill-freshness-update-dialog'
-import { useSkillUpdateRun } from '../skills/skill-update-run-store'
+import { useLatestSkillUpdateRun } from '../skills/skill-update-run-store'
 import { updatedSkillsLabel } from '../skills/skill-plan-op-copy'
 
 // Why: always rendered (not gated by `statusBarItems`). The dialog can be closed
@@ -12,7 +12,7 @@ export function SkillUpdateStatusSegment({
 }: {
   iconOnly: boolean
 }): React.JSX.Element | null {
-  const run = useSkillUpdateRun()
+  const run = useLatestSkillUpdateRun()
 
   if (run.state === 'idle') {
     return null

@@ -261,12 +261,15 @@ describe('registerSkillsHandlers', () => {
       planned: true
     })
     await handlerFor('skills:bundledPlan')(null, { force })
-    await expect(handlerFor('skills:bundledExecute')(null, { force, planDigest })).resolves.toEqual(
-      { executed: true }
-    )
+    await expect(
+      handlerFor('skills:bundledExecute')(null, { planDigest, request: { force } })
+    ).resolves.toEqual({ executed: true })
 
     expect(runtime.planLocalBundledSkills.mock.calls).toEqual([[{}], [{ force }]])
-    expect(runtime.executeLocalBundledSkills).toHaveBeenCalledWith({ force, planDigest })
+    expect(runtime.executeLocalBundledSkills).toHaveBeenCalledWith({
+      planDigest,
+      request: { force }
+    })
     expect(getWslHomeMock).not.toHaveBeenCalled()
   })
 
@@ -275,8 +278,17 @@ describe('registerSkillsHandlers', () => {
     // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: a test double implements only the members this code path reads.
     registerSkillsHandlers(store as never, runtime as never)
 
+    await expect(
+      handlerFor('skills:bundledPlan')(null, { wsl: { distro: 'Ubuntu' } })
+    ).rejects.toThrow()
+    await expect(
+      handlerFor('skills:bundledExecute')(null, {
+        planDigest: 'd'.repeat(64),
+        request: { wsl: { distro: 'Ubuntu' } }
+      })
+    ).rejects.toThrow()
     await expect(handlerFor('skills:bundledPlan')(null, { force: 'all' })).rejects.toThrow()
-    await expect(handlerFor('skills:bundledPlan')(null, { names: ['x'] })).rejects.toThrow()
+    await expect(handlerFor('skills:bundledPlan')(null, { names: ['../x'] })).rejects.toThrow()
     await expect(handlerFor('skills:bundledExecute')(null, {})).rejects.toThrow()
     await expect(
       handlerFor('skills:bundledExecute')(null, { planDigest: 'not-a-digest' })

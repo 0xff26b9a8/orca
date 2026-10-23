@@ -41,7 +41,7 @@ import type {
 
 export type SkillsApi = {
   discover: (target?: SkillDiscoveryTarget) => Promise<SkillDiscoveryResult>
-  /** This machine's plan for Orca's installed skills; WSL and remote hosts are not planned here. */
+  /** This machine's plan for Orca's installed skills; paired hosts plan over RPC. */
   bundledPlan: (request?: BundledSkillPlanRequest) => Promise<BundledSkillPlan>
   bundledExecute: (request: BundledSkillExecuteRequest) => Promise<BundledSkillInstallResult>
   prepareShare: (input: {

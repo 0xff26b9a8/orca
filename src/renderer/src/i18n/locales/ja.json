@@ -4781,7 +4781,9 @@
           "updatedSkipped": "{{value0}} · {{value1}} 件をスキップ",
           "currentOne": "1 個のスキルは最新です",
           "currentMany": "{{value0}} 個のスキルは最新です",
-          "noUpdates": "利用可能な更新はありません"
+          "noUpdates": "利用可能な更新はありません",
+          "updateServer": "サーバーの Orca を更新すると、Orca スキルを更新できます。",
+          "connectHost": "この SSH ホストに接続すると、Orca スキルを確認できます。"
         },
         "SkillFreshnessStatusPill": {
           "updateAvailable": "更新があります",
@@ -4790,7 +4792,9 @@
           "details": "詳細",
           "needsAttention": "スキルを確認",
           "checking": "確認中…",
-          "checkFailed": "チェックに失敗しました"
+          "checkFailed": "チェックに失敗しました",
+          "updateServer": "サーバーの Orca を更新してください",
+          "connectHost": "SSH ホストに接続してください"
         },
         "SkillUpdateResultRows": {},
         "SkillUpdateRow": {

@@ -4,6 +4,8 @@ import type { BundledSkillOutcome, BundledSkillPlan } from '../../../../shared/b
 import { summarizeBundledSkillPlan } from '../../../../shared/bundled-skill-summary'
 import { useSkillFreshness } from '@/hooks/useSkillFreshness'
 import { useActiveProjectSkillRuntime } from '@/hooks/useActiveProjectSkillRuntime'
+import { bundledSkillTargetKey } from '@/lib/bundled-skill-target'
+import type { BundledSkillUnsupportedReason } from '@/runtime/runtime-bundled-skills-client'
 import { notifyInstalledAgentSkillsChanged } from '@/hooks/useInstalledAgentSkills'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
@@ -19,8 +21,8 @@ import { SkillUpdateRows } from './SkillUpdateRows'
 import { SummaryHeadline } from './skill-freshness-summary-headline'
 import { updateActionLabel, updatedSkillsLabel } from './skill-plan-op-copy'
 import {
+  acknowledgeLatestSkillUpdateRun,
   acknowledgeSkillUpdateRun,
-  LOCAL_SKILL_UPDATE_TARGET,
   startSkillUpdateRun,
   useSkillUpdateRun,
   type SkillUpdateRun
@@ -99,26 +101,50 @@ function runOutcomes(run: SkillUpdateRun): ReadonlyMap<string, BundledSkillOutco
  * the disk. Holding the last plan keeps the rows on screen as the result appears; only the live
  * plan can authorize Update.
  */
-function useHeldSkillPlan(plan: BundledSkillPlan | null): [BundledSkillPlan | null, () => void] {
-  const [heldPlan, setHeldPlan] = useState<BundledSkillPlan | null>(null)
-  if (plan && plan !== heldPlan) {
-    setHeldPlan(plan)
+function useHeldSkillPlan(
+  plan: BundledSkillPlan | null,
+  targetKey: string | null
+): [BundledSkillPlan | null, () => void] {
+  const [held, setHeld] = useState<{ plan: BundledSkillPlan; targetKey: string | null } | null>(
+    null
+  )
+  if (plan && (plan !== held?.plan || targetKey !== held.targetKey)) {
+    setHeld({ plan, targetKey })
   }
-  return [plan ?? heldPlan, () => setHeldPlan(null)]
+  // Why the key: another host's rows must never stand in for this one's.
+  const heldPlan = held?.targetKey === targetKey ? held.plan : null
+  return [plan ?? heldPlan, () => setHeld(null)]
 }
 
 /** A run's progress or result once Update starts; until then the plan's headline or error. */
 function DialogHeadline({
   run,
+  unsupported,
   error,
   plan
 }: {
   run: SkillUpdateRun
+  unsupported: BundledSkillUnsupportedReason | null
   error: string | null
   plan: BundledSkillPlan | null
 }): React.JSX.Element | null {
   if (run.state !== 'idle') {
     return <RunHeadline run={run} />
+  }
+  if (unsupported) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {unsupported === 'connect-host'
+          ? translate(
+              'auto.components.skills.SkillFreshnessUpdateDialog.connectHost',
+              'Connect to this SSH host to check its Orca skills.'
+            )
+          : translate(
+              'auto.components.skills.SkillFreshnessUpdateDialog.updateServer',
+              'Update Orca on the server to update its Orca skills.'
+            )}
+      </p>
+    )
   }
   return error ? (
     <p className="min-w-0 [overflow-wrap:anywhere] text-xs text-destructive">{error}</p>
@@ -187,18 +213,25 @@ function SkillUpdateFooter({
 }
 
 export function SkillFreshnessUpdateDialog(): React.JSX.Element {
-  const activeSkillRuntime = useActiveProjectSkillRuntime()
-  const state = useSkillFreshness(activeSkillRuntime.canUseLocalSkillFreshness)
-  const run = useSkillUpdateRun(LOCAL_SKILL_UPDATE_TARGET)
+  const target = useActiveProjectSkillRuntime().bundledSkillTarget
+  const targetKey = target ? bundledSkillTargetKey(target) : null
+  const state = useSkillFreshness(target)
+  const run = useSkillUpdateRun(targetKey)
   const open = useSyncExternalStore(
     subscribeSkillFreshnessUpdateDialog,
     getSkillFreshnessUpdateDialogRequest,
     getSkillFreshnessUpdateDialogRequest
   )
   const [force, setForce] = useState<string[]>([])
-  const reviewed = useReviewedSkillPlan(state.plan, force)
+  // Why: Replace choices name one host's paths, so another host starts without them.
+  const [forceTargetKey, setForceTargetKey] = useState(targetKey)
+  if (forceTargetKey !== targetKey) {
+    setForceTargetKey(targetKey)
+    setForce([])
+  }
+  const reviewed = useReviewedSkillPlan(target, state.plan, force)
 
-  const [shownPlan, releaseHeldPlan] = useHeldSkillPlan(reviewed.plan)
+  const [shownPlan, releaseHeldPlan] = useHeldSkillPlan(reviewed.plan, targetKey)
   const shownSummary = shownPlan ? summarizeBundledSkillPlan(shownPlan) : null
   const [showLocations, setShowLocations] = useState(false)
   const phase = skillRowPhase(run)
@@ -224,18 +257,20 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     if (run.state === 'idle') {
       releaseHeldPlan()
     }
-    if (showResult) {
-      acknowledgeSkillUpdateRun(LOCAL_SKILL_UPDATE_TARGET)
+    if (showResult && targetKey) {
+      acknowledgeSkillUpdateRun(targetKey)
     }
+    // A settled run on another host would otherwise hold the status bar, which opens this one.
+    acknowledgeLatestSkillUpdateRun()
     notifyInstalledAgentSkillsChanged()
   }
 
   const handleUpdate = (): void => {
-    if (!livePlan) {
+    if (!livePlan || !target) {
       return
     }
     void startSkillUpdateRun({
-      targetKey: LOCAL_SKILL_UPDATE_TARGET,
+      target,
       // Why: only skills with work describe the in-flight run.
       names: summarizeBundledSkillPlan(livePlan)
         .skills.filter((skill) => skill.state !== 'current')
@@ -246,7 +281,9 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
   }
 
   const handleRecheck = (): void => {
-    acknowledgeSkillUpdateRun(LOCAL_SKILL_UPDATE_TARGET)
+    if (targetKey) {
+      acknowledgeSkillUpdateRun(targetKey)
+    }
     setForce([])
     void state.refresh()
   }
@@ -255,8 +292,8 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
     isReplaced: (path: string) => force.includes(path),
     onReplaceChange: (path: string, next: boolean) => {
       // Why: a choice made on the result starts a new review of the re-planned skills.
-      if (showResult) {
-        acknowledgeSkillUpdateRun(LOCAL_SKILL_UPDATE_TARGET)
+      if (showResult && targetKey) {
+        acknowledgeSkillUpdateRun(targetKey)
       }
       setForce((previous) =>
         next ? [...new Set([...previous, path])].sort() : previous.filter((item) => item !== path)
@@ -278,7 +315,7 @@ export function SkillFreshnessUpdateDialog(): React.JSX.Element {
           </DialogTitle>
         </DialogHeader>
 
-        <DialogHeadline run={run} error={error} plan={livePlan} />
+        <DialogHeadline run={run} unsupported={state.unsupported} error={error} plan={livePlan} />
 
         {shownSummary && shownSummary.skills.length > 0 ? (
           <SkillUpdateRows
