@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { SkillInstallProviderId } from './skill-install-providers'
 
 // Frozen per capability version: a client renders a value it does not know as "Needs attention".
@@ -94,6 +95,8 @@ export type BundledSkillPlanEntry = {
 
 export type BundledSkillPlan = {
   scope: 'global' | 'workspace'
+  /** The planned host's home, so surfaces can show `~` paths; not part of the digest. */
+  homeDirectory: string
   skills: readonly BundledSkillPlanEntry[]
   /** Canonical digest of `skills`; execute applies only a plan that still hashes to it. */
   planDigest: string
@@ -122,3 +125,17 @@ export type BundledSkillInstallResult = {
   scope: 'global' | 'workspace'
   skills: readonly BundledSkillOutcome[]
 }
+
+const BundledSkillForceSchema = z.array(z.string().min(1).max(4096)).max(256)
+
+/** The local app's request: this machine's global homes, Orca's installed skills only. */
+export const BundledSkillPlanRequestSchema = z.strictObject({
+  force: BundledSkillForceSchema.optional()
+})
+export type BundledSkillPlanRequest = z.infer<typeof BundledSkillPlanRequestSchema>
+
+export const BundledSkillExecuteRequestSchema = z.strictObject({
+  force: BundledSkillForceSchema.optional(),
+  planDigest: z.string().regex(/^[0-9a-f]{64}$/u)
+})
+export type BundledSkillExecuteRequest = z.infer<typeof BundledSkillExecuteRequestSchema>

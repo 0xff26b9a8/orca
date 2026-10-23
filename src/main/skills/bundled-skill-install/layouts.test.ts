@@ -56,6 +56,8 @@ type Layout = {
   badge?: 'update' | null
   agents?: SkillInstallProviderId[]
   force?: Label[]
+  /** Update rather than install: only locations that already hold the skill. */
+  installedOnly?: boolean
   filesystem?: BundledSkillFilesystem
   /** Paths outside every target that the run must leave byte-identical. */
   untouched?: (home: SkillHome) => string[]
@@ -102,6 +104,24 @@ const LAYOUTS: Layout[] = [
     badge: 'update'
   },
   {
+    name: 'update: npx Claude-only install, four other agents detected, spreads to none',
+    arrange: async (home) => {
+      await writeNpxLock(home)
+      await writeCopy(home.claude, OLD_TEXT)
+    },
+    agents: ['claude', 'codex', 'cursor', 'gemini', 'grok'],
+    installedOnly: true,
+    ops: [['claude', 'update']],
+    text: 'Updated',
+    badge: 'update',
+    untouched: (home) => [
+      home.shared,
+      home.cursor,
+      join(home.home, '.gemini', 'skills'),
+      join(home.home, '.grok', 'skills')
+    ]
+  },
+  {
     name: 'already current',
     arrange: async (home) => {
       await writeCopy(home.shared, NEW_TEXT)
@@ -121,7 +141,7 @@ const LAYOUTS: Layout[] = [
       ['shared', 'leave', 'edited'],
       ['claude', 'leave', 'shared-not-current']
     ],
-    text: "No change · 2 left alone: You've changed this copy; The shared copy this folder uses is not Orca’s",
+    text: "No change · 1 skipped: Skill edited outside Orca; The shared copy isn't Orca's",
     badge: null
   },
   {
@@ -138,7 +158,7 @@ const LAYOUTS: Layout[] = [
       ['claude', 'keep'],
       ['cursor', 'leave', 'other']
     ],
-    text: 'Updated · 1 left alone: A different skill already uses this name',
+    text: 'Updated · 1 skipped: A different skill uses this name',
     untouched: (home) => [join(home.root, 'elsewhere', NAME)]
   },
   {
@@ -153,7 +173,7 @@ const LAYOUTS: Layout[] = [
       ['shared', 'update'],
       ['claude', 'leave', 'other']
     ],
-    text: 'Updated · 1 left alone: A different skill already uses this name'
+    text: 'Updated · 1 skipped: A different skill uses this name'
   },
   {
     name: 'plugin-managed copy only',
@@ -178,7 +198,7 @@ const LAYOUTS: Layout[] = [
       ['shared', 'leave', 'unwritable'],
       ['claude', 'leave', 'shared-not-current']
     ],
-    text: "No change · 2 left alone: Orca can't write to this folder; The shared copy this folder uses is not Orca’s"
+    text: "No change · 1 skipped: Orca can't write to this folder; The shared copy isn't Orca's"
   },
   {
     name: 'npx shared copy with Claude and Cursor detected',
@@ -213,7 +233,7 @@ const LAYOUTS: Layout[] = [
       ['shared', 'leave', 'other'],
       ['claude', 'leave', 'shared-not-current']
     ],
-    text: 'No change · 2 left alone: A different skill already uses this name; The shared copy this folder uses is not Orca’s'
+    text: "No change · 1 skipped: A different skill uses this name; The shared copy isn't Orca's"
   },
   {
     name: 'host that cannot link gets a copy',
@@ -250,7 +270,7 @@ const LAYOUTS: Layout[] = [
       ['shared', 'leave', 'edited'],
       ['claude', 'leave', 'shared-not-current']
     ],
-    text: "No change · 2 left alone: You've changed this copy; The shared copy this folder uses is not Orca’s"
+    text: "No change · 1 skipped: Skill edited outside Orca; The shared copy isn't Orca's"
   },
   {
     name: '~/.claude/skills is a link to ~/.agents/skills (one target)',
@@ -307,6 +327,7 @@ describe('bundled skill install across real layouts', () => {
     const input = serviceInput(home, {
       agents: layout.agents ?? ['claude'],
       ...(layout.force ? { force: layout.force.map((label) => home[label]) } : {}),
+      ...(layout.installedOnly ? { installedOnly: true } : {}),
       ...(layout.filesystem ? { filesystem: layout.filesystem } : {})
     })
     const untouched = layout.untouched?.(home) ?? []

@@ -3,11 +3,14 @@ import {
   isBundledSkillOpKind,
   type BundledSkillInstallResult,
   type BundledSkillLeaveReason,
+  type BundledSkillOp,
   type BundledSkillOpKind,
   type BundledSkillOutcome,
   type BundledSkillPlan,
   type BundledSkillPlanEntry
 } from './bundled-skill-plan'
+import type { SkillInstallProviderId } from './skill-install-providers'
+import { bundledSkillLocation, type BundledSkillLocation } from './bundled-skill-locations'
 
 /** Ordered by precedence: a skill shows its highest state. */
 export type BundledSkillPlanState = 'current' | 'attention' | 'install' | 'update' | 'repair'
@@ -34,21 +37,38 @@ const OP_PLAN_STATE: Readonly<Record<BundledSkillOpKind, BundledSkillPlanState>>
 }
 
 export const BUNDLED_SKILL_LEAVE_REASON_TEXT: Readonly<Record<BundledSkillLeaveReason, string>> = {
-  edited: "You've changed this copy",
-  other: 'A different skill already uses this name',
+  edited: 'Skill edited outside Orca',
+  other: 'A different skill uses this name',
   unwritable: "Orca can't write to this folder",
-  unreadable: "Orca can't read all of this copy",
-  busy: 'Another skill install is still finishing here',
-  'shared-not-current': 'The shared copy this folder uses is not Orca\u2019s'
+  unreadable: "Orca can't read every file",
+  busy: 'Another install is still running',
+  'shared-not-current': "The shared copy isn't Orca's"
 }
 
-function opPlanState(kind: string): BundledSkillPlanState {
-  return isBundledSkillOpKind(kind) ? OP_PLAN_STATE[kind] : 'attention'
+/** What Update does at one location, for plain-text surfaces; the app translates its own. */
+export const BUNDLED_SKILL_PLAN_OP_TEXT: Readonly<
+  Record<Exclude<BundledSkillOpKind, 'leave'>, string>
+> = {
+  keep: 'No change',
+  write: 'Install',
+  copy: 'Install',
+  update: 'Update',
+  link: 'Link',
+  replace: 'Replace',
+  restore: 'Repair'
+}
+
+function opPlanState(op: Pick<BundledSkillOp, 'kind' | 'reason'>): BundledSkillPlanState {
+  // Why: someone else's same-named skill is theirs; it is listed, never flagged.
+  if (op.kind === 'leave' && op.reason === 'other') {
+    return 'current'
+  }
+  return isBundledSkillOpKind(op.kind) ? OP_PLAN_STATE[op.kind] : 'attention'
 }
 
 export function bundledSkillPlanState(entry: BundledSkillPlanEntry): BundledSkillPlanState {
   return entry.ops.reduce<BundledSkillPlanState>((highest, op) => {
-    const state = opPlanState(op.kind)
+    const state = opPlanState(op)
     return PLAN_STATE_ORDER.indexOf(state) > PLAN_STATE_ORDER.indexOf(highest) ? state : highest
   }, 'current')
 }
@@ -58,14 +78,28 @@ export type BundledSkillPlanSummary = {
   badge: 'update' | 'repair' | null
   /** Whether running the plan would change anything. */
   hasWork: boolean
-  skills: { name: string; state: BundledSkillPlanState }[]
+  skills: BundledSkillPlanSkillSummary[]
+}
+
+export type BundledSkillPlanSkillSummary = {
+  name: string
+  state: BundledSkillPlanState
+  /** One per planned location, labelled by agent; the dialog's rows and location table. */
+  locations: BundledSkillLocation[]
+  /** Every location is current, so the skill collapses into one line. */
+  upToDate: boolean
 }
 
 export function summarizeBundledSkillPlan(plan: BundledSkillPlan): BundledSkillPlanSummary {
-  const skills = plan.skills.map((entry) => ({
-    name: entry.name,
-    state: bundledSkillPlanState(entry)
-  }))
+  const skills = plan.skills.map((entry): BundledSkillPlanSkillSummary => {
+    const state = bundledSkillPlanState(entry)
+    return {
+      name: entry.name,
+      state,
+      locations: entry.ops.map((op) => bundledSkillLocation(op, plan.homeDirectory)),
+      upToDate: state === 'current' && entry.ops.every((op) => op.kind === 'keep')
+    }
+  })
   const states = new Set(skills.map((skill) => skill.state))
   const global = plan.scope === 'global'
   return {
@@ -78,6 +112,18 @@ export function summarizeBundledSkillPlan(plan: BundledSkillPlan): BundledSkillP
       plan.skills.some((entry) => entry.ops.some((op) => op.cleanup.length > 0)),
     skills
   }
+}
+
+const INSTALLS_FOR_AGENT = new Set<string>(['write', 'link', 'copy'])
+
+/** Agents a plan would newly give the skill: the "Install for <agent>" work. */
+export function bundledSkillInstallAgents(
+  entries: readonly BundledSkillPlanEntry[]
+): SkillInstallProviderId[] {
+  const agents = entries.flatMap((entry) =>
+    entry.ops.flatMap((op) => (INSTALLS_FOR_AGENT.has(op.kind) ? op.agents : []))
+  )
+  return [...new Set(agents)].sort()
 }
 
 /** Changes whenever the skills the badge counts, or the bytes they would get, change. */
@@ -135,21 +181,26 @@ export function bundledSkillOutcomeText(outcome: BundledSkillOutcome): BundledSk
   }, 'No change')
 }
 
-export type BundledSkillLeftAlone = { path: string; reason: string }
+export type BundledSkillLeftAlone = {
+  path: string
+  reason: string
+  /** For translated surfaces; null for a reason this build does not know. */
+  code: BundledSkillLeaveReason | null
+}
 
 export type BundledSkillOutcomeSummary = {
   name: string
   text: BundledSkillOutcomeText
   /** Printed as warnings; never part of the exit code. */
   leftAlone: BundledSkillLeftAlone[]
-  /** e.g. "Updated - 1 left alone: You've changed this copy". */
+  /** e.g. "Updated - 1 skipped: Skill edited outside Orca". */
   line: string
 }
 
 function leaveReasonText(reason: string | undefined): string {
   return reason && isBundledSkillLeaveReason(reason)
     ? BUNDLED_SKILL_LEAVE_REASON_TEXT[reason]
-    : 'Left as it is'
+    : 'This copy was kept as it is'
 }
 
 export function summarizeBundledSkillOutcome(
@@ -158,13 +209,17 @@ export function summarizeBundledSkillOutcome(
   const text = bundledSkillOutcomeText(outcome)
   const leftAlone = outcome.ops
     .filter((op) => op.kind === 'leave')
-    .map((op) => ({ path: op.path, reason: leaveReasonText(op.reason) }))
+    .map((op) => ({
+      path: op.path,
+      reason: leaveReasonText(op.reason),
+      code: op.reason && isBundledSkillLeaveReason(op.reason) ? op.reason : null
+    }))
   const reasons = [...new Set(leftAlone.map((left) => left.reason))].join('; ')
   return {
     name: outcome.name,
     text,
     leftAlone,
-    line: leftAlone.length > 0 ? `${text} \u00B7 ${leftAlone.length} left alone: ${reasons}` : text
+    line: leftAlone.length > 0 ? `${text} \u00B7 1 skipped: ${reasons}` : text
   }
 }
 
@@ -172,6 +227,9 @@ export type BundledSkillResultSummary = {
   ok: boolean
   /** The CLI's exit code: 1 only when an op failed or found the disk changed. */
   exitCode: 0 | 1
+  /** Skills the run changed: "Updated N skills · M skipped". */
+  changedCount: number
+  leftAloneCount: number
   skills: BundledSkillOutcomeSummary[]
 }
 
@@ -179,5 +237,13 @@ export function summarizeBundledSkillOutcomes(
   result: BundledSkillInstallResult
 ): BundledSkillResultSummary {
   const ok = !result.skills.some(hasProblem)
-  return { ok, exitCode: ok ? 0 : 1, skills: result.skills.map(summarizeBundledSkillOutcome) }
+  const skills = result.skills.map(summarizeBundledSkillOutcome)
+  return {
+    ok,
+    exitCode: ok ? 0 : 1,
+    changedCount: skills.filter((skill) => ['Updated', 'Installed', 'Linked'].includes(skill.text))
+      .length,
+    leftAloneCount: skills.filter((skill) => skill.leftAlone.length > 0).length,
+    skills
+  }
 }
