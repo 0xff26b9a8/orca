@@ -10005,6 +10005,11 @@
               "invert": "invert",
               "opposite": "opposite"
             },
+            "linkRoutingBackground": {
+              "background": "background",
+              "focus": "focus",
+              "tab": "tab"
+            },
             "terminalLinkActions": {
               "terminal": "terminal",
               "chat": "chat",
@@ -12136,6 +12141,10 @@
           "titleOrca": "Hold Shift to open in Orca",
           "descriptionSystem": "Links open in Orca, so {{chord}}+click sends one to your system browser instead.",
           "descriptionOrca": "Links open in your system browser. When enabled, {{chord}}+click opens one in Orca's built-in browser instead."
+        },
+        "BrowserLinkRoutingBackgroundSetting": {
+          "title": "Open links in the background",
+          "description": "Links from the terminal, chat, and markdown join the browser without taking focus from where you clicked."
         },
         "BrowserTerminalLinkActionsSetting": {
           "title": "Terminal URL clicks",
