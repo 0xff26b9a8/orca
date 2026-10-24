@@ -179,6 +179,11 @@ export type StructuredAgentSessionEndedEvent = {
   /** Absent means provider exit without extra detail; host faults retain their own classification. */
   failure?: SubmissionRejectionFact
   cause: 'unexpected-exit' | 'requested-close'
+  /** Execution-host observations from a requested provider close, when available. */
+  processExit?: {
+    root: 'live' | 'unverifiable' | 'exited'
+    workload: 'live' | 'unverifiable' | 'exited'
+  }
   fence: number
   acquisitionGeneration: string
   /** Observed child exit supplies interrupted-turn end time. */
@@ -285,6 +290,8 @@ export type StructuredAgentSessionAdapter = StructuredAgentSessionAdapterStop & 
     turnId?: string
     fence: number
     prompt?: { itemId: string }
+    /** Original host Stop time; in-process only, for a Stop that ends the session. */
+    stoppedAt?: number
     dispatchStatus?: { state: AgentJournalDispatchState; recovered: boolean } | null
     /** Re-read journal turn immediately before interrupt; direct callers may omit this guard. */
     resolveLiveTurnId?: () => string | null
