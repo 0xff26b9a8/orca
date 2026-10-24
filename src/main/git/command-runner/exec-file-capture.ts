@@ -242,13 +242,14 @@ export function execFileCapture(
       observeStderr(child, options.onStderr)
     }
 
-    if (options.stdin !== undefined) {
-      if ('id' in child) {
+    // Non-interactive signers must see EOF instead of waiting on an open pipe.
+    if ('id' in child) {
+      if (options.stdin !== undefined) {
         child.stdin.write(options.stdin)
-        child.stdin.end()
-      } else {
-        endSubprocessStdin(child.stdin, options.stdin)
       }
+      child.stdin.end()
+    } else {
+      endSubprocessStdin(child.stdin, options.stdin ?? '')
     }
 
     // Why: Node's timeout waits forever on signal-ignoring CLIs; enforce our own deadline with bounded tree cleanup.
