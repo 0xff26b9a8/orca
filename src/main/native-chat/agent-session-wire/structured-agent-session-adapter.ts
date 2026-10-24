@@ -33,7 +33,6 @@ export type {
 import type { AgentJournalDispatchRejection } from '../../../shared/agent-session-failure-words'
 import type { AgentSessionExecutionOptions } from '../../../shared/agent-session-execution-options'
 import type { AgentSessionPromptResponse } from '../../../shared/agent-session-question-answer'
-import type { ProviderHistoryWindow } from '../agent-session-journal/journal-submission-reconciler'
 import type {
   StructuredAgentSessionStartupAttempt,
   StructuredAgentSessionAcquisitionReceipt
@@ -270,11 +269,6 @@ export type StructuredAgentSessionAdapter = StructuredAgentSessionAdapterStop & 
     fence: number
   }): Promise<StructuredAgentSessionLiveOptions>
   readOptionRestoreFailures?(sessionId: string): readonly string[]
-  /** Only consistent history boundaries can prove non-delivery; omitted windows leave unsettled sends unknown. */
-  providerHistoryWindow?(input: {
-    identity: AgentSessionJournalIdentity
-    accountHome: AgentSessionAccountHome
-  }): Promise<ProviderHistoryWindow | null>
   /** Copy the provider conversation without changing the chat’s ID; omit for CLI-based forks. */
   copyConversation?(input: {
     identity: AgentSessionJournalIdentity
