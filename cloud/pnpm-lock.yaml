@@ -193,6 +193,9 @@ importers:
       '@orca-cloud/cloud-database':
         specifier: workspace:*
         version: link:../../packages/cloud-database
+      '@orca-cloud/connector-contract':
+        specifier: workspace:*
+        version: link:../../packages/connector-contract
       hono:
         specifier: ^4.13.13
         version: 4.13.13

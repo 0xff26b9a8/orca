@@ -1,6 +1,8 @@
+import { openCloudNotifications } from '@orca-cloud/cloud-database'
 import { loadConnectorConfig } from './config.js'
+import { startConnectorBackground } from './connector-background.js'
 import { openConnectorDatabase } from './connector-database.js'
-import { createConnectorServer } from './connector-server.js'
+import { createConnectorServer, listenHostname } from './connector-server.js'
 
 const config = loadConnectorConfig()
 const database = await openConnectorDatabase({
@@ -10,9 +12,18 @@ const database = await openConnectorDatabase({
   applicationName: 'orca-connector',
   readOnly: config.mode === 'validation'
 })
-const runtime = createConnectorServer(config, database)
+const notifications = openCloudNotifications({
+  ...(config.databaseUrl === undefined ? {} : { databaseUrl: config.databaseUrl }),
+  applicationName: 'orca-connector'
+})
+const runtime = createConnectorServer(config, database, notifications)
+const active = config.mode === 'active'
+if (active) {
+  await runtime.waker.start()
+}
+const stopBackground = active ? startConnectorBackground(runtime) : () => {}
 
-runtime.server.listen(config.port, () => {
+runtime.server.listen(config.port, listenHostname(config.publicUrl), () => {
   console.log(`[orca-connector] listening on ${config.publicUrl} (port ${config.port})`)
 })
 
@@ -25,10 +36,14 @@ const shutdown = (): void => {
   // Cloud Run sends SIGKILL after ten seconds; leave time for explicit cleanup.
   const deadline = setTimeout(() => process.exit(1), 9_000)
   deadline.unref()
+  stopBackground()
+  // Held polls answer at once with a reconnect, so the drain is not held up by them.
+  runtime.waker.drain()
   const requests = runtime.requestDrain.begin()
   const connections = new Promise<void>((resolve) => runtime.server.close(() => resolve()))
   void Promise.all([requests, connections])
     .then(async () => {
+      await runtime.waker.close()
       await database.close()
       clearTimeout(deadline)
     })
