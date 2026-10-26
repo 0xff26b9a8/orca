@@ -647,3 +647,20 @@ it('opens Antigravity accounts from its signed-out notice, and offers no link fo
     })
   }
 })
+
+it('renders the localized unacknowledged goal pause through the existing Stop notice', async () => {
+  await i18n.changeLanguage('ja')
+  renderStatus({
+    kind: 'status',
+    tone: 'warning',
+    ...agentSessionFailureWords(agentSessionFailureFact('cancelUnconfirmed'), {
+      surface: 'row',
+      stopNotice: 'pauseUnconfirmed'
+    })
+  })
+  expect(
+    screen.getByText(
+      'Codex の実行は停止しましたが、目標の一時停止は確認されていません。続行する前に目標を確認してください。'
+    )
+  ).toBeInTheDocument()
+})
