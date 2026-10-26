@@ -66,6 +66,7 @@ const NON_UNIT_TEST_RUNNERS = [
   })),
   ...[
     'cloud/apps/relay-fence-broker',
+    'cloud/packages/cloud-database',
     'cloud/packages/connector-contract',
     'cloud/packages/postgres-schema',
     'cloud/packages/push-contract',
