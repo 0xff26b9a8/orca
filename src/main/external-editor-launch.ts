@@ -16,6 +16,7 @@ import {
   isJetBrainsConsoleShim,
   resolveColocatedJetBrainsGuiExecutable
 } from './jetbrains-windows-gui-launchers'
+import { findInstalledVsCodeCli } from './vscode-cli-install-paths'
 import { getCmdExePath, getSpawnArgsForWindows } from './win32-utils'
 
 export const EXTERNAL_EDITOR_CLI_COMMAND = 'code'
@@ -124,13 +125,24 @@ function preferJetBrainsGuiExecutable(
   return resolveColocatedJetBrainsGuiExecutable(editorCommand, fileExists) ?? editorCommand
 }
 
+function resolveEditorCliCommand(
+  command: string,
+  platform: NodeJS.Platform,
+  fileExists: (path: string) => boolean
+): string {
+  const resolved = resolveCliCommand(command, { platform })
+  return resolved === command
+    ? (findInstalledVsCodeCli(command, platform, fileExists) ?? command)
+    : resolved
+}
+
 function resolveSimpleEditorCommand(
   command: string,
   platform: NodeJS.Platform,
   fileExists: (path: string) => boolean
 ): string {
   return preferJetBrainsGuiExecutable(
-    resolveCliCommand(command, { platform }),
+    resolveEditorCliCommand(command, platform, fileExists),
     platform,
     fileExists
   )
@@ -222,7 +234,7 @@ export function resolveVsCodeRemoteSshLaunchSpec(
     if (isCompoundShellCommand(trimmed)) {
       return null
     }
-    editorCommand = resolveCliCommand(trimmed, { platform })
+    editorCommand = resolveEditorCliCommand(trimmed, platform, fileExists)
   }
 
   if (!isVsCodeLauncherExecutable(editorCommand)) {
