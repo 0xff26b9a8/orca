@@ -1472,7 +1472,6 @@
         "aba792c8b3": "合并PR失败",
         "dbe5e2448e": "拉取请求已合并",
         "a27ee5ca1a": "这将更新 GitHub 上的PR。",
-        "03d7216d62": "{{value0}} PR #{{value1}}？",
         "e9b7cb7d17": "{{value0}} PR 失败",
         "bd3b4492a0": "拉取请求已重新打开",
         "9f88657c4e": "PR已关闭",
@@ -1918,6 +1917,16 @@
         "createWorktree": "创建工作树",
         "createWorkspace": "创建工作区"
       },
+      "PullRequestConfirmation": {
+        "closeTitle": "关闭 PR #{{number}}？",
+        "mergeLabel": "创建合并提交",
+        "mergeTitle": "创建合并提交以合并 PR #{{number}}？",
+        "rebaseLabel": "变基合并",
+        "rebaseTitle": "变基合并 PR #{{number}}？",
+        "reopenTitle": "重新打开 PR #{{number}}？",
+        "squashLabel": "压缩合并",
+        "squashTitle": "压缩合并 PR #{{number}}？"
+      },
       "PullRequestPage": {
         "2560588245": "请求评审人失败",
         "3450247584": "评论",
@@ -1987,7 +1996,6 @@
         "aae645d36d": "合并PR失败",
         "c57873d721": "拉取请求已合并",
         "a63b3c159c": "这将更新 GitHub 上的PR。",
-        "eec3706a6a": "{{value0}} PR #{{value1}}？",
         "710e47aa06": "拉取请求已重新打开",
         "7aa3b5f706": "PR已关闭",
         "3d77438c92": "这将在 GitHub 上重新打开PR。",
@@ -2316,7 +2324,6 @@
         "88f478cdef": "合并PR失败",
         "a161925adc": "拉取请求已合并",
         "0506a78337": "这将更新 GitHub 上的PR。",
-        "844dc193c7": "{{value0}} PR #{{value1}}？",
         "995dd6af9b": "开放PR检查",
         "8a22eb3f7b": "没有匹配的评审人。",
         "67755a83a1": "其他人",

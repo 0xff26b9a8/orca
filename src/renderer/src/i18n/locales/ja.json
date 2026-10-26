@@ -1472,7 +1472,6 @@
         "aba792c8b3": "PR のマージに失敗しました",
         "dbe5e2448e": "PR がマージされました",
         "a27ee5ca1a": "これにより、GitHub 上の PR が更新されます。",
-        "03d7216d62": "{{value0}} PR #{{value1}}?",
         "e9b7cb7d17": "{{value0}} PR に失敗しました",
         "bd3b4492a0": "PR が再オープンされました",
         "9f88657c4e": "PR がクローズされました",
@@ -1918,6 +1917,16 @@
         "createWorktree": "ワークツリーを作成する",
         "createWorkspace": "ワークスペースを作成"
       },
+      "PullRequestConfirmation": {
+        "closeTitle": "PR #{{number}} を閉じますか？",
+        "mergeLabel": "マージコミットを作成",
+        "mergeTitle": "マージコミットを作成して PR #{{number}} をマージしますか？",
+        "rebaseLabel": "リベースしてマージ",
+        "rebaseTitle": "PR #{{number}} をリベースしてマージしますか？",
+        "reopenTitle": "PR #{{number}} を再度開きますか？",
+        "squashLabel": "スカッシュしてマージ",
+        "squashTitle": "PR #{{number}} をスカッシュしてマージしますか？"
+      },
       "PullRequestPage": {
         "2560588245": "レビュアーのリクエストに失敗しました",
         "3450247584": "コメント",
@@ -1987,7 +1996,6 @@
         "aae645d36d": "PR のマージに失敗しました",
         "c57873d721": "PR がマージされました",
         "a63b3c159c": "これにより、GitHub 上の PR が更新されます。",
-        "eec3706a6a": "{{value0}} PR #{{value1}}?",
         "710e47aa06": "PR が再オープンされました",
         "7aa3b5f706": "PR がクローズされました",
         "3d77438c92": "これにより、GitHub で PR が再開されます。",
@@ -2316,7 +2324,6 @@
         "88f478cdef": "PR のマージに失敗しました",
         "a161925adc": "PR がマージされました",
         "0506a78337": "これにより、GitHub 上の PR が更新されます。",
-        "844dc193c7": "{{value0}} PR #{{value1}}?",
         "995dd6af9b": "PR チェックを開く",
         "8a22eb3f7b": "一致するレビュアーがいません。",
         "67755a83a1": "他のみんな",

@@ -1767,7 +1767,6 @@
         "aba792c8b3": "Failed to merge pull request",
         "dbe5e2448e": "Pull request merged",
         "a27ee5ca1a": "This will update the pull request on GitHub.",
-        "03d7216d62": "{{value0}} PR #{{value1}}?",
         "e9b7cb7d17": "Failed to {{value0}} PR",
         "bd3b4492a0": "Pull request reopened",
         "9f88657c4e": "Pull request closed",
@@ -2213,6 +2212,16 @@
         "createWorktree": "Create worktree",
         "createWorkspace": "Create workspace"
       },
+      "PullRequestConfirmation": {
+        "closeTitle": "Close PR #{{number}}?",
+        "mergeLabel": "Create merge commit",
+        "mergeTitle": "Merge PR #{{number}} with a merge commit?",
+        "rebaseLabel": "Rebase and merge",
+        "rebaseTitle": "Rebase and merge PR #{{number}}?",
+        "reopenTitle": "Reopen PR #{{number}}?",
+        "squashLabel": "Squash and merge",
+        "squashTitle": "Squash and merge PR #{{number}}?"
+      },
       "PullRequestPage": {
         "2560588245": "Failed to request reviewer",
         "3450247584": "Comment",
@@ -2286,7 +2295,6 @@
         "aae645d36d": "Failed to merge pull request",
         "c57873d721": "Pull request merged",
         "a63b3c159c": "This will update the pull request on GitHub.",
-        "eec3706a6a": "{{value0}} PR #{{value1}}?",
         "710e47aa06": "Pull request reopened",
         "7aa3b5f706": "Pull request closed",
         "3d77438c92": "This will reopen the pull request on GitHub.",
@@ -2661,7 +2669,6 @@
         "88f478cdef": "Failed to merge pull request",
         "a161925adc": "Pull request merged",
         "0506a78337": "This will update the pull request on GitHub.",
-        "844dc193c7": "{{value0}} PR #{{value1}}?",
         "995dd6af9b": "Open PR checks",
         "8a22eb3f7b": "No matching reviewers.",
         "67755a83a1": "Everyone else",

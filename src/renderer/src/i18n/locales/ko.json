@@ -1472,7 +1472,6 @@
         "aba792c8b3": "PR을 병합하지 못했습니다.",
         "dbe5e2448e": "PR이 병합되었습니다",
         "a27ee5ca1a": "그러면 GitHub의 PR이 업데이트됩니다.",
-        "03d7216d62": "{{value0}} PR #{{value1}}?",
         "e9b7cb7d17": "{{value0}} PR에 실패했습니다.",
         "bd3b4492a0": "PR이 다시 열렸습니다",
         "9f88657c4e": "PR이 종료되었습니다.",
@@ -1918,6 +1917,16 @@
         "createWorktree": "작업 트리 만들기",
         "createWorkspace": "워크스페이스 만들기"
       },
+      "PullRequestConfirmation": {
+        "closeTitle": "PR #{{number}}을(를) 닫으시겠습니까?",
+        "mergeLabel": "병합 커밋 생성",
+        "mergeTitle": "병합 커밋을 생성하여 PR #{{number}}을(를) 병합하시겠습니까?",
+        "rebaseLabel": "리베이스 및 병합",
+        "rebaseTitle": "PR #{{number}}을(를) 리베이스하여 병합하시겠습니까?",
+        "reopenTitle": "PR #{{number}}을(를) 다시 여시겠습니까?",
+        "squashLabel": "스쿼시 및 병합",
+        "squashTitle": "PR #{{number}}을(를) 스쿼시하여 병합하시겠습니까?"
+      },
       "PullRequestPage": {
         "2560588245": "리뷰어를 요청하지 못했습니다.",
         "3450247584": "댓글",
@@ -1987,7 +1996,6 @@
         "aae645d36d": "PR을 병합하지 못했습니다.",
         "c57873d721": "PR이 병합되었습니다",
         "a63b3c159c": "그러면 GitHub의 PR이 업데이트됩니다.",
-        "eec3706a6a": "{{value0}} PR #{{value1}}?",
         "710e47aa06": "PR이 다시 열렸습니다",
         "7aa3b5f706": "PR이 종료되었습니다.",
         "3d77438c92": "그러면 GitHub에서 PR이 다시 열립니다.",
@@ -2316,7 +2324,6 @@
         "88f478cdef": "PR을 병합하지 못했습니다.",
         "a161925adc": "PR이 병합되었습니다",
         "0506a78337": "그러면 GitHub의 PR이 업데이트됩니다.",
-        "844dc193c7": "{{value0}} PR #{{value1}}?",
         "995dd6af9b": "PR 체크 열기",
         "8a22eb3f7b": "일치하는 리뷰어가 없습니다.",
         "67755a83a1": "다른 사람들",
