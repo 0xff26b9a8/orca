@@ -6,6 +6,7 @@ import { posix, win32 } from 'node:path'
 import { parseWslUncPath } from '../shared/wsl-paths'
 import { isVsCodeLauncherExecutable } from '../shared/vscode-remote-ssh-launcher'
 import { resolveCliCommand } from './codex-cli/command'
+import { envWithoutAppImageRuntime } from './pty/appimage-terminal-env'
 import {
   getLauncherBaseName,
   hasMatchingOuterQuotes,
@@ -236,19 +237,24 @@ export function resolveVsCodeRemoteSshLaunchSpec(
 }
 
 function startExternalEditorProcess(launchSpec: ExternalEditorLaunchSpec): ChildProcess {
+  const detachedOptions = {
+    detached: true,
+    stdio: 'ignore',
+    // AppImage exports ARGV0, APPDIR, and mount PATH entries that editor shells must not inherit.
+    env: process.platform === 'linux' ? envWithoutAppImageRuntime(process.env) : undefined
+  } as const
   if (launchSpec.kind === 'shell') {
     const { spawnCmd, spawnArgs, hideWindowsConsole } = launchSpec
     return hideWindowsConsole
-      ? spawnProcess({ program: spawnCmd, args: spawnArgs, detached: true, stdio: 'ignore' })
-      : spawn(spawnCmd, spawnArgs, { detached: true, stdio: 'ignore', windowsHide: false })
+      ? spawnProcess({ program: spawnCmd, args: spawnArgs, ...detachedOptions })
+      : spawn(spawnCmd, spawnArgs, { ...detachedOptions, windowsHide: false })
   }
   if (launchSpec.hideWindowsConsole && !launchSpec.detachedGui) {
     // process-host preserves quoting for batch launchers and arguments containing spaces.
     return spawnProcess({
       program: launchSpec.spawnCmd,
       args: launchSpec.spawnArgs,
-      detached: true,
-      stdio: 'ignore'
+      ...detachedOptions
     })
   }
   const { spawnCmd, spawnArgs } = getSpawnArgsForWindows(
@@ -260,9 +266,9 @@ function startExternalEditorProcess(launchSpec: ExternalEditorLaunchSpec): Child
   )
   if (!launchSpec.hideWindowsConsole) {
     // process-host hides consoles; Windows terminal editors need a visible console.
-    return spawn(spawnCmd, spawnArgs, { detached: true, stdio: 'ignore', windowsHide: false })
+    return spawn(spawnCmd, spawnArgs, { ...detachedOptions, windowsHide: false })
   }
-  return spawnProcess({ program: spawnCmd, args: spawnArgs, detached: true, stdio: 'ignore' })
+  return spawnProcess({ program: spawnCmd, args: spawnArgs, ...detachedOptions })
 }
 
 export async function launchExternalEditor(launchSpec: ExternalEditorLaunchSpec): Promise<void> {
