@@ -234,7 +234,7 @@ Terminal rules:
 - Start a fresh agent with `agent launch` in the current worktree, or `worktree create --agent` for a separate checkout (see Starting agents).
 - Use `terminal wait --for tui-idle` for agent CLIs such as Claude Code, Gemini, Codex, OMP, Pi, and Grok; always pass `--timeout-ms`.
 - For long output, use cursor reads. After a limited tail preview, page from `oldestCursor`; after a cursor read, continue with `nextCursor` while `limited` is true and `nextCursor !== latestCursor`.
-- `--direction horizontal` splits left/right. `--direction vertical` splits top/bottom.
+- `--direction vertical` splits left/right. `--direction horizontal` splits top/bottom.
 
 ## Artifacts
 
