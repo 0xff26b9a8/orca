@@ -21416,5 +21416,10 @@
   },
   "browserTab": {
     "agentDriving": "An agent is using this page"
+  },
+  "nativeChat": {
+    "math": {
+      "scrollDisplayEquation": "Scroll display equation"
+    }
   }
 }
