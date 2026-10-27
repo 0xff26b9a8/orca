@@ -11,6 +11,11 @@ const PACKAGE_NAME = '@orca/process-host'
 const PACKAGE_DIRECTORY = 'src/packages/process-host'
 const PACKAGE_SOURCE = `${PACKAGE_DIRECTORY}/src/`
 const BASELINE_PATH = 'config/process-host-direct-import-baseline.txt'
+// A direct wsl.exe exec bypasses process-host's internal distro allowlist unless it is checked:
+// by calling the check itself, or by taking its program from resolveCommand, which checks centrally.
+const WSL_EXE_PROGRAM = /['"`]wsl\.exe['"`]|resolveWslExecutablePath\(|buildWslExecArgs\(/
+const WSL_ALLOWLIST_CHECK =
+  /assertWslDistroAllowed\(|\bresolve(Git|DefaultWsl)?Command\(|resolveDefaultWslCli\(/
 const SOURCE_PATTERNS = [
   '*.{ts,tsx,mts,cts,js,mjs,cjs}',
   ...['src', 'config', 'tests', 'mobile/src', 'mobile/app', 'mobile/scripts'].map(
@@ -101,6 +106,14 @@ export function assessProcessHostImports(
       ) {
         direct.add(file)
       }
+    }
+  }
+  for (const file of direct) {
+    const contents = sources.get(file) ?? ''
+    if (WSL_EXE_PROGRAM.test(contents) && !WSL_ALLOWLIST_CHECK.test(contents)) {
+      violations.push(
+        `${file}: direct wsl.exe exec must call assertWslDistroAllowed or resolve through resolveCommand`
+      )
     }
   }
   return {
