@@ -8837,7 +8837,6 @@
       "src/renderer/src/components/settings/ssh-target-save-payload.test.ts": 149,
       "src/renderer/src/components/settings/task-source-setup-state.test.ts": 42,
       "src/renderer/src/components/settings/task-tracker-integration-cards.test.tsx": 814,
-      "src/renderer/src/components/settings/terminal-search.test.ts": 281,
       "src/renderer/src/components/settings/usage-credential-host-sections.test.tsx": 743,
       "src/renderer/src/components/settings/use-debounced-settings-text-draft.test.ts": 253,
       "src/renderer/src/components/settings/use-mac-captured-digit-chords.test.ts": 597,
