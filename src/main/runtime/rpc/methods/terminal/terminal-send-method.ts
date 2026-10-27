@@ -19,6 +19,7 @@ import {
   ensureUnsupportedTerminalPromptReceipt,
   observeReplayedTerminalPrompt
 } from './terminal-prompt-receipt'
+import { observeQuestionAnswerSend } from './terminal-send-question-answered'
 
 export const TERMINAL_SEND_METHODS = [
   defineMethod({
@@ -215,6 +216,7 @@ export const TERMINAL_SEND_METHODS = [
               mobileFloorClaim.current = claim
             }
           : undefined
+      const answered = observeQuestionAnswerSend(params, runtime)
       let result
       let acceptedPromptCheckpoint: unknown
       try {
@@ -301,7 +303,7 @@ export const TERMINAL_SEND_METHODS = [
         )
       }
       // Deliberate mobile input claims its driver floor; clientless sends use the current mobile driver.
-      return { send: result }
+      return { send: answered(result) }
     }
   })
 ]
