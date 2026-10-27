@@ -8558,7 +8558,6 @@
       "src/renderer/src/components/right-sidebar/source-control-discard-localization.test.ts": 219,
       "src/renderer/src/components/right-sidebar/source-control-dropdown-items.create-pr-intent.test.ts": 163,
       "src/renderer/src/components/right-sidebar/source-control-dropdown-items.test.ts": 256,
-      "src/renderer/src/components/right-sidebar/source-control-entry-actions.test.ts": 45,
       "src/renderer/src/components/right-sidebar/source-control-entry-context-menu.test.tsx": 367,
       "src/renderer/src/components/right-sidebar/source-control-file-filter.test.ts": 46,
       "src/renderer/src/components/right-sidebar/source-control-header-toolbar-identity.test.tsx": 346,
