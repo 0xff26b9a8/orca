@@ -285,7 +285,7 @@ jobs:
       ORCA_MOBILE_TYPECHECK_COMPILER: 'bun'
     if: github.event_name == 'push'
     # Why ARM: the same pure-Node Vitest run `verify` makes on a pull request.
-    runs-on: blacksmith-4vcpu-ubuntu-2404-arm
+    runs-on: ubuntu-24.04-arm
 
     defaults:
       run:
