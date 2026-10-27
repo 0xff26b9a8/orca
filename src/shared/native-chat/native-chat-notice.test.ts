@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { nativeChatNoticeBlock, nativeChatNoticeLook } from './native-chat-notice'
-import type { NativeChatTextBlock } from './native-chat-types'
+import type { NativeChatTextBlock } from '../native-chat-types'
 
 const block = (fields: Partial<NativeChatTextBlock>): NativeChatTextBlock => ({
   type: 'text',
