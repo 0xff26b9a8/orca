@@ -5,28 +5,27 @@ import {
   type CatalogMidSessionApply,
   type CatalogModel,
   type CatalogOptionApply
-} from '../../../../shared/agent-session-option-catalog'
+} from './agent-session-option-catalog'
 import type {
   SessionOptionDescriptor,
   SessionOptionSetResult,
   SessionOptionValue
-} from '../../../../shared/native-chat/input/native-chat-session-options'
-import { buildNativeChatSessionOptionCommand } from '../../../../shared/native-chat/input/native-chat-session-option-commands'
+} from './native-chat/input/native-chat-session-options'
+import { buildNativeChatSessionOptionCommand } from './native-chat/input/native-chat-session-option-commands'
 import {
+  flattenNativeChatSessionOptionRecord,
   getTrackedSessionOption as getTrackedOption,
   isFlipOnlyMidSession,
-  type NativeChatSessionOptionRecord,
-  flattenNativeChatSessionOptionRecord
-} from '../../../../shared/native-chat/input/native-chat-session-option-state'
+  type NativeChatSessionOptionRecord
+} from './native-chat/input/native-chat-session-option-state'
 import type {
   NativeChatSessionOptionDispatchCommand,
   NativeChatSessionOptionDispatchResult
-} from './native-chat-session-option-command-dispatch'
-
+} from './native-chat-session-option-dispatch'
 import {
   resolveEffectiveNativeChatModelId,
   type NativeChatSessionOptionMode
-} from '../../../../shared/native-chat/input/native-chat-session-option-snapshot'
+} from './native-chat/input/native-chat-session-option-snapshot'
 
 type SessionOptionApplyContext = {
   mode: NativeChatSessionOptionMode

@@ -7,6 +7,8 @@ import {
   nativeChatEditFilePatchText
 } from '../../../src/shared/native-chat/tools/native-chat-edit-cards'
 import {
+  nativeChatEditFileBaseName,
+  nativeChatEditGutterChars,
   unifiedLineNumber,
   type NativeChatEditFile,
   type NativeChatEditLine
@@ -20,10 +22,6 @@ import {
   toolStyles as styles,
   toolType
 } from './native-chat/transcript/mobile-native-chat-tool-styles'
-
-function baseName(path: string): string {
-  return path.split(/[\\/]/).at(-1) || path
-}
 
 function VerbIcon({ kind, size }: { kind: NativeChatEditFile['changeKind']; size: number }) {
   const Icon = kind === 'added' ? FilePlus2 : kind === 'deleted' ? FileMinus2 : FilePen
@@ -98,11 +96,7 @@ function DiffCardRows({
 }) {
   const onLayout = useMobileNativeChatOpenedDetail()
   const type = toolType(fontScale).code
-  // Leave unresolved gutters blank; snippet-relative numbers would imply real file positions.
-  const widest = file.lineNumbersKnown
-    ? file.lines.reduce((max, line) => Math.max(max, unifiedLineNumber(line) ?? 0), 0)
-    : 0
-  const gutterChars = file.lineNumbersKnown ? Math.max(3, String(widest).length + 1) : 0
+  const gutterChars = nativeChatEditGutterChars(file)
   const seen = new Map<string, number>()
   return (
     <MobileNativeChatOwnedScrollView
@@ -172,7 +166,7 @@ export function MobileNativeChatDiffCard({
                 numberOfLines={1}
                 accessibilityLabel={file.oldPath}
               >
-                {baseName(file.oldPath)}
+                {nativeChatEditFileBaseName(file.oldPath)}
               </Text>
               <Text style={[styles.lineWord, type.row]}>→</Text>
             </>
@@ -184,7 +178,7 @@ export function MobileNativeChatDiffCard({
             suppressHighlighting={!openFile}
             accessibilityRole={openFile ? 'link' : undefined}
           >
-            {baseName(file.path)}
+            {nativeChatEditFileBaseName(file.path)}
           </Text>
           <Text style={[styles.lineMeta, type.meta]}>
             {file.added > 0 ? <Text style={styles.countAdded}>{`+${file.added}`}</Text> : null}
