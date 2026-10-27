@@ -11124,7 +11124,6 @@
       "src/renderer/src/lib/worktree-visit-recency.test.ts": 35,
       "src/renderer/src/lib/wsl-host-account-owner.test.ts": 103,
       "src/renderer/src/runtime/abortable-runtime-environment-call.test.ts": 121,
-      "src/renderer/src/runtime/agent-resume-host-authority-capability.test.ts": 225,
       "src/renderer/src/runtime/agent-session-keyboard-capability.test.ts": 147,
       "src/renderer/src/runtime/agent-session-operation-id.test.ts": 24,
       "src/renderer/src/runtime/antigravity-generation-compatibility.test.ts": 175,
