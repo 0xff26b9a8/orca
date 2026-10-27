@@ -13059,7 +13059,6 @@
       "src/shared/windows-cmd-runner-delayed-launch.test.ts": 34,
       "src/shared/windows-command-line-budget.test.ts": 258,
       "src/shared/windows-console-input.test.ts": 54,
-      "src/shared/windows-environment-expansion.test.ts": 79,
       "src/shared/windows-interactive-login-spawn.test.ts": 38,
       "src/shared/windows-long-path-git-args.test.ts": 29,
       "src/shared/windows-path-access.test.ts": 35,
