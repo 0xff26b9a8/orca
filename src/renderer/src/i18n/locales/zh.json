@@ -20352,6 +20352,28 @@
     },
     "managedProfile": {
       "createFailed": "无法创建此工作区的浏览器配置文件。关闭此选项卡并打开一个新选项卡以重试。"
+    },
+    "history": {
+      "clear": "清除浏览记录",
+      "clearAllTime": "所有时间",
+      "clearLastHour": "过去一小时",
+      "clearRange": "清除以下时间之后的历史记录",
+      "clearToday": "今天",
+      "cleared": "已清除浏览记录",
+      "close": "关闭",
+      "description": "搜索和管理浏览记录",
+      "empty": "您访问的页面将显示在这里",
+      "enterKey": "Enter",
+      "escKey": "Esc",
+      "menuItem": "历史记录",
+      "noMatches": "没有页面与您的搜索匹配",
+      "open": "打开",
+      "remove": "从历史记录中移除",
+      "removeShort": "移除",
+      "search": "搜索历史记录",
+      "title": "历史记录",
+      "today": "今天",
+      "yesterday": "昨天"
     }
   },
   "runtimeRpc": {
@@ -20433,7 +20455,8 @@
       "openAnyway": "无论如何打开"
     },
     "fileLoad": {
-      "hostUnresolved": "主机找不到该文件的工作区。它可能已被删除，或者主机可能还不知道。重试，或从选项卡栏中关闭此选项卡。"
+      "hostUnresolved": "主机找不到该文件的工作区。它可能已被删除，或者主机可能还不知道。重试，或从选项卡栏中关闭此选项卡。",
+      "remoteTooLarge": "此文件过大，无法从其主机打开。"
     },
     "markdownPreview": {
       "tooLarge": "文件超过 {{limit}} 预览限制。请打开文件查看源代码。",

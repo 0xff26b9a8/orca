@@ -93,7 +93,8 @@
       "openAnyway": "Abrir assim mesmo"
     },
     "fileLoad": {
-      "hostUnresolved": "O host não encontrou o espaço de trabalho deste arquivo. Ele pode ter sido removido, ou o host ainda não sabe da sua existência. Tente novamente ou feche esta aba na barra de abas."
+      "hostUnresolved": "O host não encontrou o espaço de trabalho deste arquivo. Ele pode ter sido removido, ou o host ainda não sabe da sua existência. Tente novamente ou feche esta aba na barra de abas.",
+      "remoteTooLarge": "Este arquivo é grande demais para ser aberto a partir do host."
     },
     "markdownPreview": {
       "tooLarge": "O arquivo excede o limite de prévia de {{limit}}. Abra o arquivo para ver o código-fonte.",
@@ -558,6 +559,28 @@
     }
   },
   "browser": {
+    "history": {
+      "clear": "Limpar histórico de navegação",
+      "clearAllTime": "Todo o período",
+      "clearLastHour": "Última hora",
+      "clearRange": "Limpar histórico a partir de",
+      "clearToday": "Hoje",
+      "cleared": "Histórico de navegação limpo",
+      "close": "Fechar",
+      "description": "Pesquise e gerencie o histórico de navegação",
+      "empty": "As páginas visitadas aparecerão aqui",
+      "enterKey": "Enter",
+      "escKey": "Esc",
+      "menuItem": "Histórico",
+      "noMatches": "Nenhuma página corresponde à sua pesquisa",
+      "open": "Abrir",
+      "remove": "Remover do histórico",
+      "removeShort": "Remover",
+      "search": "Pesquisar histórico",
+      "title": "Histórico",
+      "today": "Hoje",
+      "yesterday": "Ontem"
+    },
     "loadFailure": {
       "connectionNotSecure": "A conexão não é segura",
       "cantReachHost": "Não é possível acessar {{value0}}",

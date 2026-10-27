@@ -20352,6 +20352,28 @@
     },
     "managedProfile": {
       "createFailed": "No se pudo crear el perfil del navegador de este espacio de trabajo. Cierra esta pestaña y abre una nueva para volver a intentarlo."
+    },
+    "history": {
+      "clear": "Borrar el historial de navegación",
+      "clearAllTime": "Todo el tiempo",
+      "clearLastHour": "Última hora",
+      "clearRange": "Borrar historial desde",
+      "clearToday": "Hoy",
+      "cleared": "Historial de navegación borrado",
+      "close": "Cerrar",
+      "description": "Busca y administra el historial de navegación",
+      "empty": "Las páginas que visites aparecerán aquí",
+      "enterKey": "Intro",
+      "escKey": "Esc",
+      "menuItem": "Historial",
+      "noMatches": "Ninguna página coincide con tu búsqueda",
+      "open": "Abrir",
+      "remove": "Eliminar del historial",
+      "removeShort": "Eliminar",
+      "search": "Buscar en el historial",
+      "title": "Historial",
+      "today": "Hoy",
+      "yesterday": "Ayer"
     }
   },
   "runtimeRpc": {
@@ -20573,7 +20595,8 @@
       "openAnyway": "Abrir de todos modos"
     },
     "fileLoad": {
-      "hostUnresolved": "El host no pudo encontrar el espacio de trabajo de este archivo. Puede que se haya eliminado o que el host aún no lo conozca. Reintenta o cierra esta pestaña desde la barra de pestañas."
+      "hostUnresolved": "El host no pudo encontrar el espacio de trabajo de este archivo. Puede que se haya eliminado o que el host aún no lo conozca. Reintenta o cierra esta pestaña desde la barra de pestañas.",
+      "remoteTooLarge": "Este archivo es demasiado grande para abrirlo desde su host."
     }
   },
   "accounts": {
