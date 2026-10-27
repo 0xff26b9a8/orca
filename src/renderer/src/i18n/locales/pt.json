@@ -11504,9 +11504,10 @@
           "b2bc47c080": "mais locais",
           "b47ba1a9d2": "Pré-visualização de {{value0}}",
           "2251d41ebb": "Grupos de worktrees ocultas",
-          "f54f2bec5d": "{{value0}} worktrees ocultas para {{value1}}",
           "5a9688802a": "Mostrar mais {{value0}}",
-          "294de4aeb2": "Mostrar menos"
+          "294de4aeb2": "Mostrar menos",
+          "collapseAriaLabel": "Recolher worktrees ocultas de {{repo}}",
+          "expandAriaLabel": "Expandir worktrees ocultas de {{repo}}"
         },
         "WorkspaceKanbanSettingsMenu": {
           "79eb990aa4": "Adicionar status",
