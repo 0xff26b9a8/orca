@@ -8102,7 +8102,6 @@
       "src/renderer/src/components/native-chat/native-chat-session-option-enrichment.test.ts": 1656,
       "src/renderer/src/components/native-chat/native-chat-session-option-labels.test.ts": 52,
       "src/renderer/src/components/native-chat/native-chat-session-transport.test.ts": 140,
-      "src/renderer/src/components/native-chat/native-chat-shared-copy-matches-catalog.test.ts": 230,
       "src/renderer/src/components/native-chat/native-chat-shortcut.test.ts": 48,
       "src/renderer/src/components/native-chat/native-chat-split-flow.test.ts": 1678,
       "src/renderer/src/components/native-chat/native-chat-split-shortcut.test.ts": 56,
