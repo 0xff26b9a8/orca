@@ -1,6 +1,7 @@
 import { memo, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { colors, radii, spacing, typography } from '../../theme/mobile-theme'
+import { readableMermaidFlowchartSvg } from '../../../../src/shared/mermaid-flowchart-contrast'
 import { MERMAID_DIAGRAM_CONFIG } from './mermaid-diagram-config'
 import { loadPageMermaid } from './mermaid-page-engine'
 
@@ -37,7 +38,7 @@ export const MermaidDiagram = memo(function MermaidDiagram({ source, base }: Mer
           return
         }
         // Only mermaid sanitizes its serialization; strict mode already made returned SVG safe to parse.
-        host.innerHTML = svg
+        host.innerHTML = readableMermaidFlowchartSvg(svg, colors.textPrimary, colors.bgRaised)
       } catch {
         if (!disposed) {
           setFailedSource(source)
