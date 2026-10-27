@@ -1247,6 +1247,10 @@
             "copy": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation."
           }
         },
+        "GeneralPane": {
+          "confirm_running_terminal_close": "Confirm before closing running terminals",
+          "confirm_running_terminal_close_description": "Ask before stopping a running agent or command when closing a terminal."
+        },
         "GeneralRemoteServerUpdates": {
           "reviewUpdateOne": "1 update available",
           "reviewUpdates": "{{value0}} updates available"
