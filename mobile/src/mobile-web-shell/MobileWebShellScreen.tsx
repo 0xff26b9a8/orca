@@ -229,8 +229,8 @@ export function MobileWebShellScreen({
       console.warn('[web-shell] refused to open this screen', issue)
       reportShellFailure('document-load-failed')
     },
-    // Push so Back reveals the mounted page without downloading or handshaking again.
-    onNavigate: (href: string) => {
+    // Push so Back reveals the mounted page without downloading or handshaking again, unless the page replaced itself.
+    onNavigate: (href: string, replace: boolean) => {
       if (overlay) {
         return void router.replace(href)
       }
@@ -254,7 +254,7 @@ export function MobileWebShellScreen({
         router.dismissTo(href)
         return
       }
-      router.push(href)
+      return void (replace ? router.replace(href) : router.push(href))
     },
     serveNativeVerb,
     onExternalLink: openUrlForPage,

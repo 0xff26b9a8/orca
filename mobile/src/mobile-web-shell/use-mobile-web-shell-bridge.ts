@@ -63,7 +63,7 @@ export type MobileWebShellBridgeArgs = {
   // Effective session grants include the served-route union when this page owns the host area.
   routeGrants: readonly string[]
   ownsHostArea?: boolean
-  onNavigate: (href: string) => void
+  onNavigate: (href: string, replace: boolean) => void
   onExternalLink: (url: string) => void
   onHaptic: (kind: BridgeHapticsKind) => void
   serveNativeVerb: (verb: BridgeNativeVerb, params: unknown) => Promise<unknown>
@@ -143,7 +143,7 @@ export function useMobileWebShellBridge(args: MobileWebShellBridgeArgs): MobileW
           recordShellLifecycleLine(latest.hostId, line)
         }
       }),
-      onNavigate: (href) => argsRef.current.onNavigate(href),
+      onNavigate: (href, replace) => argsRef.current.onNavigate(href, replace),
       onNavigateBack: () => argsRef.current.onNavigateBack(),
       onExternalLink: (url) => argsRef.current.onExternalLink(url),
       onHaptic: (kind) => argsRef.current.onHaptic(kind),

@@ -76,8 +76,8 @@ export type BridgeHostOptions = {
   // Read allowlisted storage synchronously for every init so document reloads include writes made since mount.
   readStorage: () => PageStorageForInit
   onStorageWrite: (key: string, value: string | null) => void
-  // Required to honor navigate grants: open targets the page cannot render.
-  onNavigate: (href: string) => void
+  // Required to honor navigate grants: open targets the page cannot render, replacing this screen when asked.
+  onNavigate: (href: string, replace: boolean) => void
   // Serve native verbs only on-device; rejection becomes the page’s request error and never reaches the desktop.
   serveNativeVerb: (verb: BridgeNativeVerb, params: unknown) => Promise<unknown>
   // The envelope already checked URL schemes. Never throw from native frame handling; report device-open failure locally because notify has no reply.
