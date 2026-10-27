@@ -1,3 +1,4 @@
+import { parseTerminalKittyKeyboardFlags } from '../../../../src/shared/terminal-kitty-keyboard-flags'
 import { resetSmoothScrollOffset } from './normal-buffer-smooth-scroll'
 import { stopSurfaceTouchGestures } from './surface-touch-gestures'
 import { clearLongPress } from './tap-dispatch'
@@ -17,7 +18,11 @@ import {
 } from './mouse-mode-decset-scan'
 import { captureInitialOscLinkTexts } from './osc-link-tap'
 import { attachOsc52ClipboardBridge } from './osc52-clipboard-bridge'
-import { attachTerminalQueryReplyBridge, resetTerminalDataReplyAuthority } from './query-reply'
+import {
+  attachProgramStatusQueryReplies,
+  attachTerminalQueryReplyBridge,
+  resetTerminalDataReplyAuthority
+} from './query-reply'
 import { cancelSelect } from './selection-mode'
 import { resetEvictionCounter } from './selection-state-and-eviction'
 import { beginTerminalSurfaceSwap, commitTerminalSurfaceSwap } from './surface-swap'
@@ -48,6 +53,7 @@ function openTerminal(scope: TerminalDocumentScope, cols: number, rows: number) 
   })
   scope.term = term
   attachOsc52ClipboardBridge(scope, term)
+  attachProgramStatusQueryReplies(scope, term)
   term.open(scope.surface!)
   attachWebglAddon(scope, true)
   try {
@@ -85,7 +91,8 @@ export function init(
   nextTheme: Parameters<typeof applyTerminalTheme>[1],
   nextFontScale: unknown,
   preserveScroll: boolean,
-  nextOscLinks: unknown
+  nextOscLinks: unknown,
+  kittyKeyboardFlags: unknown
 ) {
   // Replay replaces the scroll target; retire momentum and pending drags belonging to the old one.
   stopSurfaceTouchGestures(scope)
@@ -125,13 +132,11 @@ export function init(
   scope.mouseEncodingKnown = false
   scope.sgrMouseMode = false
   scope.sgrMousePixelsMode = false
-  scope.lastEmittedModes = {
-    bracketedPasteMode: false,
-    altScreen: false,
-    mouseTrackingMode: 'none',
-    sgrMouseMode: false,
-    sgrMousePixelsMode: false
-  }
+  // lastEmittedModes stays what native last received, so a cleared snapshot still publishes its modes.
+  scope.keyboardModes.adoptSnapshot(
+    typeof initialData === 'string' ? initialData : '',
+    parseTerminalKittyKeyboardFlags(kittyKeyboardFlags)
+  )
   const replayData = normalizeInitialData(initialData)
   // Mirror only replayed modes after normal-buffer prefixes are discarded.
   updateMouseModeFromData(scope, replayData)
@@ -204,6 +209,7 @@ export function init(
 
 export function write(scope: TerminalDocumentScope, data: string) {
   updateMouseModeFromData(scope, data, true)
+  scope.keyboardModes.scan(data)
   enqueueWrite(scope, data)
   pumpWrites(scope, scope.terminalGeneration)
   // Refit once after first live output reveals a wider line; later chunks preserve manual zoom.
