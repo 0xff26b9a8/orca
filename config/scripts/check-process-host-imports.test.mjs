@@ -191,7 +191,7 @@ describe('process-host import boundary', () => {
     })
   })
 
-  it('requires the distro allowlist check, or resolveCommand, before any direct wsl.exe exec outside process-host', () => {
+  it('requires the distro allowlist check before any hand-built wsl.exe exec outside process-host', () => {
     const exec = "import { execFile } from 'node:child_process'\n"
     expect(
       assess(
@@ -202,6 +202,8 @@ describe('process-host import boundary', () => {
           'src/main/unrelated.ts': `${exec}execFile('git', ['status'])`,
           'src/main/built.ts': `${exec}execFile(program, buildWslExecArgs(distro, ['sh']))`,
           'src/main/resolved-git.ts': `${exec}const r = resolveGitCommand(args, o)\nspawn(r.binary, r.args)`,
+          // resolveCommand checks only what it resolves, not a wsl.exe exec built beside it.
+          'src/main/mixed.ts': `${exec}const r = resolveCommand('git', a, cwd)\nexecFile('wsl.exe', ['-d', distro])`,
           'src/main/comment-only.ts':
             "import type { ChildProcess } from 'node:child_process'\n// wsl.exe pads output",
           'src/main/caller.test.ts': `${exec}execFile('wsl.exe', [])`,
@@ -214,14 +216,17 @@ describe('process-host import boundary', () => {
           'src/main/unrelated.ts',
           'src/main/built.ts',
           'src/main/resolved-git.ts',
+          'src/main/mixed.ts',
           'src/main/comment-only.ts'
         ]
       ).violations
     ).toEqual(
-      ['src/main/built.ts', 'src/main/resolved.ts', 'src/main/unguarded.ts'].map(
-        (file) =>
-          `${file}: direct wsl.exe exec must call assertWslDistroAllowed or resolve through resolveCommand`
-      )
+      [
+        'src/main/built.ts',
+        'src/main/mixed.ts',
+        'src/main/resolved.ts',
+        'src/main/unguarded.ts'
+      ].map((file) => `${file}: direct wsl.exe exec must call assertWslDistroAllowed`)
     )
   })
 
