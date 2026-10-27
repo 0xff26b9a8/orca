@@ -21457,6 +21457,7 @@
       "title": "Couldn't name this chat",
       "description": "The chat-name agent stopped with an error, so the chat keeps its first message as its name.",
       "viewError": "view error",
+      "settings": "Settings",
       "dialogTitle": "Chat auto-name failed",
       "dialogDescriptionStart": "Orca couldn't generate a name for",
       "dialogDescriptionEnd": "from its first message."
