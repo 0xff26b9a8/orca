@@ -1634,8 +1634,6 @@
       "src/main/cli/appimage-generation-residency.test.ts": 58,
       "src/main/cli/appimage-generation-stable-launcher.test.ts": 100,
       "src/main/cli/appimage-payload-removal.reentrancy.test.ts": 37,
-      "src/main/cli/appimage-payload-removal.test.ts": 27,
-      "src/main/cli/appimage-registration-lock.test.ts": 93,
       "src/main/cli/appimage-serve-preparation.test.ts": 782,
       "src/main/cli/appimage-stable-launcher.test.ts": 186,
       "src/main/cli/cli-command-installation-races.test.ts": 162,
