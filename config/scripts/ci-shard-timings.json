@@ -8778,7 +8778,6 @@
       "src/renderer/src/components/settings/chat-settings-unsaved-guard.test.tsx": 1560,
       "src/renderer/src/components/settings/cli-install-failure.test.ts": 34,
       "src/renderer/src/components/settings/cli-source-control-integration-cards.test.tsx": 695,
-      "src/renderer/src/components/settings/codex-account-auth-warning.test.ts": 36,
       "src/renderer/src/components/settings/codex-config-sync-warning.test.ts": 34,
       "src/renderer/src/components/settings/codex-session-source-home-control.test.tsx": 154,
       "src/renderer/src/components/settings/developer-permissions-search.test.ts": 178,
