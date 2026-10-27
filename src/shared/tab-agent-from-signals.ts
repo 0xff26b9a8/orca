@@ -1,17 +1,17 @@
-import { titleShowsNoAgent } from '../../../shared/agent-detection'
+import { titleShowsNoAgent } from './agent-detection'
 import {
   isClaudeIdentityFrameTitle,
   resolveExplicitTerminalTitleAgentType
-} from '../../../shared/terminal-title-agent-type'
+} from './terminal-title-agent-type'
 import {
   resolveCompatibleAgentTypeForOwner,
   shareCompatibleTitleIdentityGroup
-} from '../../../shared/agent-title-owner'
-import { isOpenCodeNativeTitle } from '../../../shared/opencode-terminal-title'
-import { resolvePaneAgentOwnerRecord } from '../../../shared/pane-agent-owner'
-import type { TerminalAgent } from '../../../shared/terminal-agent'
-import type { TuiAgent } from '../../../shared/tui-agent'
-import { agentTypeToIconAgent } from './agent-status'
+} from './agent-title-owner'
+import { isOpenCodeNativeTitle } from './opencode-terminal-title'
+import { resolvePaneAgentOwnerRecord } from './pane-agent-owner'
+import type { TerminalAgent } from './terminal-agent'
+import type { TuiAgent } from './tui-agent'
+import { agentTypeToIconAgent } from './agent-type-icon-agent'
 
 /**
  * Resolves wrapper-compatible signal identity against the pane owner.
@@ -148,9 +148,6 @@ export function resolveTabAgentFromSignals(args: {
     processShellForeground: args.processShellForeground
   })
   const activeLaunchAgent = launchedAgentExited ? null : launchAgent
-  // Exit evidence retires sleeping occupancy too; stale records must not restore agent icons after local shell return.
-  const activeSleepingSessionAgent =
-    launchedAgentExited || processProvesShell ? null : sleepingSessionAgent
   // Why: re-own the foreground process within its title-identity group so OMP's nested pi (shell → omp → pi) can't flip an OMP-owned tab's icon.
   const processAgent = resolveSignalAgentForLaunchOwner(args.processAgent, owner, ownerIsLaunch)
   return (
@@ -158,9 +155,44 @@ export function resolveTabAgentFromSignals(args: {
     processAgent ??
     titleAgent ??
     idleFocusedIdentity ??
-    activeSleepingSessionAgent ??
+    sleepingSessionAgent ??
     activeLaunchAgent ??
     liveSiblingIdentity ??
     idleSiblingIdentity
   )
+}
+
+/** A hook, completion or process, or a title naming the launched agent (any agent when none was launched), arms exit clearing. */
+export function hasObservedTabAgentSignal(args: {
+  title: string
+  launchAgent?: TuiAgent | null
+  hookAgent?: TerminalAgent | null
+  siblingHookAgent?: TerminalAgent | null
+  hasCompletedHook: boolean
+  processAgent?: TerminalAgent | null
+}): boolean {
+  const explicitTitleAgent = resolveExplicitTerminalTitleAgentType(args.title)
+  const fallbackAgentSignal = args.launchAgent
+    ? explicitTitleAgent === args.launchAgent
+    : Boolean(explicitTitleAgent || args.siblingHookAgent)
+  return Boolean(
+    args.hookAgent || args.hasCompletedHook || args.processAgent || fallbackAgentSignal
+  )
+}
+
+/** One-shot read without useTabAgent's observation history or OSC 133;D, so local-only exit clearing does not apply. */
+export function resolveTabAgentFromSignalSnapshot(
+  args: Omit<
+    Parameters<typeof resolveTabAgentFromSignals>[0],
+    'hasObservedAgentSignal' | 'isRemote' | 'processShellForeground'
+  >
+): TerminalAgent | null {
+  return resolveTabAgentFromSignals({
+    ...args,
+    hasObservedAgentSignal: hasObservedTabAgentSignal({
+      ...args,
+      hasCompletedHook: Boolean(args.focusedCompletedHookAgent)
+    }),
+    isRemote: true
+  })
 }
