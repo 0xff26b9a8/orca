@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { summarizeToolInput } from '../../../src/shared/native-chat/tools/native-chat-tool-summary'
+import { summarizeToolInput } from '../../../../../src/shared/native-chat/tools/native-chat-tool-summary'
 
 describe('summarizeToolInput', () => {
   it('does not traverse an unbounded tool-input object for a short preview', () => {

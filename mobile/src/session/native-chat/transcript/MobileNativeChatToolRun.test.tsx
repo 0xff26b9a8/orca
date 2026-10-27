@@ -1,15 +1,15 @@
 import { createElement, type ReactNode } from 'react'
 import { act, create, type ReactTestInstance, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { AgentJournalToolCallItem } from '../../../src/shared/agent-session-journal-types'
-import { MAX_TOOL_DETAIL_LENGTH } from '../../../src/shared/native-chat/tools/native-chat-tool-summary'
-import { projectStructuredItemToNativeChat } from '../../../src/shared/structured-agent-session-projection'
+import type { AgentJournalToolCallItem } from '../../../../../src/shared/agent-session-journal-types'
+import { MAX_TOOL_DETAIL_LENGTH } from '../../../../../src/shared/native-chat/tools/native-chat-tool-summary'
+import { projectStructuredItemToNativeChat } from '../../../../../src/shared/structured-agent-session-projection'
 import type {
   NativeChatBlock,
   NativeChatMessage,
   NativeChatToolCallBlock
-} from '../../../src/shared/native-chat-types'
-import { colors } from '../theme/mobile-theme'
+} from '../../../../../src/shared/native-chat-types'
+import { colors } from '../../../theme/mobile-theme'
 
 const scrolls = vi.hoisted(() => ({ toEnd: vi.fn(), to: vi.fn() }))
 
@@ -67,16 +67,18 @@ vi.mock('lucide-react-native', () => ({
   Wrench: 'Wrench'
 }))
 
-vi.mock('../components/MobileSourceCopyButton', () => ({ MobileSourceCopyButton: 'CopyButton' }))
-vi.mock('../platform/external-link', () => ({ openExternalLink: vi.fn() }))
-vi.mock('../components/inline-text-selection', () => ({ INLINE_TEXT_SELECTION: false }))
+vi.mock('../../../components/MobileSourceCopyButton', () => ({
+  MobileSourceCopyButton: 'CopyButton'
+}))
+vi.mock('../../../platform/external-link', () => ({ openExternalLink: vi.fn() }))
+vi.mock('../../../components/inline-text-selection', () => ({ INLINE_TEXT_SELECTION: false }))
 
-import { openExternalLink } from '../platform/external-link'
+import { openExternalLink } from '../../../platform/external-link'
 import { ToolRun } from './MobileNativeChatToolRun'
 import {
   MobileNativeChatDisclosureContext,
   useMobileNativeChatDisclosures
-} from './mobile-native-chat-disclosure-store'
+} from '../../mobile-native-chat-disclosure-store'
 
 describe('ToolRun', () => {
   let renderer: ReactTestRenderer | null = null

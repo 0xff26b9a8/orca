@@ -40,8 +40,8 @@ import {
   nativeChatAskRunSubject
 } from '../../../src/shared/native-chat/input/native-chat-ask-row'
 import type { NativeChatResolvedPrompt } from '../../../src/shared/native-chat-resolution-receipt'
-import { MobileNativeChatSubagentGroup } from './MobileNativeChatSubagentGroup'
-import { ToolRun } from './MobileNativeChatToolRun'
+import { MobileNativeChatSubagentGroup } from './native-chat/transcript/MobileNativeChatSubagentGroup'
+import { ToolRun } from './native-chat/transcript/MobileNativeChatToolRun'
 import type { NativeChatTurnStatus } from './use-mobile-native-chat-turn-status'
 import { styles } from './mobile-native-chat-message-styles'
 import { agentMessageAttribution } from './mobile-agent-message-attribution'

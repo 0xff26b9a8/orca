@@ -1,6 +1,6 @@
 import { Platform, StyleSheet } from 'react-native'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-import { MONO_SIZE, scaledType } from './mobile-native-chat-message-styles'
+import { colors, radii, spacing, typography } from '../../../theme/mobile-theme'
+import { MONO_SIZE, scaledType } from '../../mobile-native-chat-message-styles'
 
 export function toolType(fontScale: number) {
   return {

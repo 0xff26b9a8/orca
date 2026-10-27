@@ -23,42 +23,41 @@ import {
   describeLatestToolCall,
   NATIVE_CHAT_TOOL_ACTIVITY_COPY,
   selectActiveToolCall
-} from '../../../src/shared/native-chat/tools/native-chat-tool-activity'
-import { nativeChatToolRunIconName } from '../../../src/shared/native-chat/tools/native-chat-tool-icon'
-import { nativeChatToolLineIdentity } from '../../../src/shared/native-chat/tools/native-chat-tool-line-identity'
-import { pairNativeChatToolResults } from '../../../src/shared/native-chat/tools/native-chat-tool-pairing'
-import { nativeChatToolRunOutcome } from '../../../src/shared/native-chat/tools/native-chat-tool-run-outcome'
+} from '../../../../../src/shared/native-chat/tools/native-chat-tool-activity'
+import { nativeChatToolRunIconName } from '../../../../../src/shared/native-chat/tools/native-chat-tool-icon'
+import { nativeChatToolLineIdentity } from '../../../../../src/shared/native-chat/tools/native-chat-tool-line-identity'
+import { pairNativeChatToolResults } from '../../../../../src/shared/native-chat/tools/native-chat-tool-pairing'
+import { nativeChatToolRunOutcome } from '../../../../../src/shared/native-chat/tools/native-chat-tool-run-outcome'
 import {
   NATIVE_CHAT_TOOL_RUN_SENTENCE_ENGLISH,
   nativeChatToolRunSentence
-} from '../../../src/shared/native-chat/tools/native-chat-tool-run-sentence'
-import { countToolCalls } from '../../../src/shared/native-chat/tools/native-chat-tool-summary'
-import { buildEditCards } from '../../../src/shared/native-chat/tools/native-chat-edit-cards'
+} from '../../../../../src/shared/native-chat/tools/native-chat-tool-run-sentence'
+import { countToolCalls } from '../../../../../src/shared/native-chat/tools/native-chat-tool-summary'
+import { buildEditCards } from '../../../../../src/shared/native-chat/tools/native-chat-edit-cards'
 import {
   isToolCallBlock,
   type NativeChatBlock,
   type NativeChatToolCallBlock
-} from '../../../src/shared/native-chat-types'
-import { buildNativeChatTaskListRows } from '../../../src/shared/native-chat/input/native-chat-task-list-history'
-import { colors } from '../theme/mobile-theme'
+} from '../../../../../src/shared/native-chat-types'
+import { buildNativeChatTaskListRows } from '../../../../../src/shared/native-chat/input/native-chat-task-list-history'
+import { colors } from '../../../theme/mobile-theme'
 import { MobileNativeChatToolGlyph } from './MobileNativeChatToolIcon'
 import { MobileNativeChatToolLine } from './MobileNativeChatToolLine'
-import { MobileNativeChatDiffCard } from './MobileNativeChatDiffCard'
-import { MobileNativeChatTaskList } from './native-chat/input/MobileNativeChatTaskList'
-import { MobileNativeChatOpenedDetailContext } from './mobile-native-chat-opened-detail'
+import { MobileNativeChatDiffCard } from '../../MobileNativeChatDiffCard'
+import { MobileNativeChatTaskList } from '../input/MobileNativeChatTaskList'
+import { MobileNativeChatOpenedDetailContext } from '../../mobile-native-chat-opened-detail'
 import {
   MAX_DISCLOSURES,
   MobileNativeChatDisclosureContext,
   useMobileNativeChatDisclosure
-} from './mobile-native-chat-disclosure-store'
+} from '../../mobile-native-chat-disclosure-store'
 import { toolStyles as styles, toolType } from './mobile-native-chat-tool-styles'
-import { mobileNativeChatMemberId } from './mobile-native-chat-reading-place'
-import { MobileNativeChatOwnedScrollView } from './MobileNativeChatOwnedScrollView'
+import { mobileNativeChatMemberId } from '../../mobile-native-chat-reading-place'
+import { MobileNativeChatOwnedScrollView } from '../../MobileNativeChatOwnedScrollView'
 import type {
   MobileNativeChatToolRunAsides,
   MobileNativeChatToolRunProps
 } from './mobile-native-chat-tool-run-props'
-export type { MobileNativeChatToolRunAsides } from './mobile-native-chat-tool-run-props'
 
 /** Desktop's 18rem: an opened run lists this much before it scrolls in place. */
 const MEMBERS_MIN_HEIGHT = 288

@@ -5,15 +5,15 @@ import {
   nativeChatSubagentGroupHeader,
   sayNativeChatSubagentGroupEnglish as say,
   subagentStateLabel
-} from '../../../src/shared/native-chat-subagent-group-header'
-import { normalizeSubagentState } from '../../../src/shared/native-chat-subagent-summary'
-import { formatNativeChatDuration } from '../../../src/shared/native-chat-turn-status'
+} from '../../../../../src/shared/native-chat-subagent-group-header'
+import { normalizeSubagentState } from '../../../../../src/shared/native-chat-subagent-summary'
+import { formatNativeChatDuration } from '../../../../../src/shared/native-chat-turn-status'
 import type {
   NativeChatSubagentGroupBlock,
   NativeChatSubagentState
-} from '../../../src/shared/native-chat-types'
-import { useNow } from '../hooks/use-now'
-import { colors, spacing, typography } from '../theme/mobile-theme'
+} from '../../../../../src/shared/native-chat-types'
+import { useNow } from '../../../hooks/use-now'
+import { colors, spacing, typography } from '../../../theme/mobile-theme'
 
 function stateDotStyle(state: NativeChatSubagentState): ViewStyle {
   switch (state) {

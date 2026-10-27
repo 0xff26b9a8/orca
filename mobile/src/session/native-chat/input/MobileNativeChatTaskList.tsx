@@ -10,7 +10,7 @@ import {
 } from '../../../../../src/shared/native-chat/input/native-chat-task-list'
 import { colors } from '../../../theme/mobile-theme'
 import { useMobileNativeChatOpenedDetail } from '../../mobile-native-chat-opened-detail'
-import { toolStyles as styles, toolType } from '../../mobile-native-chat-tool-styles'
+import { toolStyles as styles, toolType } from '../transcript/mobile-native-chat-tool-styles'
 import { useMobileNativeChatDisclosure } from '../../mobile-native-chat-disclosure-store'
 
 const STATUS_WORD: Record<NativeChatTask['status'], string> = {

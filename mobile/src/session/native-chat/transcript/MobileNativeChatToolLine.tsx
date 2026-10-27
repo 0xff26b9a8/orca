@@ -1,38 +1,38 @@
 import { useMemo } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { MobileNativeChatOwnedScrollView } from './MobileNativeChatOwnedScrollView'
+import { MobileNativeChatOwnedScrollView } from '../../MobileNativeChatOwnedScrollView'
 import { ChevronRight } from 'lucide-react-native'
-import { agentJournalToolCallLifecycle } from '../../../src/shared/agent-journal-tool-call-lifecycle'
+import { agentJournalToolCallLifecycle } from '../../../../../src/shared/agent-journal-tool-call-lifecycle'
 import {
   diffFromText,
   diffFromToolCall
-} from '../../../src/shared/native-chat/tools/native-chat-diff'
-import type { NativeChatDiffLine } from '../../../src/shared/native-chat/tools/native-chat-diff'
+} from '../../../../../src/shared/native-chat/tools/native-chat-diff'
+import type { NativeChatDiffLine } from '../../../../../src/shared/native-chat/tools/native-chat-diff'
 import {
   formatToolDuration,
   mcpToolIdentity,
   toolWebSearchResults,
   type NativeChatWebSearchResult
-} from '../../../src/shared/native-chat/tools/native-chat-tool-identity'
-import { nativeChatToolIconName } from '../../../src/shared/native-chat/tools/native-chat-tool-icon'
+} from '../../../../../src/shared/native-chat/tools/native-chat-tool-identity'
+import { nativeChatToolIconName } from '../../../../../src/shared/native-chat/tools/native-chat-tool-icon'
 import {
   NATIVE_CHAT_TOOL_ROW_VERB_COPY,
   nativeChatToolLineLabel
-} from '../../../src/shared/native-chat/tools/native-chat-tool-line-label'
+} from '../../../../../src/shared/native-chat/tools/native-chat-tool-line-label'
 import {
   isToolCallBlock,
   type NativeChatToolCallBlock,
   type NativeChatToolResultBlock
-} from '../../../src/shared/native-chat-types'
-import { MobileSyntaxSegments } from '../components/MobileSyntaxSegments'
-import { INLINE_TEXT_SELECTION } from '../components/inline-text-selection'
-import { openExternalLink } from '../platform/external-link'
-import { colors } from '../theme/mobile-theme'
-import { highlightMobileCode } from './mobile-file-syntax'
+} from '../../../../../src/shared/native-chat-types'
+import { MobileSyntaxSegments } from '../../../components/MobileSyntaxSegments'
+import { INLINE_TEXT_SELECTION } from '../../../components/inline-text-selection'
+import { openExternalLink } from '../../../platform/external-link'
+import { colors } from '../../../theme/mobile-theme'
+import { highlightMobileCode } from '../../mobile-file-syntax'
 import { MobileNativeChatToolGlyph } from './MobileNativeChatToolIcon'
-import { MobileNativeChatToolOutput } from './MobileNativeChatFullContent'
-import { useMobileNativeChatOpenedDetail } from './mobile-native-chat-opened-detail'
-import { useMobileNativeChatDisclosure } from './mobile-native-chat-disclosure-store'
+import { MobileNativeChatToolOutput } from '../../MobileNativeChatFullContent'
+import { useMobileNativeChatOpenedDetail } from '../../mobile-native-chat-opened-detail'
+import { useMobileNativeChatDisclosure } from '../../mobile-native-chat-disclosure-store'
 import { toolStyles as styles, toolType } from './mobile-native-chat-tool-styles'
 
 const RESULT_LABEL = 'Result'

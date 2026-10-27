@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, expect, it, vi } from 'vitest'
-import type { NativeChatBlock } from '../../../src/shared/native-chat-types'
+import type { NativeChatBlock } from '../../../../../src/shared/native-chat-types'
 
 vi.mock('react-native', () => ({
   Animated: {
@@ -40,7 +40,9 @@ vi.mock('lucide-react-native', () => ({
   Wrench: () => null
 }))
 
-vi.mock('../components/MobileSourceCopyButton', () => ({ MobileSourceCopyButton: 'CopyButton' }))
+vi.mock('../../../components/MobileSourceCopyButton', () => ({
+  MobileSourceCopyButton: 'CopyButton'
+}))
 
 import { ToolRun } from './MobileNativeChatToolRun'
 
