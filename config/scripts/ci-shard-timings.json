@@ -12618,7 +12618,7 @@
       "src/shared/native-chat-session-option-defaults.test.ts": 61,
       "src/shared/native-chat-session-option-snapshot.test.ts": 100,
       "src/shared/native-chat-session-option-state.test.ts": 52,
-      "src/shared/native-chat-shell-environment.test.ts": 30,
+      "src/shared/native-chat/native-chat-shell-environment.test.ts": 30,
       "src/shared/native-chat-slash-commands.omp.test.ts": 54,
       "src/shared/native-chat-slash-commands.test.ts": 52,
       "src/shared/native-chat-stopped-send-turn.test.ts": 278,

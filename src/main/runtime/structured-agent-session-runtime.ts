@@ -33,7 +33,7 @@ import {
   createStructuredAgentSessionOwnerProbe,
   createStructuredAgentSessionOwnerProbes
 } from './structured-agent-session-owner-probe'
-import type { NativeChatShellEnvironmentPolicy } from '../../shared/native-chat-shell-environment'
+import type { NativeChatShellEnvironmentPolicy } from '../../shared/native-chat/native-chat-shell-environment'
 import { createStructuredAgentEnvironmentResolvers } from './structured-agent-shell-environment'
 import type { ClaudeStructuredAuthPolicy } from '../claude-accounts/claude-structured-auth-policy'
 import type { StructuredAgentAdapterContext } from './structured-agent-runtime-registration-types'
