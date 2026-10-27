@@ -81,7 +81,9 @@ describe('CI dependency download caches', () => {
     const restore = action.runs.steps.find((step) => step.id === 'pnpm-store-restore')
     expect(action.inputs['cache-pnpm-store-lookup-only'].default).toBe('auto')
     expect(lookup.uses).toBe('actions/cache@v5')
-    expect(lookup.if).toBe("steps.pnpm-store-mode.outputs.lookup-only == 'true'")
+    expect(lookup.if).toBe(
+      "steps.pnpm-store-mode.outputs.lookup-only == 'true' && runner.environment != 'github-hosted'"
+    )
     expect(lookup.with).toEqual({
       path: '${{ env.ORCA_PNPM_STORE_CACHE_PATH }}',
       key: restore.with.key,
