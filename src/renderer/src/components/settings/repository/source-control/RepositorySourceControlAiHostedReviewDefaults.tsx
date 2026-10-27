@@ -2,9 +2,9 @@ import type React from 'react'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
-import { Label } from '../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+} from '../../../../../../shared/source-control-ai-types'
+import { Label } from '../../../ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select'
 import { triStateValue } from './repository-source-control-ai-draft'
 import { translate } from '@/i18n/i18n'
 

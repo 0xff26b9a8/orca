@@ -1,19 +1,17 @@
 import { useMemo } from 'react'
 import type React from 'react'
-import type { Repo } from '../../../../shared/repo-types'
-import { normalizeSourceControlAiSettings } from '../../../../shared/source-control-ai'
-import type { SourceControlAiRepoUpdate } from '../../../../shared/source-control-ai-recipe-save'
-import { useAppStore } from '../../store'
-import { getRepositorySourceControlAiSectionId } from './repository-settings-targets'
+import type { Repo } from '../../../../../../shared/repo-types'
+import { normalizeSourceControlAiSettings } from '../../../../../../shared/source-control-ai-settings'
+import type { SourceControlAiRepoUpdate } from '../../../../../../shared/source-control-ai-recipe-save'
+import { useAppStore } from '../../../../store/index'
+import { getRepositorySourceControlAiSectionId } from '../../repository-settings-targets'
 import { RepositorySourceControlAiActionRows } from './RepositorySourceControlAiActionRows'
 import { RepositorySourceControlAiCustomCommand } from './RepositorySourceControlAiCustomCommand'
 import { RepositorySourceControlAiEnablement } from './RepositorySourceControlAiEnablement'
 import { RepositorySourceControlAiHostedReviewDefaults } from './RepositorySourceControlAiHostedReviewDefaults'
-import {
-  normalizePersistedRepoAi,
-  useRepositorySourceControlAiGlobalUx
-} from './repository-source-control-ai-global-ux'
-import { getSettingOwnershipSummary } from './setting-ownership'
+import { normalizeRepoAiDraft } from './repository-source-control-ai-draft'
+import { useRepositorySourceControlAiGlobalUx } from './repository-source-control-ai-global-ux'
+import { getSettingOwnershipSummary } from '../../setting-ownership'
 import { translate } from '@/i18n/i18n'
 
 type RepositorySourceControlAiSectionProps = {
@@ -33,7 +31,7 @@ export function RepositorySourceControlAiSection({
     settings?.commitMessageAi
   )
   const persistedRepoAi = useMemo(
-    () => normalizePersistedRepoAi(repo.sourceControlAi),
+    () => normalizeRepoAiDraft(repo.sourceControlAi),
     [repo.sourceControlAi]
   )
   const {

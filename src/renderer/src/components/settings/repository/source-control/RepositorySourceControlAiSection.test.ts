@@ -1,43 +1,43 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, render, cleanup, fireEvent } from '@testing-library/react'
-import './__fixtures__/settings-persistence-test-fixture'
+import '../../__fixtures__/settings-persistence-test-fixture'
 import React from 'react'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../../../shared/tui-agent'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { normalizeRepoSourceControlAiOverrides } from '../../../../shared/source-control-ai'
+import { normalizeRepoSourceControlAiOverrides } from '../../../../../../shared/source-control-ai-repo-settings'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
+} from '../../../../../../shared/source-control-ai-types'
 import {
   SOURCE_CONTROL_ACTION_IDS,
   setSourceControlActionAgentDefault,
   type SourceControlActionId
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../../../shared/source-control-ai-actions'
 import {
   computeActionDirtyById,
   dropRepoLegacyInstructionForAction,
   withRepoAiActionMode
 } from './repository-source-control-ai-draft'
-import { withRepoAiActionAgent } from './repository-source-control-ai-action-agent-draft'
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control-ai-operation-policy'
+import { withRepoAiActionAgent } from '../../repository-source-control-ai-action-agent-draft'
+import { resolveSourceControlActionRecipe } from '../../../../../../shared/source-control-ai-operation-policy'
 import {
   saveSourceControlActionRecipe,
   toSourceControlAiRepoUpdate
-} from '../../../../shared/source-control-ai-recipe-save'
-import { sourceControlActionRecipeMatchesTarget } from '../right-sidebar/source-control-action-recipe-match'
-import { SourceControlActionAgentPicker } from './SourceControlActionAgentPicker'
+} from '../../../../../../shared/source-control-ai-recipe-save'
+import { sourceControlActionRecipeMatchesTarget } from '../../../right-sidebar/source-control-action-recipe-match'
+import { SourceControlActionAgentPicker } from '../../SourceControlActionAgentPicker'
 import { RepositorySourceControlAiActionRows } from './RepositorySourceControlAiActionRows'
 import { RepositorySourceControlAiEnablement } from './RepositorySourceControlAiEnablement'
-import { SourceControlAiActionRecipeDefaults } from './SourceControlAiActionRecipeDefaults'
-import { useAppStore } from '../../store'
-import { TooltipProvider } from '../ui/tooltip'
+import { SourceControlAiActionRecipeDefaults } from '../../SourceControlAiActionRecipeDefaults'
+import { useAppStore } from '../../../../store/index'
+import { TooltipProvider } from '../../../ui/tooltip'
 import { setLocalRuntimeCapabilitiesForTests } from '@/runtime/local-runtime-capabilities'
-import { projectAgentLaunchSettings } from '../../../../shared/agent-launch-settings'
+import { projectAgentLaunchSettings } from '../../../../../../shared/agent-launch-settings'
 import { TEST_REPO } from '@/store/slices/worktrees-slice-test-fixtures'
-import { clearHostAgentMenuSettingsForTests } from './use-host-agent-launch-preferences'
-import { mutateHostAgentLaunchSettings } from './agent-launch-settings-transport'
+import { clearHostAgentMenuSettingsForTests } from '../../use-host-agent-launch-preferences'
+import { mutateHostAgentLaunchSettings } from '../../agent-launch-settings-transport'
 import { getRuntimeAgentInventoryKey } from '@/store/slices/runtime-agent-inventory-key'
 import { resetHostStructuredAgentsForTests } from '@/runtime/host-structured-agents'
 const rpc = vi.hoisted(() => vi.fn())

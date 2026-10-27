@@ -1,22 +1,20 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import {
-  normalizeRepoSourceControlAiOverrides,
-  normalizeSourceControlAiSettings
-} from '../../../../shared/source-control-ai'
-import type { RepoSourceControlAiOverrides } from '../../../../shared/source-control-ai-types'
-import type { SourceControlAiRepoUpdate } from '../../../../shared/source-control-ai-recipe-save'
+import { normalizeRepoSourceControlAiOverrides } from '../../../../../../shared/source-control-ai-repo-settings'
+import { normalizeSourceControlAiSettings } from '../../../../../../shared/source-control-ai-settings'
+import type { RepoSourceControlAiOverrides } from '../../../../../../shared/source-control-ai-types'
+import type { SourceControlAiRepoUpdate } from '../../../../../../shared/source-control-ai-recipe-save'
 import { useRepositorySourceControlAiGlobalUx } from './repository-source-control-ai-global-ux'
-import { withRepoAiActionLaunchPreferences } from './repository-source-control-ai-action-agent-draft'
+import { withRepoAiActionLaunchPreferences } from '../../repository-source-control-ai-action-agent-draft'
 import {
   readActionRecipeTextDraft,
   withRepoAiActionRecipeText
 } from './repository-source-control-ai-draft'
-import { toSourceControlAiRepoUpdate } from '../../../../shared/source-control-ai-recipe-save'
-import type { SourceControlActionId } from '../../../../shared/source-control-ai-actions'
-import { getDefaultSettings } from '../../../../shared/constants'
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control-ai-operation-policy'
+import { toSourceControlAiRepoUpdate } from '../../../../../../shared/source-control-ai-recipe-save'
+import type { SourceControlActionId } from '../../../../../../shared/source-control-ai-actions'
+import { getDefaultSettings } from '../../../../../../shared/constants'
+import { resolveSourceControlActionRecipe } from '../../../../../../shared/source-control-ai-operation-policy'
 
 const source = normalizeSourceControlAiSettings(undefined, undefined)
 

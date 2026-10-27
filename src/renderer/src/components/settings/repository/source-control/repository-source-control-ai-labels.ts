@@ -1,16 +1,16 @@
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../../../shared/tui-agent'
 import {
   DEFAULT_SOURCE_CONTROL_ACTION_COMMAND_TEMPLATES,
   resolveSourceControlActionCommandTemplate,
   type SourceControlActionId,
   type SourceControlActionRecipe
-} from '../../../../shared/source-control-ai-actions'
+} from '../../../../../../shared/source-control-ai-actions'
 import type {
   RepoSourceControlAiOverrides,
   SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
-import type { CustomAgentId } from '../../../../shared/commit-message-agent-spec'
-import { isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
+} from '../../../../../../shared/source-control-ai-types'
+import type { CustomAgentId } from '../../../../../../shared/commit-message-agent-spec'
+import { isCustomAgentId } from '../../../../../../shared/commit-message-agent-spec'
 
 export const ACTION_MODE_INHERIT = 'inherit'
 export const ACTION_MODE_OVERRIDE = 'override'

@@ -1,33 +1,31 @@
-import { useAppStore } from '@/store'
+import type { RepositorySourceControlAiActionRowsProps } from './repository-source-control-ai-action-rows-props'
+import { useAppStore } from '@/store/index'
 import { useAgentMenuObservation } from '@/components/tab-bar/use-new-tab-agent-menu-rows'
 import { sourceControlRepoAgentRows } from '@/lib/source-control-agent-picker'
 import {
   SourceControlActionAgentPickerView,
   sourceControlActionAgentPreview,
   canSaveSourceControlActionSurface
-} from './SourceControlActionAgentPicker'
-import { SourceControlActionArguments } from './SourceControlActionArguments'
+} from '../../SourceControlActionAgentPicker'
+import { SourceControlActionArguments } from '../../SourceControlActionArguments'
 import type React from 'react'
 import { Terminal } from 'lucide-react'
-import type { TuiAgent } from '../../../../shared/tui-agent'
-import { CUSTOM_AGENT_ID, isCustomAgentId } from '../../../../shared/commit-message-agent-spec'
-import type {
-  RepoSourceControlAiOverrides,
-  SourceControlAiSettings
-} from '../../../../shared/source-control-ai-types'
+
+import {
+  CUSTOM_AGENT_ID,
+  isCustomAgentId
+} from '../../../../../../shared/commit-message-agent-spec'
+
 import {
   SOURCE_CONTROL_ACTION_IDS,
-  SOURCE_CONTROL_ACTION_LABELS,
-  type SourceControlActionRecipe,
-  type SourceControlActionId,
-  type SourceControlActionLaunchPreferences
-} from '../../../../shared/source-control-ai-actions'
-import { Input } from '../ui/input'
-import { Label } from '../ui/label'
-import { Button } from '../ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+  SOURCE_CONTROL_ACTION_LABELS
+} from '../../../../../../shared/source-control-ai-actions'
+import { Input } from '../../../ui/input'
+import { Label } from '../../../ui/label'
+import { Button } from '../../../ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select'
 import { AgentIcon } from '@/lib/agent-catalog'
-import { SourceControlActionVariableChips } from '../source-control/SourceControlActionVariableChips'
+import { SourceControlActionVariableChips } from '../../../source-control/SourceControlActionVariableChips'
 import {
   getActionDescriptions,
   SOURCE_CONTROL_TEXT_ACTION_ID_SET,
@@ -35,7 +33,7 @@ import {
   getSourceControlActionAgentSupportText,
   getSourceControlActionAgentWarningText,
   getSourceControlAgentArgsPlaceholder
-} from './source-control-action-recipe-options'
+} from '../../source-control-action-recipe-options'
 import {
   ACTION_MODE_INHERIT,
   ACTION_MODE_OVERRIDE,
@@ -49,46 +47,17 @@ import {
   resolveAgentArgsPlaceholderAgent
 } from './repository-source-control-ai-labels'
 import { hasOwnActionOverride } from './repository-source-control-ai-draft'
-import { getRepositorySourceControlAiActionRecipeSectionId } from './repository-settings-targets'
+import { getRepositorySourceControlAiActionRecipeSectionId } from '../../repository-settings-targets'
 import { translate } from '@/i18n/i18n'
-import { SourceControlActionOptionField } from './SourceControlActionOptionField'
+import { SourceControlActionOptionField } from '../../SourceControlActionOptionField'
 import {
   useSourceControlActionAgentInventory,
   useSourceControlActionAgent
-} from './use-source-control-action-agent'
-import { resolveSourceControlActionRecipe } from '../../../../shared/source-control-ai-operation-policy'
-import { shouldShowSourceControlActionArguments } from './source-control-action-arguments-visibility'
+} from '../../use-source-control-action-agent'
+import { resolveSourceControlActionRecipe } from '../../../../../../shared/source-control-ai-operation-policy'
+import { shouldShowSourceControlActionArguments } from '../../source-control-action-arguments-visibility'
 import { chatProviderAgents, useHostStructuredAgentsVersion } from '@/lib/chat-provider-agents'
-import { LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
-
-type RepositorySourceControlAiActionRowsProps = {
-  repoId: string
-  repoAi: RepoSourceControlAiOverrides
-  source: SourceControlAiSettings
-  defaultTuiAgent: TuiAgent | 'blank' | null | undefined
-  onActionModeChange: (actionId: SourceControlActionId, mode: string) => void
-  onActionAgentChange: (
-    actionId: SourceControlActionId,
-    value: string,
-    choice?: Pick<SourceControlActionRecipe, 'surface'>
-  ) => void
-  onActionLaunchPreferencesChange: (
-    actionId: SourceControlActionId,
-    value: SourceControlActionLaunchPreferences | undefined
-  ) => void
-  onActionTemplateChange: (actionId: SourceControlActionId, value: string) => void
-  onActionAgentArgsChange: (
-    actionId: SourceControlActionId,
-    value: string,
-    commit?: boolean
-  ) => void
-  onAppendVariable: (actionId: SourceControlActionId, variable: string) => void
-  /** Per-action saving state for CLI args + command template (matches global recipes). */
-  savingActionIds: Partial<Record<SourceControlActionId, boolean>>
-  actionDirtyById: Record<SourceControlActionId, boolean>
-  onActionDiscard: (actionId: SourceControlActionId) => void
-  onActionSave: (actionId: SourceControlActionId) => void
-}
+import { LOCAL_EXECUTION_HOST_ID } from '../../../../../../shared/execution-host'
 
 export function RepositorySourceControlAiActionRows({
   repoId,
