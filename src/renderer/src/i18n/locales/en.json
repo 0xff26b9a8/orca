@@ -19209,11 +19209,6 @@
         "cancelled": "This plain SSH terminal was closed before it started.",
         "terminalUnavailable": "Orca couldn’t open a terminal here.",
         "openHint": "Keeps you working on the host while Orca can’t set up there."
-      },
-      "ClaudeAgentViewIndicator": {
-        "viewing": "Currently viewing",
-        "viewingChild": "Viewing subagent {{name}}",
-        "returnHint": "Click the parent row to return. Esc stops this subagent. Enter sends your draft to this subagent."
       }
     },
     "i18n": {
