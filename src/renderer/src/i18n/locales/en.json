@@ -1561,6 +1561,12 @@
         "agentUnavailable": "Claude cannot open this agent. It may no longer be available.",
         "closeDialog": "Claude did not switch views. Close any open dialog and try again.",
         "hostUnavailable": "Subagent navigation is unavailable on this host. Update Orca and restart Claude in this pane."
+      },
+      "wslHostWindowsDriveRefusal": {
+        "addOnThisComputer": "Add on this computer",
+        "title": "Add Windows drive folders on this computer",
+        "descriptionWithPath": "{{value0}} is on a Windows drive. Git in WSL reports false line-ending changes there, misses edits made from Windows, and searches it slowly.",
+        "description": "This folder is on a Windows drive. Git in WSL reports false line-ending changes there, misses edits made from Windows, and searches it slowly."
       }
     },
     "hooks": {

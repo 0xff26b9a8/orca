@@ -2297,6 +2297,9 @@
             }
           }
         },
+        "addRepoWslHostFolderPicker": {
+          "windowsDrive": "Folders on a Windows drive stay on this computer. Choose this computer as the host to add one."
+        },
         "index": {
           "b826a98b6f": "busy"
         },
