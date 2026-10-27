@@ -173,6 +173,7 @@ export abstract class AgentBrowserBridgeInteractionCommands extends AgentBrowser
         let releaseDebugger = (): void => {}
         try {
           releaseDebugger = acquireElectronDebugger(wc).release
+          await this.waitForPagePaint(wc, target.webContentsId)
           const send: GuestCdpSender = (method, params, sessionId) =>
             sendGuestCdpCommand(wc, method, params, sessionId)
           const guardFocus = (): Promise<() => void> =>
