@@ -1,24 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import {
   applyMentionSuggestion,
+  applyPickerSuggestion,
+  applySlashSuggestion,
+  buildNativeChatPickerItems,
+  classifyNativeChatSend,
   deriveComposerAutocomplete,
   editReplacesTriggerToken,
-  isSkillPickerTriggered
-} from './native-chat-composer-state'
-import { applyPickerSuggestion } from '../../../../shared/native-chat/input/native-chat-picker-triggers'
-import {
-  applySlashSuggestion,
-  classifyNativeChatSend,
   filterSlashCommands,
+  isSkillPickerTriggered,
   isSlashCommandDraft,
   slashCommandDispatchText,
-  sessionSlashCommandSuggestions,
   type SlashCommandSuggestion
-} from '../../../../shared/native-chat/input/native-chat-slash-commands'
-import { buildNativeChatPickerItems } from '../../../../shared/native-chat/input/native-chat-picker-items'
-import type { DiscoveredSkill } from '../../../../shared/skills'
-import { getNativeChatAgentProfile } from '../../../../shared/native-chat-agent-profiles'
-import { pickedSkillsInText } from '../../../../shared/structured-agent-session-send-mutation'
+} from './native-chat-composer-autocomplete'
+import { sessionSlashCommandSuggestions } from './native-chat/input/native-chat-slash-commands'
+import type { DiscoveredSkill } from './skills'
+import { getNativeChatAgentProfile } from './native-chat-agent-profiles'
+import { pickedSkillsInText } from './structured-agent-session-send-mutation'
 
 const COMMANDS: SlashCommandSuggestion[] = [
   { name: 'clear' },

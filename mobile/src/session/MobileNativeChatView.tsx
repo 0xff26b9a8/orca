@@ -1,3 +1,4 @@
+import type { NativeChatSkillDiscoverySnapshot } from '../../../src/shared/native-chat/input/native-chat-picker-items'
 import { useCallback, useMemo } from 'react'
 import { nativeChatTaskListPredecessors } from '../../../src/shared/native-chat/input/native-chat-task-list-history'
 import {
@@ -40,6 +41,8 @@ import {
   useSettledMobileNativeChatInputLock
 } from './native-chat/use-mobile-native-chat-input-lease'
 import { MobileNativeChatLiveLine } from './native-chat/transcript/MobileNativeChatLiveLine'
+import { MobileNativeChatAwaitingInputRow } from './native-chat/transcript/MobileNativeChatAwaitingInputRow'
+import type { NativeChatAwaitingInput } from '../../../src/shared/native-chat/native-chat-terminal-turn'
 import { MobileNativeChatFloatingControls } from './MobileNativeChatFloatingControls'
 import type { PendingNativeChatImage } from './native-chat/composer/mobile-native-chat-image-attachment'
 import {
@@ -71,8 +74,10 @@ type Props = ComposerTrayProps & {
   // Permanent read failure replaces the pane because further chat actions cannot succeed.
   readFailedFinally?: boolean
   agent?: string | null
+  /** The turn is live: working, or waiting on the reader. */
   agentWorking?: boolean
   canStop?: boolean
+  awaitingInput?: NativeChatAwaitingInput | null
   structuredActivityUi?: boolean
   turnIndicator?: NativeChatLiveTurnIndicator | null
   workingStartedAt?: number | null
@@ -111,6 +116,8 @@ type Props = ComposerTrayProps & {
   onClearSendError?: () => void
   filePaths?: string[]
   onNeedFiles?: (query: string) => void
+  skillDiscovery?: NativeChatSkillDiscoverySnapshot
+  onNeedSkills?: () => void
   sessionOptions?: MobileNativeChatSessionOptionPickersProps | null
   structuredComposer?: MobileNativeChatStructuredComposer | null
   ask?: AskPrompt | null
@@ -143,6 +150,7 @@ export function MobileNativeChatView({
   agent,
   agentWorking,
   canStop = agentWorking,
+  awaitingInput = null,
   structuredActivityUi = false,
   turnIndicator = null,
   workingStartedAt,
@@ -177,6 +185,8 @@ export function MobileNativeChatView({
   onClearSendError,
   filePaths,
   onNeedFiles,
+  skillDiscovery,
+  onNeedSkills,
   sessionOptions,
   structuredComposer = null,
   ask,
@@ -249,7 +259,7 @@ export function MobileNativeChatView({
 
   const turns = useMobileNativeChatTurnDisclosure({
     messages: data,
-    enabled: structuredActivityUi,
+    enabled: true,
     isWorking: agentWorking === true,
     workingStartedAt,
     settledTurns,
@@ -280,14 +290,17 @@ export function MobileNativeChatView({
     actionablePromptIds
   })
 
-  const liveStatus = turns.liveLine ? (
-    <MobileNativeChatLiveLine
-      line={turns.liveLine}
-      onToggleReasoning={turns.onToggleReasoning}
-      fontScale={fontScale}
-      onOpenFile={onOpenFile}
-    />
-  ) : null
+  const liveStatus =
+    awaitingInput === 'unshown' ? (
+      <MobileNativeChatAwaitingInputRow subject={null} pending fontScale={fontScale} />
+    ) : turns.liveLine ? (
+      <MobileNativeChatLiveLine
+        line={turns.liveLine}
+        onToggleReasoning={turns.onToggleReasoning}
+        fontScale={fontScale}
+        onOpenFile={onOpenFile}
+      />
+    ) : null
 
   const header = mobileNativeChatListHeader(hasMore, olderPages, loadEarlier)
   // Changing text scale relays out every row, so preserve the page’s reading anchor.
@@ -395,11 +408,13 @@ export function MobileNativeChatView({
         placeholder={composerPlaceholder}
         filePaths={filePaths}
         onNeedFiles={onNeedFiles}
+        skillDiscovery={skillDiscovery}
+        onNeedSkills={onNeedSkills}
         stop={
           canStop
             ? {
                 onStop,
-                held: agentWorking === true && turnIndicator?.stopRequestInFlight === true
+                held: turnIndicator?.stopRequestInFlight === true
               }
             : null
         }
