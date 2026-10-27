@@ -1,8 +1,8 @@
-import { useJiraCreateAssignee } from './use-jira-create-assignee'
+import { useJiraCreateAssignee } from '../../use-jira-create-assignee'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import { filterJiraProjectPickerProjects } from '@/components/jira-project-picker-filter'
-import { isVisibleJiraCreateField } from '@/components/task-page-jira-create-fields'
+import { isVisibleJiraCreateField } from '@/components/task-page/jira/task-page-jira-create-fields'
 import {
   compareJiraProjectsByDisplayLabel,
   getJiraProjectSelectionKey

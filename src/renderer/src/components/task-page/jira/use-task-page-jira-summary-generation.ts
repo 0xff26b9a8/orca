@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createBrowserUuid } from '@/lib/browser-uuid'
+import { createNonSecureContextUuid as createBrowserUuid } from '../../../../../shared/non-secure-context-uuid'
 import { isWebClientLocation } from '@/lib/web-client-location'
 import { ipcOrRuntimeTargetForHostId } from '@/runtime/runtime-client-target'
 import {
   generateRuntimeJiraIssueSummary,
   cancelRuntimeJiraIssueSummary
 } from '@/runtime/runtime-jira-summary-generation-client'
-import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
-import type { JiraIssueSummaryGenerationRequest } from '../../../shared/jira/jira-issue-summary-generation'
-import { getTaskSourceCacheScope } from '../../../shared/task-source-context'
+import type { RuntimeClientTarget } from '../../../../../shared/runtime-client-target'
+import type { JiraIssueSummaryGenerationRequest } from '../../../../../shared/jira/jira-issue-summary-generation'
+import { getTaskSourceCacheScope } from '../../../../../shared/task-source-context'
 import { translate } from '@/i18n/i18n'
 import type { TaskPageJiraIssueCreationModel } from './use-task-page-jira-issue-creation'
 

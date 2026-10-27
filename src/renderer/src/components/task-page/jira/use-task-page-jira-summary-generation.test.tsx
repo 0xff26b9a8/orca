@@ -2,8 +2,11 @@
 import { act, useState } from 'react'
 import { renderHook, cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { JiraIssueSummaryGenerationResult } from '../../../shared/jira/jira-issue-summary-generation'
-import { LOCAL_EXECUTION_HOST_ID, toRuntimeExecutionHostId } from '../../../shared/execution-host'
+import type { JiraIssueSummaryGenerationResult } from '../../../../../shared/jira/jira-issue-summary-generation'
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  toRuntimeExecutionHostId
+} from '../../../../../shared/execution-host'
 import { useTaskPageJiraSummaryGeneration } from './use-task-page-jira-summary-generation'
 
 const mocks = vi.hoisted(() => ({ generate: vi.fn(), cancel: vi.fn(), error: vi.fn() }))

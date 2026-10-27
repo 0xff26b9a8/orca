@@ -1,10 +1,11 @@
-import type { TaskPageLinearIssueCreationModel } from './task-page/linear/use-task-page-linear-issue-creation'
+import type { TaskPageLinearIssueCreationModel } from '../linear/use-task-page-linear-issue-creation'
 import { useCallback } from 'react'
 import {
   buildJiraCreateSubmission,
   hasJiraAssigneeCreateField
-} from '@/components/task-page-jira-create-fields'
-import { jiraCreateIssue, jiraGetIssue } from '@/runtime/runtime-jira-client'
+} from '@/components/task-page/jira/task-page-jira-create-fields'
+import { jiraCreateIssue } from '@/runtime/runtime-jira-user-fields-client'
+import { jiraGetIssue } from '@/runtime/runtime-jira-client'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { defaultScopeSource } from '@/lib/default-creation-host'
