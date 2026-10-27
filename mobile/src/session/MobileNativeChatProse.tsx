@@ -14,7 +14,10 @@ import {
 import { withoutPendingNativeChatVisualDirectiveTail } from '../../../src/shared/native-chat/native-chat-visual-directive'
 import { isAgentSessionAttachmentStorePath } from '../../../src/shared/agent-session-attachments'
 import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
-import { isRenderableImageUri, readStoredChatImage } from './mobile-native-chat-image-preview'
+import {
+  isRenderableImageUri,
+  readStoredChatImage
+} from './native-chat/visual/mobile-native-chat-image-preview'
 import type { RpcClient } from '../transport/rpc-client'
 import {
   CHAT_PROSE_SCALE,
@@ -22,7 +25,7 @@ import {
   styles,
   TEXT_SIZE
 } from './mobile-native-chat-message-styles'
-import type { MobileNativeChatVisualRender } from './mobile-native-chat-visual-context'
+import type { MobileNativeChatVisualRender } from './native-chat/visual/mobile-native-chat-visual-context'
 
 export function Prose({
   block,

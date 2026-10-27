@@ -178,7 +178,9 @@ vi.mock('./native-chat/input/MobileNativeChatQueuedMessages', () => ({
 vi.mock('./native-chat/input/MobileNativeChatBackgroundTasks', () => ({
   MobileNativeChatBackgroundTasks: 'BackgroundTasks'
 }))
-vi.mock('./MobileNativeChatImageViewer', () => ({ MobileNativeChatImageViewer: 'ImageViewer' }))
+vi.mock('./native-chat/visual/MobileNativeChatImageViewer', () => ({
+  MobileNativeChatImageViewer: 'ImageViewer'
+}))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'ActionsSheet'
 }))

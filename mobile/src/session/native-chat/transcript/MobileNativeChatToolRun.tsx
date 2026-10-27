@@ -45,7 +45,7 @@ import { MobileNativeChatToolGlyph } from './MobileNativeChatToolIcon'
 import { MobileNativeChatToolLine } from './MobileNativeChatToolLine'
 import { MobileNativeChatDiffCard } from '../../MobileNativeChatDiffCard'
 import { MobileNativeChatTaskList } from '../input/MobileNativeChatTaskList'
-import { MobileNativeChatOpenedDetailContext } from '../../mobile-native-chat-opened-detail'
+import { MobileNativeChatOpenedDetailContext } from '../visual/mobile-native-chat-opened-detail'
 import {
   MAX_DISCLOSURES,
   MobileNativeChatDisclosureContext,

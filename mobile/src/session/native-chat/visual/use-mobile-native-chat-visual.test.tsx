@@ -20,7 +20,7 @@ import {
   useMobileNativeChatVisual,
   type MobileNativeChatVisualState
 } from './use-mobile-native-chat-visual'
-import { stubRpcClient } from '../transport/rpc-client-test-stub'
+import { stubRpcClient } from '../../../transport/rpc-client-test-stub'
 
 const source = { client: stubRpcClient(), sessionId: 'session-1' }
 

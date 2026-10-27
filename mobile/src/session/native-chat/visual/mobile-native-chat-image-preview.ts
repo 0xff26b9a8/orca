@@ -1,9 +1,9 @@
-import { buildImageDataUri } from '../../../src/shared/image-data-uri'
-import { PrioritySemaphore } from '../../../src/shared/priority-semaphore'
-import { filePreviewImageSchema } from '../files/file-preview-reply-schema'
-import { bindDeferredRpcOperation, defineRpcOperation } from '../transport/rpc-operation'
-import { rpcResultVariant } from '../transport/rpc-operation-result-reader'
-import type { RpcClient } from '../transport/rpc-client'
+import { buildImageDataUri } from '../../../../../src/shared/image-data-uri'
+import { PrioritySemaphore } from '../../../../../src/shared/priority-semaphore'
+import { filePreviewImageSchema } from '../../../files/file-preview-reply-schema'
+import { bindDeferredRpcOperation, defineRpcOperation } from '../../../transport/rpc-operation'
+import { rpcResultVariant } from '../../../transport/rpc-operation-result-reader'
+import type { RpcClient } from '../../../transport/rpc-client'
 
 // Accept device-loadable URI schemes only; a bare host/SSH path must remain a text placeholder.
 const RENDERABLE_IMAGE_URI = /^(file:|data:|https?:|content:|blob:)/i

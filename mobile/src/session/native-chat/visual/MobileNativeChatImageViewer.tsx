@@ -1,7 +1,7 @@
 import { Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { X } from 'lucide-react-native'
-import { useWindowSafeAreaInsets } from '../layout/side-safe-area'
-import { colors, spacing } from '../theme/mobile-theme'
+import { useWindowSafeAreaInsets } from '../../../layout/side-safe-area'
+import { colors, spacing } from '../../../theme/mobile-theme'
 
 export function MobileNativeChatImageViewer({
   uri,

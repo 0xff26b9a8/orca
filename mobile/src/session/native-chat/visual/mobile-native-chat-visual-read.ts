@@ -1,9 +1,9 @@
 import { z } from 'zod'
-import { NATIVE_CHAT_VISUAL_MAX_BYTES } from '../../../src/shared/native-chat/native-chat-visual-directive'
-import { bindDeferredRpcOperation, defineRpcOperation } from '../transport/rpc-operation'
-import { rpcResultVariant } from '../transport/rpc-operation-result-reader'
-import { isMobileMethodUnavailableError } from '../transport/mobile-method-unavailable'
-import type { RpcClient } from '../transport/rpc-client'
+import { NATIVE_CHAT_VISUAL_MAX_BYTES } from '../../../../../src/shared/native-chat/native-chat-visual-directive'
+import { bindDeferredRpcOperation, defineRpcOperation } from '../../../transport/rpc-operation'
+import { rpcResultVariant } from '../../../transport/rpc-operation-result-reader'
+import { isMobileMethodUnavailableError } from '../../../transport/mobile-method-unavailable'
+import type { RpcClient } from '../../../transport/rpc-client'
 
 export type MobileNativeChatVisualSource = {
   client: RpcClient

@@ -1,5 +1,5 @@
-import type { NativeChatVisualTheme } from '../../../src/shared/native-chat/native-chat-visual-shell'
-import { colors, radii } from '../theme/mobile-theme'
+import type { NativeChatVisualTheme } from '../../../../../src/shared/native-chat/native-chat-visual-shell'
+import { colors, radii } from '../../../theme/mobile-theme'
 
 // Match desktop’s dark chart tokens; initialize visual styles before author content runs.
 export const MOBILE_NATIVE_CHAT_VISUAL_THEME: NativeChatVisualTheme = {

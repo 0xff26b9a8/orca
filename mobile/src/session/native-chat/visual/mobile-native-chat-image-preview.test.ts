@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { stubRpcClient } from '../transport/rpc-client-test-stub'
-import type { RpcClient } from '../transport/rpc-client'
-import type { RpcResponse } from '../transport/types'
+import { stubRpcClient } from '../../../transport/rpc-client-test-stub'
+import type { RpcClient } from '../../../transport/rpc-client'
+import type { RpcResponse } from '../../../transport/types'
 import { isRenderableImageUri, readStoredChatImage } from './mobile-native-chat-image-preview'
 
 describe('isRenderableImageUri', () => {

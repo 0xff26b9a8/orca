@@ -69,7 +69,9 @@ vi.mock('lucide-react-native', () =>
 )
 vi.mock('../MobileNativeChatMessage', () => ({ MobileNativeChatMessage: 'ChatMessage' }))
 vi.mock('../MobileNativeChatRowOverlaysHost', () => ({ MobileNativeChatRowOverlaysHost: 'View' }))
-vi.mock('../MobileNativeChatVisual', () => ({ useMobileNativeChatVisualRenderer: () => null }))
+vi.mock('../native-chat/visual/MobileNativeChatVisual', () => ({
+  useMobileNativeChatVisualRenderer: () => null
+}))
 vi.mock('../../platform/use-reduced-motion', () => ({ useReducedMotionEnabled: () => null }))
 vi.mock('../MobileNativeChatLiveLine', () => ({ MobileNativeChatLiveLine: 'LiveStatus' }))
 vi.mock('../native-chat/input/MobileNativeChatAsk', () => ({ MobileNativeChatAsk: 'ChatAsk' }))

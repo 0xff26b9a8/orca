@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
 import {
   MobileNativeChatVisualContext,
   type MobileNativeChatVisualRender
@@ -57,12 +57,12 @@ vi.mock('lucide-react-native', () => ({
   SquareTerminal: 'SquareTerminal',
   Wrench: 'Wrench'
 }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
-vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
 
-import { MobileNativeChatMessage } from './MobileNativeChatMessage'
+import { MobileNativeChatMessage } from '../../MobileNativeChatMessage'
 
 const renderVisual: MobileNativeChatVisualRender = () => 'visual'
 

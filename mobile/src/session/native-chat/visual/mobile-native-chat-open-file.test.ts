@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { RpcResponse } from '../transport/types'
-import type { UnvalidatedRpcRequestPort } from '../transport/unvalidated-rpc-request-port'
+import type { RpcResponse } from '../../../transport/types'
+import type { UnvalidatedRpcRequestPort } from '../../../transport/unvalidated-rpc-request-port'
 import { openMobileNativeChatFileTap } from './mobile-native-chat-open-file'
 
 function ok(result: unknown): RpcResponse {
