@@ -1,10 +1,10 @@
-import { AGENT_CHAT_PERMISSION_MODE_OPTION_ID } from './agent-chat-permission-mode'
+import { AGENT_CHAT_PERMISSION_MODE_OPTION_ID } from '../../agent-chat-permission-mode'
 import type {
   AgentSessionOptionCatalog,
   CatalogMidSessionApply,
   CatalogModel,
   CatalogOption
-} from './agent-session-option-catalog'
+} from '../../agent-session-option-catalog-types'
 import type {
   NativeChatLiveOptionTransport,
   SessionOptionDescriptor,
@@ -18,7 +18,6 @@ import {
 } from './native-chat-session-option-state'
 
 export type NativeChatSessionOptionMode = 'draft' | 'live'
-export type { NativeChatLiveOptionTransport }
 
 function choiceWithCurrent(
   choices: readonly SessionOptionSelectChoice[],

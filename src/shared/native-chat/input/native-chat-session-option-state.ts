@@ -1,8 +1,8 @@
-import type { AgentType } from './agent-status-types'
+import type { AgentType } from '../../agent-status-types'
 import type {
   CatalogMidSessionApply,
   AgentSessionOptionCatalog
-} from './agent-session-option-catalog'
+} from '../../agent-session-option-catalog-types'
 import type { SessionOptionValue, SessionOptionValueSource } from './native-chat-session-options'
 
 export type TrackedNativeChatSessionOption = {

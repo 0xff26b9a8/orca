@@ -1,16 +1,16 @@
-import type { AgentType } from './agent-status-types'
+import type { AgentType } from '../../agent-status-types'
 import {
   AGENT_CHAT_PERMISSION_MODE_OPTION_ID,
   isAgentChatPermissionChoice,
   newChatPermissionModeForSettings,
   type NewChatPermissionSettings
-} from './agent-chat-permission-mode'
-import type { GlobalSettings } from './global-settings-types'
+} from '../../agent-chat-permission-mode'
+import type { GlobalSettings } from '../../global-settings-types'
 import {
   findCatalogModel,
   getAgentSessionOptionCatalog,
   sessionOptionValueIsValid
-} from './agent-session-option-catalog'
+} from '../../agent-session-option-catalog'
 import type {
   NativeChatSessionOptionSettingsMutation,
   PersistedNativeChatSessionOptions,
@@ -19,7 +19,7 @@ import type {
 import {
   decodeStructuredAgentSessionOptionValue,
   encodeStructuredAgentSessionOptionValue
-} from './structured-agent-session-option-codec'
+} from '../../structured-agent-session-option-codec'
 
 export function resolveNativeChatSessionOptionDefaults(
   persisted: PersistedNativeChatSessionOptions | null | undefined,
