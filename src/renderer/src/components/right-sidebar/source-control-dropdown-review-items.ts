@@ -8,8 +8,8 @@ import {
 } from '@/i18n/hosted-review-localized-copy'
 import { canClickBlockedCreateReviewReason } from './source-control-create-review-blocked-action'
 import { hostedReviewSignInHint } from './hosted-review-create-failure-copy'
-import type { DropdownItem } from './source-control-dropdown-item-types'
-import type { DropdownActionContext } from './source-control-dropdown-action-context'
+import type { DropdownItem } from '../../../../shared/source-control-dropdown-item-types'
+import type { DropdownActionContext } from '../../../../shared/source-control-dropdown-action-context'
 
 export type HostedReviewDropdownItems = {
   createPR: DropdownItem
