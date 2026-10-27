@@ -25,6 +25,7 @@ import { MobileSyntaxSegments } from '../../../components/MobileSyntaxSegments'
 import { INLINE_TEXT_SELECTION } from '../../../components/inline-text-selection'
 import { openExternalLink } from '../../../platform/external-link'
 import { colors } from '../../../theme/mobile-theme'
+import { useMobileColorScheme } from '../../../theme/use-mobile-color-scheme'
 import { highlightMobileCode } from '../../mobile-file-syntax'
 import { MobileNativeChatToolGlyph } from './MobileNativeChatToolIcon'
 import { MobileNativeChatToolOutput } from '../../MobileNativeChatFullContent'
@@ -39,6 +40,7 @@ function SearchResults({
   results: NativeChatWebSearchResult[]
   fontScale: number
 }): React.JSX.Element {
+  useMobileColorScheme()
   const type = toolType(fontScale).meta
   return (
     <View style={[styles.codeBox, styles.searchResults]}>
@@ -59,6 +61,7 @@ function SearchResults({
 }
 
 function DiffView({ lines, fontScale }: { lines: NativeChatDiffLine[]; fontScale: number }) {
+  useMobileColorScheme()
   const type = toolType(fontScale).code
   return (
     <View style={styles.codeBox}>
@@ -101,6 +104,7 @@ function ToolLineDetail({
   disclosureKey?: string
   memberId?: string
 }): React.JSX.Element {
+  useMobileColorScheme()
   const diff = call
     ? diffFromToolCall(call.name, call.input)
     : body
@@ -159,6 +163,7 @@ export function MobileNativeChatToolLine({
   fontScale: number
   onOpenFile?: (path: string) => void
 }): React.JSX.Element {
+  useMobileColorScheme()
   const [expanded, setExpanded] = useMobileNativeChatDisclosure(disclosureKey, false)
   const { call, label, body, resultPreview, failed, results, hasDetail } = useMemo(
     () => nativeChatToolLineView(block, result),
