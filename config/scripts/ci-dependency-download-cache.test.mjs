@@ -490,7 +490,7 @@ describe('CI dependency download caches', () => {
     )
     const linux = release.strategy.matrix.include.find((entry) => entry.platform === 'linux-x64')
 
-    expect([linux.os, 'blacksmith-4vcpu-ubuntu-2404']).toContain(packaging['runs-on'])
+    expect([linux.os, 'ubuntu-24.04']).toContain(packaging['runs-on'])
     expect(writer.if).toBe("matrix.platform == 'linux-x64' && github.ref == 'refs/heads/main'")
     expect(writer.uses).toBe('actions/cache@v5')
     expect(writer.with.path).toBe(consumer.with.path)
