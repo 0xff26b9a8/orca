@@ -1120,7 +1120,6 @@
 1 test-no-wall-clock:src/renderer/src/components/sidebar/SidebarToolbar.test.tsx
 5 test-no-wall-clock:src/renderer/src/components/sidebar/use-workspace-reference-details.test.tsx
 3 test-no-wall-clock:src/renderer/src/components/sidebar/worktree-agent-rows-subscriptions.bench.test.tsx
-1 test-no-wall-clock:src/renderer/src/components/sidebar/worktree-card-agent-summary.test.ts
 4 test-no-wall-clock:src/renderer/src/components/sidebar/WorktreeCard.compact-hover.test.tsx
 13 test-no-wall-clock:src/renderer/src/components/sidebar/WorktreeCard.pr-display.test.tsx
 2 test-no-wall-clock:src/renderer/src/components/sidebar/WorktreeCard.single-reference-details.test.tsx
