@@ -3,8 +3,8 @@ import {
   deriveNativeChatContextUsage,
   isNativeChatCompactionBoundary
 } from './native-chat-context-usage'
-import type { AgentSessionTokenUsage } from './agent-session-context-usage'
-import type { NativeChatMessage } from './native-chat-types'
+import type { AgentSessionTokenUsage } from '../agent-session-context-usage'
+import type { NativeChatMessage } from '../native-chat-types'
 
 function assistant(
   id: string,
