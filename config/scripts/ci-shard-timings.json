@@ -11205,7 +11205,6 @@
       "src/renderer/src/runtime/remote-runtime-terminal-stale-stream-frames.test.ts": 173,
       "src/renderer/src/runtime/remote-runtime-terminal-stall-recovery.test.ts": 702,
       "src/renderer/src/runtime/remote-server-install-failure-probe.test.ts": 28,
-      "src/renderer/src/runtime/remote-server-parity.test.ts": 1246,
       "src/renderer/src/runtime/remote-server-restart-wait.test.ts": 72,
       "src/renderer/src/runtime/remote-server-update-coordinator.test.ts": 163,
       "src/renderer/src/runtime/remote-terminal-layout-resolution.test.ts": 39,
