@@ -1,15 +1,15 @@
-import { getDefaultWorkspaceSession } from '../../shared/constants'
-import type { PersistPtyBindingArgs } from '../persistence/loading-store/pty-binding-persistence'
-import { ptyBindingIsRefused } from '../persistence/loading-store/pty-binding-refusals'
-import { applyPtyBinding } from '../persistence/loading-store/pty-binding-session-update'
+import { getDefaultWorkspaceSession } from '../../../shared/constants'
+import type { PersistPtyBindingArgs } from '../../persistence/loading-store/pty-binding-persistence'
+import { ptyBindingIsRefused } from '../../persistence/loading-store/pty-binding-refusals'
+import { applyPtyBinding } from '../../persistence/loading-store/pty-binding-session-update'
 import {
   withRuntimePaneAdmission,
   withDurableRuntimeStore
-} from '../runtime/runtime-durable-store-fixture'
+} from '../../runtime/runtime-durable-store-fixture'
 import { vi, type Mock } from 'vitest'
-import { makePaneKey } from '../../shared/stable-pane-id'
-import { WORKTREE_TERMINALS_SLEEPING_ERROR } from '../runtime/worktree-terminals-sleeping-error'
-import { registerPtyHandlers } from './pty/register-handlers'
+import { makePaneKey } from '../../../shared/stable-pane-id'
+import { WORKTREE_TERMINALS_SLEEPING_ERROR } from '../../runtime/worktree-terminals-sleeping-error'
+import { registerPtyHandlers } from './register-handlers'
 
 type IpcHandlerMap = Map<string, (_event: unknown, args: unknown) => unknown>
 type LaunchRaceSpawnReply = {

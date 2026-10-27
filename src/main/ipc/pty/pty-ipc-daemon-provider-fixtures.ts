@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
-import type { TuiAgent } from '../../shared/tui-agent'
-import { registerPtyHandlers } from './pty/register-handlers'
-import { setLocalPtyProvider } from './pty/provider/registry'
+import type { TuiAgent } from '../../../shared/tui-agent'
+import { registerPtyHandlers } from './register-handlers'
+import { setLocalPtyProvider } from './provider/registry'
 
 type IpcHandlerMap = Map<string, (_event: unknown, args: unknown) => unknown>
 

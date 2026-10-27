@@ -2,23 +2,23 @@ import { createPaneBindingStore } from './pty-launch-race-test-fixture'
 // Real runtime and IPC handlers share one fake provider; suites declare their own hoisted module mocks.
 import { vi } from 'vitest'
 import type { Mock } from 'vitest'
-import { registerPtyHandlers } from './pty/register-handlers'
+import { registerPtyHandlers } from './register-handlers'
 import { existsSyncMock, statSyncMock } from './pty-ipc-mock-registry'
 import type { PtyIpcSuiteFixtures } from './pty-ipc-test-harness'
-import { OrcaRuntimeService } from '../runtime/orca-runtime'
-import type { TerminalWorkspaceLaunchScope } from '../runtime/runtime-legacy-worker-terminal-recovery-types'
+import { OrcaRuntimeService } from '../../runtime/orca-runtime'
+import type { TerminalWorkspaceLaunchScope } from '../../runtime/runtime-legacy-worker-terminal-recovery-types'
 import {
   IDENTITY_ENV_KEYS,
   launchWorkspaceId,
   type LaunchWorkspace
-} from '../../shared/launch-parity-window-request.test-fixture'
-import { isHiddenRendererPty } from './pty/delivery/pty-hidden-delivery-gate'
+} from '../../../shared/launch-parity-window-request.test-fixture'
+import { isHiddenRendererPty } from './delivery/pty-hidden-delivery-gate'
 import { HOST_TAB_ID } from './pty-launch-parity-host.test-cases'
 import {
   partialRuntimeStore,
   storeProject,
   storeProjectGroup
-} from '../runtime/runtime-store-partial-fixture'
+} from '../../runtime/runtime-store-partial-fixture'
 
 const WINDOWS_ENV = {
   COMSPEC: 'C:\\Windows\\system32\\cmd.exe',

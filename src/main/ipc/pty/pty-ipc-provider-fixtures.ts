@@ -1,8 +1,8 @@
 import { vi } from 'vitest'
 import type { Mock } from 'vitest'
-import type { AgentSessionOwnerBinding } from '../../shared/agent-session-host-authority'
-import { registerPtyHandlers } from './pty/register-handlers'
-import { setLocalPtyProvider } from './pty/provider/registry'
+import type { AgentSessionOwnerBinding } from '../../../shared/agent-session-host-authority'
+import { registerPtyHandlers } from './register-handlers'
+import { setLocalPtyProvider } from './provider/registry'
 import { makeDisposable } from './pty-ipc-test-constants'
 
 export type MockPtyProcess = {

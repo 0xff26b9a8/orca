@@ -1,6 +1,6 @@
-import type { TerminalCreateOptions } from '../runtime/runtime-terminal-contracts'
-import type { LaunchWorkspace } from '../../shared/launch-parity-window-request.test-fixture'
-import { POSIX_PATH, WSL_PATH } from '../../shared/launch-parity-window-cases.test-fixture'
+import type { TerminalCreateOptions } from '../../runtime/runtime-terminal-contracts'
+import type { LaunchWorkspace } from '../../../shared/launch-parity-window-request.test-fixture'
+import { POSIX_PATH, WSL_PATH } from '../../../shared/launch-parity-window-cases.test-fixture'
 
 export const HOST_TAB_ID = '33333333-3333-4333-8333-333333333333'
 export const HOST_LEAF_ID = '44444444-4444-4444-8444-444444444444'

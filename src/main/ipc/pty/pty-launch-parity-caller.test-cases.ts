@@ -1,4 +1,4 @@
-import { POSIX_PATH, WIN_PATH } from '../../shared/launch-parity-window-cases.test-fixture'
+import { POSIX_PATH, WIN_PATH } from '../../../shared/launch-parity-window-cases.test-fixture'
 import {
   AGENT_PHONE,
   CMD,
