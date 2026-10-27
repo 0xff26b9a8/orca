@@ -1647,7 +1647,6 @@
       "src/main/cli/cli-installer-unreadable-command.test.ts": 240,
       "src/main/cli/cli-installer-windows-path.test.ts": 214,
       "src/main/cli/cli-installer.test.ts": 143,
-      "src/main/cli/cli-privileged-processes.test.ts": 47,
       "src/main/cli/keyed-promise-queue.test.ts": 48,
       "src/main/cli/legacy-appimage-cli-wrapper.test.ts": 68,
       "src/main/cli/linux-bare-orca-dispatcher.test.ts": 149,
