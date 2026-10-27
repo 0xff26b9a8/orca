@@ -12558,7 +12558,7 @@
       "src/shared/native-chat/native-chat-visual-height-governor.test.ts": 141,
       "src/shared/native-chat/native-chat-visual-shell.reader-scroll.test.ts": 188,
       "src/shared/native-chat/native-chat-visual-shell.test.ts": 202,
-      "src/shared/native-chat-work-run.test.ts": 127,
+      "src/shared/native-chat/native-chat-work-run.test.ts": 127,
       "src/shared/native-chat/native-chat-command-language.test.ts": 42,
       "src/shared/native-chat/native-chat-orca-stop-cut.test.ts": 198,
       "src/shared/native-chat/native-chat-provider-frame-summary.test.ts": 27,
