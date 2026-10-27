@@ -24,16 +24,16 @@ import { deriveNativeChatRowContent } from '../../../../../src/shared/native-cha
 import {
   MobileNativeChatGroupedThought,
   MobileNativeChatReasoningRow
-} from '../../MobileNativeChatReasoningRow'
+} from './MobileNativeChatReasoningRow'
 import { mobileNativeChatRowId } from '../../mobile-native-chat-reading-place'
 import { nativeChatWorkRunEntries } from '../../../../../src/shared/native-chat-work-run'
 import { nativeChatReasoningDisclosureKey } from '../../../../../src/shared/native-chat-reasoning-row'
-import { MobileNativeChatTurnStatus } from '../../MobileNativeChatTurnStatus'
-import { MobileNativeChatNoticeRow } from '../../MobileNativeChatNoticeRow'
-import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
+import { MobileNativeChatTurnStatus } from './MobileNativeChatTurnStatus'
+import { MobileNativeChatNoticeRow } from './MobileNativeChatNoticeRow'
+import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
 import { MobileNativeChatUserMessageFold } from './MobileNativeChatUserMessageFold'
 import { MobileNativeChatMessageTime } from './MobileNativeChatMessageTime'
-import { MobileNativeChatAwaitingInputRow } from '../../MobileNativeChatAwaitingInputRow'
+import { MobileNativeChatAwaitingInputRow } from './MobileNativeChatAwaitingInputRow'
 import { MobileNativeChatResolutionReceipt } from '../../MobileNativeChatResolutionReceipt'
 import {
   nativeChatAskRunBlocks,

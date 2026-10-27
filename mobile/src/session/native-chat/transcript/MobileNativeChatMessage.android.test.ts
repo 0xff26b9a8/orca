@@ -63,7 +63,7 @@ vi.mock('../visual/MobileNativeChatImageViewer', () => ({
 }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
-import { MobileNativeChatRowOverlaysHost } from '../../MobileNativeChatRowOverlaysHost'
+import { MobileNativeChatRowOverlaysHost } from './MobileNativeChatRowOverlaysHost'
 
 const inChat = (...rows: NativeChatMessage[]) =>
   createElement(

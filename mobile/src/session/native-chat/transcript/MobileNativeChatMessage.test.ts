@@ -18,7 +18,7 @@ import { structuredQuestionTranscript } from '../../../../../src/shared/structur
 import type { NativeChatResolvedPrompt } from '../../../../../src/shared/native-chat-resolution-receipt'
 import { colors, typography } from '../../../theme/mobile-theme'
 import { ANSWERED_PROMPT_ITEMS } from '../input/mobile-native-chat-answered-prompts.test-fixture'
-import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
+import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
 import { styles } from './mobile-native-chat-message-styles'
 import { stubRpcClient } from '../../../transport/rpc-client-test-stub'
 

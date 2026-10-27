@@ -14,8 +14,8 @@ import { useMobileNativeChatMessageDetail } from './native-chat/transcript/use-m
 import {
   MobileNativeChatReplyRevealsContext,
   useMobileNativeChatReplyReveals
-} from './mobile-native-chat-reply-reveals'
-import { MobileNativeChatRowOverlaysHost } from './MobileNativeChatRowOverlaysHost'
+} from './native-chat/transcript/mobile-native-chat-reply-reveals'
+import { MobileNativeChatRowOverlaysHost } from './native-chat/transcript/MobileNativeChatRowOverlaysHost'
 import { nativeChatAskRequiresTerminal } from '../../../src/shared/native-chat-agent-support'
 
 type Props = {

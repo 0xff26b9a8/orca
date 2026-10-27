@@ -32,7 +32,7 @@ import { highlightMobileCode } from '../../mobile-file-syntax'
 import { MobileNativeChatToolGlyph } from './MobileNativeChatToolIcon'
 import { MobileNativeChatToolOutput } from '../../MobileNativeChatFullContent'
 import { useMobileNativeChatOpenedDetail } from '../visual/mobile-native-chat-opened-detail'
-import { useMobileNativeChatDisclosure } from '../../mobile-native-chat-disclosure-store'
+import { useMobileNativeChatDisclosure } from './mobile-native-chat-disclosure-store'
 import { toolStyles as styles, toolType } from './mobile-native-chat-tool-styles'
 
 const RESULT_LABEL = 'Result'

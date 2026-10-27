@@ -12,7 +12,7 @@ import {
   startNativeChatTextReveal,
   type NativeChatTextRevealFrames
 } from '../../../../../src/shared/native-chat-text-reveal'
-import { MobileNativeChatReplyRevealsContext } from '../../mobile-native-chat-reply-reveals'
+import { MobileNativeChatReplyRevealsContext } from './mobile-native-chat-reply-reveals'
 import { MobileNativeChatGrowthHoldContext } from '../../mobile-native-chat-growth-hold'
 
 const FRAMES: NativeChatTextRevealFrames = {

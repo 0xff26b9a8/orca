@@ -5,11 +5,7 @@ import type {
   NativeChatMessage,
   NativeChatSubagentEntry
 } from '../../../../../src/shared/native-chat-types'
-import {
-  Harness,
-  Result,
-  userMessage
-} from '../../use-mobile-native-chat-turn-disclosure.test-fixture'
+import { Harness, Result, userMessage } from './use-mobile-native-chat-turn-disclosure.test-fixture'
 
 vi.mock('react-native', async () => {
   const React = await import('react')

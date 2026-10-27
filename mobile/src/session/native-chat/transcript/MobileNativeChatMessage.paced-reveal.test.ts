@@ -10,7 +10,7 @@ import { NATIVE_CHAT_TEXT_REVEAL_DELAY_MS } from '../../../../../src/shared/nati
 import {
   MobileNativeChatReplyRevealsContext,
   type MobileNativeChatReplyReveals
-} from '../../mobile-native-chat-reply-reveals'
+} from './mobile-native-chat-reply-reveals'
 import {
   createMobileNativeChatGrowthHold,
   MobileNativeChatGrowthHoldContext
@@ -32,8 +32,8 @@ vi.mock('../../../platform/clipboard', () => ({
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('../../MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
-vi.mock('../../MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
+vi.mock('./MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
+vi.mock('./MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
 vi.mock('./MobileNativeChatToolRun', () => ({ ToolRun: 'ToolRun' }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'

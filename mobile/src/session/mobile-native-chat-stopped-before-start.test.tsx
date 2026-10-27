@@ -73,7 +73,7 @@ vi.mock('./native-chat/transcript/MobileNativeChatMessageActionsSheet', () => ({
 
 import { MobileMarkdown } from '../components/MobileMarkdown'
 import { MobileNativeChatMessage } from './native-chat/transcript/MobileNativeChatMessage'
-import { useMobileNativeChatTurnDisclosure } from './use-mobile-native-chat-turn-disclosure'
+import { useMobileNativeChatTurnDisclosure } from './native-chat/transcript/use-mobile-native-chat-turn-disclosure'
 
 const THREAD: AgentJournalTurnScope = { kind: 'thread' }
 let sequence = 0

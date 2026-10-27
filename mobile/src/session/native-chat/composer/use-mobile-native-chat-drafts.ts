@@ -9,7 +9,7 @@ import {
 } from './mobile-native-chat-draft-reconcile'
 import { normalizeNativeChatUserText as normalizeReconcileText } from '../../../../../src/shared/native-chat-image-transcript-markers'
 import { useMobileNativeChatUnconfirmedSends } from '../use-mobile-native-chat-unconfirmed-sends'
-import { rebaseMobileNativeChatPendingBaselines } from '../../mobile-native-chat-pending-baseline'
+import { rebaseMobileNativeChatPendingBaselines } from '../transcript/mobile-native-chat-pending-baseline'
 import { retireLandedMobileNativeChatPending } from '../mobile-native-chat-pending-retirement'
 import {
   appendMobileNativeChatPending,

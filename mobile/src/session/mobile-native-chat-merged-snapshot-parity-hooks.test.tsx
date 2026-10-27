@@ -1,5 +1,5 @@
-import { resolveMobileNativeChatRowProps } from './use-mobile-native-chat-row-props'
-import { MobileNativeChatRow } from './MobileNativeChatRowItemSource'
+import { resolveMobileNativeChatRowProps } from './native-chat/transcript/use-mobile-native-chat-row-props'
+import { MobileNativeChatRow } from './native-chat/transcript/MobileNativeChatRowItemSource'
 // Compare live merged hooks/list output after every frame with a newly opened chat, including own echoes and host Stopping. Native row rendering, controller input construction and reconnects are outside this proof.
 
 import { createElement, isValidElement, type ReactElement, type ReactNode } from 'react'
@@ -65,7 +65,9 @@ vi.mock('./native-chat/transcript/MobileNativeChatMessage', () => ({
 vi.mock('./native-chat/transcript/MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('./MobileNativeChatLiveLine', () => ({ MobileNativeChatLiveLine: 'LiveStatus' }))
+vi.mock('./native-chat/transcript/MobileNativeChatLiveLine', () => ({
+  MobileNativeChatLiveLine: 'LiveStatus'
+}))
 vi.mock('./native-chat/composer/MobileNativeChatComposer', () => ({
   MobileNativeChatDraftComposer: 'Composer'
 }))

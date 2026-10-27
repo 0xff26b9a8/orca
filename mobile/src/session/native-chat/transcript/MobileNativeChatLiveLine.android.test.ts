@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from 'react'
 import { act, create, type ReactTestInstance, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatLiveReasoning } from '../../../src/shared/native-chat-reasoning-row'
+import type { NativeChatLiveReasoning } from '../../../../../src/shared/native-chat-reasoning-row'
 
 // Android lacks inline selection; exercise the message-actions copy path separately from iOS.
 vi.mock('react-native', async () => {
@@ -20,14 +20,14 @@ vi.mock('react-native', async () => {
   }
 })
 vi.mock('lucide-react-native', () => ({ ChevronRight: 'ChevronRight' }))
-vi.mock('../components/LoadingSpinner', () => ({ LoadingSpinner: 'LoadingSpinner' }))
+vi.mock('../../../components/LoadingSpinner', () => ({ LoadingSpinner: 'LoadingSpinner' }))
 vi.mock('./MobileNativeChatReasoningRow', () => ({
   MobileNativeChatReasoningBody: 'ReasoningBody'
 }))
-vi.mock('./native-chat/transcript/MobileNativeChatMessageActionsSheet', () => ({
+vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('./native-chat/visual/MobileNativeChatImageViewer', () => ({
+vi.mock('../visual/MobileNativeChatImageViewer', () => ({
   MobileNativeChatImageViewer: 'ImageViewer'
 }))
 

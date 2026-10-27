@@ -1,10 +1,10 @@
 import type {
   NativeChatMessage,
   NativeChatToolCallBlock
-} from '../../../src/shared/native-chat-types'
-import type { NativeChatTaskListPredecessors } from '../../../src/shared/native-chat/input/native-chat-task-list-history'
-import type { NativeChatResolvedPrompt } from '../../../src/shared/native-chat-resolution-receipt'
-import { isActionableStructuredAgentSessionPrompt } from '../../../src/shared/structured-agent-session-live-turn'
+} from '../../../../../src/shared/native-chat-types'
+import type { NativeChatTaskListPredecessors } from '../../../../../src/shared/native-chat/input/native-chat-task-list-history'
+import type { NativeChatResolvedPrompt } from '../../../../../src/shared/native-chat-resolution-receipt'
+import { isActionableStructuredAgentSessionPrompt } from '../../../../../src/shared/structured-agent-session-live-turn'
 import type { MobileNativeChatTurnRow } from './use-mobile-native-chat-turn-disclosure'
 
 /** The message and its derived render inputs share one reuse boundary. */

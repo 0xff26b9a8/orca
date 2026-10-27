@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
-import { MobileNativeChatImageViewer } from './native-chat/visual/MobileNativeChatImageViewer'
-import { MobileNativeChatMessageActionsSheet } from './native-chat/transcript/MobileNativeChatMessageActionsSheet'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import { MobileNativeChatImageViewer } from '../visual/MobileNativeChatImageViewer'
+import { MobileNativeChatMessageActionsSheet } from './MobileNativeChatMessageActionsSheet'
 import {
   MobileNativeChatRowOverlaysContext,
   type MobileNativeChatViewedImage
@@ -9,8 +9,8 @@ import {
 import {
   useMobileNativeChatConversationState,
   type MobileNativeChatConversation
-} from './use-mobile-native-chat-conversation-state'
-import type { RpcClient } from '../transport/rpc-client'
+} from '../../use-mobile-native-chat-conversation-state'
+import type { RpcClient } from '../../../transport/rpc-client'
 
 export function MobileNativeChatRowOverlaysHost({
   conversation,

@@ -1,22 +1,18 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react-native'
-import { AGENT_SESSION_HOST_STATUS_COPY } from '../../../src/shared/agent-session-host-status-rows'
+import { AGENT_SESSION_HOST_STATUS_COPY } from '../../../../../src/shared/agent-session-host-status-rows'
 import {
   NATIVE_CHAT_NOTICE_COPY,
   nativeChatNoticeBlock,
   nativeChatNoticeLook,
   type NativeChatNoticeTone
-} from '../../../src/shared/native-chat-notice'
-import { isTextBlock, type NativeChatBlock } from '../../../src/shared/native-chat-types'
-import { usageLimitLineText } from '../../../src/shared/agent-session-usage-limit-words'
-import { MobileMarkdown } from '../components/MobileMarkdown'
-import { INLINE_TEXT_SELECTION } from '../components/inline-text-selection'
-import { colors, radii, spacing, typography } from '../theme/mobile-theme'
-import {
-  MONO_SIZE,
-  TEXT_SIZE,
-  scaledType
-} from './native-chat/transcript/mobile-native-chat-message-styles'
+} from '../../../../../src/shared/native-chat-notice'
+import { isTextBlock, type NativeChatBlock } from '../../../../../src/shared/native-chat-types'
+import { usageLimitLineText } from '../../../../../src/shared/agent-session-usage-limit-words'
+import { MobileMarkdown } from '../../../components/MobileMarkdown'
+import { INLINE_TEXT_SELECTION } from '../../../components/inline-text-selection'
+import { colors, radii, spacing, typography } from '../../../theme/mobile-theme'
+import { MONO_SIZE, TEXT_SIZE, scaledType } from './mobile-native-chat-message-styles'
 
 const TONE_COLOR: Record<NativeChatNoticeTone, string> = {
   warning: colors.statusAmber,

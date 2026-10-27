@@ -61,7 +61,7 @@ vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
 
 import { nativeChatReasoningDisclosureKey } from '../../../../../src/shared/native-chat-reasoning-row'
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
-import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
+import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
 
 const thought: NativeChatMessage = {
   id: 'r1',

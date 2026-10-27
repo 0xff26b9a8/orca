@@ -50,7 +50,7 @@ import {
   MAX_DISCLOSURES,
   MobileNativeChatDisclosureContext,
   useMobileNativeChatDisclosure
-} from '../../mobile-native-chat-disclosure-store'
+} from './mobile-native-chat-disclosure-store'
 import { toolStyles as styles, toolType } from './mobile-native-chat-tool-styles'
 import { mobileNativeChatMemberId } from '../../mobile-native-chat-reading-place'
 import { MobileNativeChatOwnedScrollView } from '../../MobileNativeChatOwnedScrollView'

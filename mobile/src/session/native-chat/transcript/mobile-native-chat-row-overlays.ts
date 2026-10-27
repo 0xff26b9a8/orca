@@ -1,6 +1,6 @@
 import { createContext } from 'react'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
-import type { RpcClient } from '../transport/rpc-client'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import type { RpcClient } from '../../../transport/rpc-client'
 
 export type MobileNativeChatViewedImage = { uri: string; label: string }
 

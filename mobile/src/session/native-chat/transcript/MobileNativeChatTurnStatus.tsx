@@ -5,9 +5,9 @@ import {
   formatNativeChatTurnStatusLabel,
   NATIVE_CHAT_TURN_STATUS_COPY,
   nativeChatElapsedSeconds
-} from '../../../src/shared/native-chat-turn-status'
-import type { AgentTurnOutcome } from '../../../src/shared/agent-turn-outcome'
-import { colors, spacing, typography } from '../theme/mobile-theme'
+} from '../../../../../src/shared/native-chat-turn-status'
+import type { AgentTurnOutcome } from '../../../../../src/shared/agent-turn-outcome'
+import { colors, spacing, typography } from '../../../theme/mobile-theme'
 
 // Stop ticking settled turns so old transcripts retain no timers.
 function useElapsedSeconds(startedAt: number | null, counting: boolean): number {

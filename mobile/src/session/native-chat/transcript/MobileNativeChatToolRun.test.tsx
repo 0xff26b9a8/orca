@@ -78,7 +78,7 @@ import { ToolRun } from './MobileNativeChatToolRun'
 import {
   MobileNativeChatDisclosureContext,
   useMobileNativeChatDisclosures
-} from '../../mobile-native-chat-disclosure-store'
+} from './mobile-native-chat-disclosure-store'
 
 describe('ToolRun', () => {
   let renderer: ReactTestRenderer | null = null

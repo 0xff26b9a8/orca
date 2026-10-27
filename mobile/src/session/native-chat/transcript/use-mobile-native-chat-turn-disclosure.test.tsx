@@ -3,12 +3,12 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type {
   AgentJournalItemBody,
-  AgentJournalRenderItem,
-  AgentJournalTurnScope
-} from '../../../src/shared/agent-session-journal-types'
-import { agentJournalSubmissionKey } from '../../../src/shared/agent-session-journal-item-key'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
-import type { NativeChatTurnJournal } from '../../../src/shared/native-chat-turn-membership'
+  AgentJournalRenderItem
+} from '../../../../../src/shared/agent-session-journal-types'
+import type { AgentJournalTurnScope } from '../../../../../src/shared/agent-session-journal-turn-scope'
+import { agentJournalSubmissionKey } from '../../../../../src/shared/agent-session-journal-item-key'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import type { NativeChatTurnJournal } from '../../../../../src/shared/native-chat-turn-membership'
 import { useMobileNativeChatTurnDisclosure } from './use-mobile-native-chat-turn-disclosure'
 
 import { Harness, Result, userMessage } from './use-mobile-native-chat-turn-disclosure.test-fixture'

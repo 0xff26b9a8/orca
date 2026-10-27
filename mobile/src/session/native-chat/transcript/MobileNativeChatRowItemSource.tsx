@@ -2,16 +2,16 @@ import { memo, useContext, useMemo, type ComponentProps } from 'react'
 import {
   MobileNativeChatItemSourceContext,
   MobileNativeChatRootItemSourceContext
-} from './mobile-native-chat-item-read'
-import { MobileNativeChatMessage } from './native-chat/transcript/MobileNativeChatMessage'
+} from '../../mobile-native-chat-item-read'
+import { MobileNativeChatMessage } from './MobileNativeChatMessage'
 import {
   resolveMobileNativeChatRowProps,
   type MobileNativeChatRowLookups
 } from './use-mobile-native-chat-row-props'
 import { equalMobileNativeChatRowContent } from './mobile-native-chat-row-projection'
-import type { MobileNativeChatVisualSource } from './native-chat/visual/mobile-native-chat-visual-read'
-import type { MobileNativeChatMessageDetail } from './native-chat/transcript/use-mobile-native-chat-message-detail'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
+import type { MobileNativeChatVisualSource } from '../visual/mobile-native-chat-visual-read'
+import type { MobileNativeChatMessageDetail } from './use-mobile-native-chat-message-detail'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
 
 type Recovery = MobileNativeChatVisualSource & {
   load: (id: string) => Promise<void>

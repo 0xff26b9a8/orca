@@ -20,7 +20,10 @@ vi.mock('react-native', async () => {
 vi.mock('lucide-react-native', () => ({ ChevronRight: 'ChevronRight' }))
 
 import { MobileNativeChatTurnStatus } from './MobileNativeChatTurnStatus'
-import { findAllByHostType, findByHostType } from '../test-support/react-test-renderer-host-nodes'
+import {
+  findAllByHostType,
+  findByHostType
+} from '../../../test-support/react-test-renderer-host-nodes'
 
 const labels = (node: ReactTestInstance): string[] =>
   findAllByHostType(node, 'Text').map((text) => String(text.children.join('')))

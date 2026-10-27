@@ -13,7 +13,7 @@ import {
 } from '../../../../../src/shared/agent-session-host-status-rows'
 import { withoutPendingNativeChatVisualDirectiveTail } from '../../../../../src/shared/native-chat/native-chat-visual-directive'
 import { isAgentSessionAttachmentStorePath } from '../../../../../src/shared/agent-session-attachments'
-import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
+import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
 import {
   isRenderableImageUri,
   readStoredChatImage

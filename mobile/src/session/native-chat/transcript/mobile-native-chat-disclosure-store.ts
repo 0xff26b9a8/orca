@@ -1,10 +1,8 @@
 // Store disclosures above recycled transcript rows so opened tools remain open when rows remount.
 
 import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react'
-import {
-  MobileNativeChatScrollRoots,
-  type MobileNativeChatRootPosition
-} from './mobile-native-chat-scroll-roots'
+import { MobileNativeChatScrollRoots } from '../../mobile-native-chat-scroll-roots'
+import type { MobileNativeChatRootPosition } from '../../mobile-native-chat-scroll-root-handle'
 
 export type MobileNativeChatRunScroll = MobileNativeChatRootPosition
 

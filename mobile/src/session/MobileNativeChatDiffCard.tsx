@@ -15,7 +15,7 @@ import { NATIVE_CHAT_TOOL_ROW_VERB_COPY } from '../../../src/shared/native-chat/
 import { MobileSourceCopyButton } from '../components/MobileSourceCopyButton'
 import { colors } from '../theme/mobile-theme'
 import { useMobileNativeChatOpenedDetail } from './native-chat/visual/mobile-native-chat-opened-detail'
-import { useMobileNativeChatDisclosure } from './mobile-native-chat-disclosure-store'
+import { useMobileNativeChatDisclosure } from './native-chat/transcript/mobile-native-chat-disclosure-store'
 import {
   toolStyles as styles,
   toolType

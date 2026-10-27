@@ -26,9 +26,9 @@ import {
   MobileNativeChatDisclosureContext,
   useMobileNativeChatDisclosures,
   type MobileNativeChatDisclosureStore
-} from './mobile-native-chat-disclosure-store'
-import { useMobileNativeChatRowKeys } from './mobile-native-chat-row-keys'
-import { useMobileNativeChatTurnDisclosure } from './use-mobile-native-chat-turn-disclosure'
+} from './native-chat/transcript/mobile-native-chat-disclosure-store'
+import { useMobileNativeChatRowKeys } from './native-chat/transcript/mobile-native-chat-row-keys'
+import { useMobileNativeChatTurnDisclosure } from './native-chat/transcript/use-mobile-native-chat-turn-disclosure'
 
 vi.mock('react-native', async () => {
   const React = await import('react')

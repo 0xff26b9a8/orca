@@ -11,7 +11,7 @@ import {
 import { colors } from '../../../theme/mobile-theme'
 import { useMobileNativeChatOpenedDetail } from '../visual/mobile-native-chat-opened-detail'
 import { toolStyles as styles, toolType } from '../transcript/mobile-native-chat-tool-styles'
-import { useMobileNativeChatDisclosure } from '../../mobile-native-chat-disclosure-store'
+import { useMobileNativeChatDisclosure } from '../transcript/mobile-native-chat-disclosure-store'
 
 const STATUS_WORD: Record<NativeChatTask['status'], string> = {
   completed: NATIVE_CHAT_TASK_LIST_COPY.completed,

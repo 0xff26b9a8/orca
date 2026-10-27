@@ -1,29 +1,32 @@
 import { useCallback, useMemo, useState } from 'react'
-import { isSubagentGroupBlock, type NativeChatMessage } from '../../../src/shared/native-chat-types'
-import { nativeChatReasoningDisclosureKey } from '../../../src/shared/native-chat-reasoning-row'
+import {
+  isSubagentGroupBlock,
+  type NativeChatMessage
+} from '../../../../../src/shared/native-chat-types'
+import { nativeChatReasoningDisclosureKey } from '../../../../../src/shared/native-chat-reasoning-row'
 import {
   nativeChatLiveLine,
   type NativeChatLiveLine
-} from '../../../src/shared/native-chat-live-line'
-import type { NativeChatSettledTurns } from '../../../src/shared/native-chat-turn-status'
+} from '../../../../../src/shared/native-chat-live-line'
+import type {
+  NativeChatSettledTurns,
+  NativeChatTurnStatus
+} from '../../../../../src/shared/native-chat-turn-status'
+import { isNativeChatRowInLiveWorkingTurn } from '../../../../../src/shared/native-chat-live-turn-membership'
 import {
-  isNativeChatRowInLiveWorkingTurn,
   nativeChatTurnMembership,
   type NativeChatTurnJournal
-} from '../../../src/shared/native-chat-turn-membership'
-import { nativeChatMessagesWaitingBehindLiveTurn } from '../../../src/shared/native-chat-messages-waiting-behind-live-turn'
-import { NATIVE_CHAT_STREAMING_ID } from '../../../src/shared/native-chat/native-chat-streaming'
-import type { NativeChatResolvedPrompt } from '../../../src/shared/native-chat-resolution-receipt'
+} from '../../../../../src/shared/native-chat-turn-membership'
+import { nativeChatMessagesWaitingBehindLiveTurn } from '../../../../../src/shared/native-chat-messages-waiting-behind-live-turn'
+import { NATIVE_CHAT_STREAMING_ID } from '../../../../../src/shared/native-chat/native-chat-streaming'
+import type { NativeChatResolvedPrompt } from '../../../../../src/shared/native-chat-resolution-receipt'
 import { useMobileNativeChatTranscriptRows } from './use-mobile-native-chat-transcript-rows'
-import type { MobileNativeChatRunPresentation } from './mobile-native-chat-run-descriptors'
+import type { MobileNativeChatRunPresentation } from '../../mobile-native-chat-run-descriptors'
 import {
   nativeChatRowsInDrawOrder,
   nativeChatTurnBarRows
-} from '../../../src/shared/native-chat-turn-grouping'
-import {
-  useMobileNativeChatTurnStatus,
-  type NativeChatTurnStatus
-} from './use-mobile-native-chat-turn-status'
+} from '../../../../../src/shared/native-chat-turn-grouping'
+import { useMobileNativeChatTurnStatus } from './use-mobile-native-chat-turn-status'
 
 const EMPTY_TURN_IDS: ReadonlySet<string> = new Set()
 const NO_TURN_KEYS: readonly undefined[] = []

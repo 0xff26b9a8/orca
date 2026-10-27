@@ -27,7 +27,7 @@ import {
   stopJournal,
   type StopJournal
 } from './mobile-native-chat-stop-journal.test-fixture'
-import { useMobileNativeChatTurnDisclosure } from './use-mobile-native-chat-turn-disclosure'
+import { useMobileNativeChatTurnDisclosure } from './native-chat/transcript/use-mobile-native-chat-turn-disclosure'
 
 const STOP_ROW = `stopped-before-start:orca:${NEVER_OPENED}`
 

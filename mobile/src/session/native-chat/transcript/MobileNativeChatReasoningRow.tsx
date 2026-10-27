@@ -1,23 +1,20 @@
-import { mobileNativeChatMemberId } from './mobile-native-chat-reading-place'
+import { mobileNativeChatMemberId } from '../../mobile-native-chat-reading-place'
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { MobileNativeChatOwnedScrollView } from './MobileNativeChatOwnedScrollView'
+import { MobileNativeChatOwnedScrollView } from '../../MobileNativeChatOwnedScrollView'
 import { Brain, ChevronRight } from 'lucide-react-native'
 import {
   nativeChatReasoningDisclosureKey,
   nativeChatReasoningHeadline,
   nativeChatReasoningHeadlineText
-} from '../../../src/shared/native-chat-reasoning-row'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
-import { deriveNativeChatRowContent } from '../../../src/shared/native-chat-row-content'
-import { useMobileNativeChatFullMessage } from './MobileNativeChatFullContent'
-import { MobileMarkdown } from '../components/MobileMarkdown'
-import { colors } from '../theme/mobile-theme'
-import { MobileNativeChatLongPressContent } from './MobileNativeChatLongPressContent'
-import {
-  CHAT_PROSE_SCALE,
-  styles
-} from './native-chat/transcript/mobile-native-chat-message-styles'
+} from '../../../../../src/shared/native-chat-reasoning-row'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import { deriveNativeChatRowContent } from '../../../../../src/shared/native-chat-row-content'
+import { useMobileNativeChatFullMessage } from '../../MobileNativeChatFullContent'
+import { MobileMarkdown } from '../../../components/MobileMarkdown'
+import { colors } from '../../../theme/mobile-theme'
+import { MobileNativeChatLongPressContent } from '../../MobileNativeChatLongPressContent'
+import { CHAT_PROSE_SCALE, styles } from './mobile-native-chat-message-styles'
 
 /** A grouped thought keeps its own source recovery when its original transcript row is hidden. */
 export function MobileNativeChatGroupedThought({

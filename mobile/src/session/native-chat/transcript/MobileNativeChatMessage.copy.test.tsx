@@ -23,8 +23,8 @@ vi.mock('../../../platform/clipboard', () => ({ useClipboardWriter: () => ({ wri
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('../../MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
-vi.mock('../../MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
+vi.mock('./MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
+vi.mock('./MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
 vi.mock('./MobileNativeChatToolRun', () => ({ ToolRun: 'ToolRun' }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'

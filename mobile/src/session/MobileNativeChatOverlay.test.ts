@@ -23,7 +23,7 @@ vi.mock('./native-chat/input/MobileNativeChatBackgroundTasks', () => ({
 vi.mock('./native-chat/visual/MobileNativeChatVisual', () => ({
   useMobileNativeChatVisualRenderer: () => null
 }))
-vi.mock('./MobileNativeChatRowOverlaysHost', () => ({
+vi.mock('./native-chat/transcript/MobileNativeChatRowOverlaysHost', () => ({
   MobileNativeChatRowOverlaysHost: 'View'
 }))
 
