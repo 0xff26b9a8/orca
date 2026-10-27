@@ -3,8 +3,8 @@ import { StyleSheet, Text } from 'react-native'
 import {
   NATIVE_CHAT_MESSAGE_FULL_TIME_FORMAT,
   NATIVE_CHAT_MESSAGE_TIME_FORMAT
-} from '../../../src/shared/native-chat-message-time'
-import { colors, typography } from '../theme/mobile-theme'
+} from '../../../../../src/shared/native-chat-message-time'
+import { colors, typography } from '../../../theme/mobile-theme'
 import { scaledType } from './mobile-native-chat-message-styles'
 
 let formatters: { time: Intl.DateTimeFormat; full: Intl.DateTimeFormat } | null = null

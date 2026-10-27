@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
 import { MobileNativeChatMessageActionsSheet } from './MobileNativeChatMessageActionsSheet'
 
 const { writeText, alert } = vi.hoisted(() => ({ writeText: vi.fn(), alert: vi.fn() }))
@@ -26,9 +26,11 @@ vi.mock('lucide-react-native', () => ({
   Edit3: 'Edit3',
   Trash2: 'Trash2'
 }))
-vi.mock('../platform/clipboard', () => ({ useClipboardWriter: () => ({ writeText }) }))
+vi.mock('../../../platform/clipboard', () => ({ useClipboardWriter: () => ({ writeText }) }))
 // Keep the real drawer lifecycle; only native animation completion is driven by the test.
-vi.mock('../components/mounted-bottom-drawer', () => ({ MountedBottomDrawer: 'MountedDrawer' }))
+vi.mock('../../../components/mounted-bottom-drawer', () => ({
+  MountedBottomDrawer: 'MountedDrawer'
+}))
 
 const message: NativeChatMessage = {
   id: 'reply',

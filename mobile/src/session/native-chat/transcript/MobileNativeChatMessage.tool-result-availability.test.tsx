@@ -1,15 +1,15 @@
 import { createElement, Fragment, type ReactNode } from 'react'
 import { act, create, type ReactTestInstance, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
 import type {
   AgentJournalItemBody,
   AgentJournalRenderItem
-} from '../../../src/shared/agent-session-journal-types'
-import * as toolFold from '../../../src/shared/native-chat/tools/native-chat-tool-pairs'
-import { projectStructuredItemsToNativeChat } from '../../../src/shared/structured-agent-session-projection'
-import { foldMobileNativeChatMessages } from './mobile-native-chat-render-data'
-import { useMobileNativeChatTurnDisclosure } from './use-mobile-native-chat-turn-disclosure'
+} from '../../../../../src/shared/agent-session-journal-types'
+import * as toolFold from '../../../../../src/shared/native-chat/tools/native-chat-tool-pairs'
+import { projectStructuredItemsToNativeChat } from '../../../../../src/shared/structured-agent-session-projection'
+import { foldMobileNativeChatMessages } from '../../mobile-native-chat-render-data'
+import { useMobileNativeChatTurnDisclosure } from '../../use-mobile-native-chat-turn-disclosure'
 
 vi.mock('react-native', async () => {
   const React = await import('react')
@@ -62,7 +62,7 @@ vi.mock('lucide-react-native', () => ({
   SquareTerminal: 'SquareTerminal',
   Wrench: 'Wrench'
 }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
@@ -71,7 +71,7 @@ import { MobileNativeChatMessage } from './MobileNativeChatMessage'
 import {
   MobileNativeChatDisclosureContext,
   useMobileNativeChatDisclosures
-} from './mobile-native-chat-disclosure-store'
+} from '../../mobile-native-chat-disclosure-store'
 
 function message(blocks: NativeChatMessage['blocks']): NativeChatMessage {
   return { id: 'source', role: 'assistant', blocks, timestamp: 1, source: 'transcript' }

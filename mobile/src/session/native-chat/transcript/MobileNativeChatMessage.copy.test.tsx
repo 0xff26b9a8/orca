@@ -1,8 +1,8 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
-import { colors } from '../theme/mobile-theme'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import { colors } from '../../../theme/mobile-theme'
 
 const { writeText, alert } = vi.hoisted(() => ({
   writeText: vi.fn<(text: string) => Promise<void>>(),
@@ -18,17 +18,17 @@ vi.mock('react-native', () => ({
   StyleSheet: { create: (value: unknown) => value, hairlineWidth: 1 }
 }))
 vi.mock('lucide-react-native', () => ({ Copy: 'Copy', Check: 'Check' }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
-vi.mock('../platform/clipboard', () => ({ useClipboardWriter: () => ({ writeText }) }))
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../../platform/clipboard', () => ({ useClipboardWriter: () => ({ writeText }) }))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('./MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
-vi.mock('./MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
-vi.mock('./native-chat/transcript/MobileNativeChatToolRun', () => ({ ToolRun: 'ToolRun' }))
+vi.mock('../../MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
+vi.mock('../../MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
+vi.mock('./MobileNativeChatToolRun', () => ({ ToolRun: 'ToolRun' }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
-import { MobileNativeChatLongPressContent } from './MobileNativeChatLongPressContent'
+import { MobileNativeChatLongPressContent } from '../../MobileNativeChatLongPressContent'
 
 const first = '# Answer\n\n- first\n  - nested\n\n```ts\n  const x = 1\n```'
 const last = '| Name | Value |\n| --- | --- |\n| x | 1 |\n\nFinal paragraph.\n'

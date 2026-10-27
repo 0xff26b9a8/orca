@@ -1,52 +1,52 @@
 import { memo, useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react'
 import { Text, View } from 'react-native'
-import { INLINE_TEXT_SELECTION } from '../components/inline-text-selection'
-import { MobileNativeChatLongPressContent as Content } from './MobileNativeChatLongPressContent'
-import { splitNativeChatBlocks } from '../../../src/shared/native-chat/tools/native-chat-tool-fold'
-import { selectActiveToolCall } from '../../../src/shared/native-chat/tools/native-chat-tool-activity'
+import { INLINE_TEXT_SELECTION } from '../../../components/inline-text-selection'
+import { MobileNativeChatLongPressContent as Content } from '../../MobileNativeChatLongPressContent'
+import { splitNativeChatBlocks } from '../../../../../src/shared/native-chat/tools/native-chat-tool-fold'
+import { selectActiveToolCall } from '../../../../../src/shared/native-chat/tools/native-chat-tool-activity'
 import {
   isImageRefBlock,
   isSubagentGroupBlock,
   isTextBlock
-} from '../../../src/shared/native-chat-types'
+} from '../../../../../src/shared/native-chat-types'
 import {
   isRenderableSubagentGroup,
   withoutSubagentGroupTwins
-} from '../../../src/shared/native-chat-subagent-summary'
+} from '../../../../../src/shared/native-chat-subagent-summary'
 import type {
   NativeChatBlock,
   NativeChatMessage,
   NativeChatToolCallBlock
-} from '../../../src/shared/native-chat-types'
-import { MobileSourceCopyButton } from '../components/MobileSourceCopyButton'
+} from '../../../../../src/shared/native-chat-types'
+import { MobileSourceCopyButton } from '../../../components/MobileSourceCopyButton'
 import { nativeChatMessagePlainText } from './mobile-native-chat-message-plain-text'
-import { deriveNativeChatRowContent } from '../../../src/shared/native-chat-row-content'
+import { deriveNativeChatRowContent } from '../../../../../src/shared/native-chat-row-content'
 import {
   MobileNativeChatGroupedThought,
   MobileNativeChatReasoningRow
-} from './MobileNativeChatReasoningRow'
-import { mobileNativeChatRowId } from './mobile-native-chat-reading-place'
-import { nativeChatWorkRunEntries } from '../../../src/shared/native-chat-work-run'
-import { nativeChatReasoningDisclosureKey } from '../../../src/shared/native-chat-reasoning-row'
-import { MobileNativeChatTurnStatus } from './MobileNativeChatTurnStatus'
-import { MobileNativeChatNoticeRow } from './MobileNativeChatNoticeRow'
-import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
+} from '../../MobileNativeChatReasoningRow'
+import { mobileNativeChatRowId } from '../../mobile-native-chat-reading-place'
+import { nativeChatWorkRunEntries } from '../../../../../src/shared/native-chat-work-run'
+import { nativeChatReasoningDisclosureKey } from '../../../../../src/shared/native-chat-reasoning-row'
+import { MobileNativeChatTurnStatus } from '../../MobileNativeChatTurnStatus'
+import { MobileNativeChatNoticeRow } from '../../MobileNativeChatNoticeRow'
+import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
 import { MobileNativeChatUserMessageFold } from './MobileNativeChatUserMessageFold'
 import { MobileNativeChatMessageTime } from './MobileNativeChatMessageTime'
-import { MobileNativeChatAwaitingInputRow } from './MobileNativeChatAwaitingInputRow'
-import { MobileNativeChatResolutionReceipt } from './MobileNativeChatResolutionReceipt'
+import { MobileNativeChatAwaitingInputRow } from '../../MobileNativeChatAwaitingInputRow'
+import { MobileNativeChatResolutionReceipt } from '../../MobileNativeChatResolutionReceipt'
 import {
   nativeChatAskRunBlocks,
   nativeChatAskRunSubject
-} from '../../../src/shared/native-chat/input/native-chat-ask-row'
-import type { NativeChatResolvedPrompt } from '../../../src/shared/native-chat-resolution-receipt'
-import { MobileNativeChatSubagentGroup } from './native-chat/transcript/MobileNativeChatSubagentGroup'
-import { ToolRun } from './native-chat/transcript/MobileNativeChatToolRun'
-import type { NativeChatTurnStatus } from './use-mobile-native-chat-turn-status'
+} from '../../../../../src/shared/native-chat/input/native-chat-ask-row'
+import type { NativeChatResolvedPrompt } from '../../../../../src/shared/native-chat-resolution-receipt'
+import { MobileNativeChatSubagentGroup } from './MobileNativeChatSubagentGroup'
+import { ToolRun } from './MobileNativeChatToolRun'
+import type { NativeChatTurnStatus } from '../../../../../src/shared/native-chat-turn-status'
 import { styles } from './mobile-native-chat-message-styles'
-import { agentMessageAttribution } from './mobile-agent-message-attribution'
-import { MobileNativeChatVisualContext } from './native-chat/visual/mobile-native-chat-visual-context'
-import { useMobileNativeChatFullMessage } from './MobileNativeChatFullContent'
+import { agentMessageAttribution } from '../../mobile-agent-message-attribution'
+import { MobileNativeChatVisualContext } from '../visual/mobile-native-chat-visual-context'
+import { useMobileNativeChatFullMessage } from '../../MobileNativeChatFullContent'
 import { MobileNativeChatPacedProse } from './MobileNativeChatPacedProse'
 import { Prose } from './MobileNativeChatProse'
 

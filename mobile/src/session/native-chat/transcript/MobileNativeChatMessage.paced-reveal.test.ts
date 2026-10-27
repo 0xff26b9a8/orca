@@ -1,20 +1,20 @@
 import { createElement } from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
 import {
   createNativeChatReplyRevealTracker,
   trackNativeChatReplyRows
-} from '../../../src/shared/native-chat-reply-reveals'
-import { NATIVE_CHAT_TEXT_REVEAL_DELAY_MS } from '../../../src/shared/native-chat-text-reveal'
+} from '../../../../../src/shared/native-chat-reply-reveals'
+import { NATIVE_CHAT_TEXT_REVEAL_DELAY_MS } from '../../../../../src/shared/native-chat-text-reveal'
 import {
   MobileNativeChatReplyRevealsContext,
   type MobileNativeChatReplyReveals
-} from './mobile-native-chat-reply-reveals'
+} from '../../mobile-native-chat-reply-reveals'
 import {
   createMobileNativeChatGrowthHold,
   MobileNativeChatGrowthHoldContext
-} from './mobile-native-chat-growth-hold'
+} from '../../mobile-native-chat-growth-hold'
 
 vi.mock('react-native', () => ({
   Image: 'Image',
@@ -25,14 +25,16 @@ vi.mock('react-native', () => ({
   StyleSheet: { create: (value: unknown) => value, hairlineWidth: 1 }
 }))
 vi.mock('lucide-react-native', () => ({ Copy: 'Copy', Check: 'Check' }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
-vi.mock('../platform/clipboard', () => ({ useClipboardWriter: () => ({ writeText: vi.fn() }) }))
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../../platform/clipboard', () => ({
+  useClipboardWriter: () => ({ writeText: vi.fn() })
+}))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('./MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
-vi.mock('./MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
-vi.mock('./native-chat/transcript/MobileNativeChatToolRun', () => ({ ToolRun: 'ToolRun' }))
+vi.mock('../../MobileNativeChatReasoningRow', () => ({ MobileNativeChatReasoningRow: 'Reasoning' }))
+vi.mock('../../MobileNativeChatTurnStatus', () => ({ MobileNativeChatTurnStatus: 'TurnStatus' }))
+vi.mock('./MobileNativeChatToolRun', () => ({ ToolRun: 'ToolRun' }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
 

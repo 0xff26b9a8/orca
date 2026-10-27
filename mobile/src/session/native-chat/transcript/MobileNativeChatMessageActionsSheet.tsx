@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react'
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Copy, TextSelect, X } from 'lucide-react-native'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
-import { ActionSheetContent } from '../components/ActionSheetModal'
-import { BottomDrawer } from '../components/BottomDrawer'
-import { useClipboardWriter } from '../platform/clipboard'
-import { useWindowSafeAreaInsets } from '../layout/side-safe-area'
-import { colors, spacing, typography } from '../theme/mobile-theme'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import { ActionSheetContent } from '../../../components/ActionSheetModal'
+import { BottomDrawer } from '../../../components/BottomDrawer'
+import { useClipboardWriter } from '../../../platform/clipboard'
+import { useWindowSafeAreaInsets } from '../../../layout/side-safe-area'
+import { colors, spacing, typography } from '../../../theme/mobile-theme'
 import { nativeChatMessagePlainText } from './mobile-native-chat-message-plain-text'
 
 type Props = {

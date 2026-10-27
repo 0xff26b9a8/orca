@@ -3,11 +3,11 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import {
   NATIVE_CHAT_USER_MESSAGE_MAX_UNFOLDED_LINES,
   nativeChatUserMessageFolds
-} from '../../../src/shared/native-chat-user-message-fold'
-import { styles as markdownStyles } from '../components/mobile-markdown-styles'
-import { onBrightColors, spacing, typography } from '../theme/mobile-theme'
+} from '../../../../../src/shared/native-chat-user-message-fold'
+import { styles as markdownStyles } from '../../../components/mobile-markdown-styles'
+import { onBrightColors, spacing, typography } from '../../../theme/mobile-theme'
 import { CHAT_PROSE_SCALE } from './mobile-native-chat-message-styles'
-import type { useMobileNativeChatFullMessage } from './MobileNativeChatFullContent'
+import type { useMobileNativeChatFullMessage } from '../../MobileNativeChatFullContent'
 
 const FOLDED_HEIGHT =
   NATIVE_CHAT_USER_MESSAGE_MAX_UNFOLDED_LINES *

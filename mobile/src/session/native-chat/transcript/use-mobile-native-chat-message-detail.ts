@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useReducer } from 'react'
-import { isTextBlock, type NativeChatMessage } from '../../../src/shared/native-chat-types'
-import { projectStructuredItemToNativeChat } from '../../../src/shared/structured-agent-session-projection'
-import { readMobileNativeChatItem } from './mobile-native-chat-item-read'
-import type { MobileNativeChatVisualSource } from './native-chat/visual/mobile-native-chat-visual-read'
+import { isTextBlock, type NativeChatMessage } from '../../../../../src/shared/native-chat-types'
+import { projectStructuredItemToNativeChat } from '../../../../../src/shared/structured-agent-session-projection'
+import { readMobileNativeChatItem } from '../../mobile-native-chat-item-read'
+import type { MobileNativeChatVisualSource } from '../visual/mobile-native-chat-visual-read'
 
 export type MobileNativeChatMessageDetail = {
   raw(id: string): NativeChatMessage | undefined

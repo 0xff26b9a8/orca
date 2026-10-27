@@ -4,8 +4,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type {
   NativeChatMessage,
   NativeChatSubagentEntry
-} from '../../../src/shared/native-chat-types'
-import { Harness, Result, userMessage } from './use-mobile-native-chat-turn-disclosure.test-fixture'
+} from '../../../../../src/shared/native-chat-types'
+import {
+  Harness,
+  Result,
+  userMessage
+} from '../../use-mobile-native-chat-turn-disclosure.test-fixture'
 
 vi.mock('react-native', async () => {
   const React = await import('react')
@@ -45,11 +49,11 @@ vi.mock('lucide-react-native', () => ({
   SquareTerminal: 'SquareTerminal',
   Wrench: 'Wrench'
 }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('../hooks/use-now', () => ({ useNow: () => 70_000 }))
+vi.mock('../../../hooks/use-now', () => ({ useNow: () => 70_000 }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
 

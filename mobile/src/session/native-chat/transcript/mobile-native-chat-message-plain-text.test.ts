@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { AGENT_SESSION_HOST_STATUS_COPY } from '../../../src/shared/agent-session-host-status-rows'
-import type { NativeChatBlock } from '../../../src/shared/native-chat-types'
+import { AGENT_SESSION_HOST_STATUS_COPY } from '../../../../../src/shared/agent-session-host-status-rows'
+import type { NativeChatBlock } from '../../../../../src/shared/native-chat-types'
 import { nativeChatMessagePlainText } from './mobile-native-chat-message-plain-text'
 
 describe('nativeChatMessagePlainText', () => {

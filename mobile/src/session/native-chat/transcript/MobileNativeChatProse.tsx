@@ -1,31 +1,31 @@
 import { useContext, useEffect, useState } from 'react'
 import { Image, Pressable, Text, View } from 'react-native'
-import { INLINE_TEXT_SELECTION } from '../components/inline-text-selection'
-import { MobileMarkdown } from '../components/MobileMarkdown'
-import { isImageRefBlock, isTextBlock } from '../../../src/shared/native-chat-types'
+import { INLINE_TEXT_SELECTION } from '../../../components/inline-text-selection'
+import { MobileMarkdown } from '../../../components/MobileMarkdown'
+import { isImageRefBlock, isTextBlock } from '../../../../../src/shared/native-chat-types'
 import type {
   NativeChatBlock,
   NativeChatImageRefBlock
-} from '../../../src/shared/native-chat-types'
+} from '../../../../../src/shared/native-chat-types'
 import {
   AGENT_SESSION_HOST_STATUS_COPY,
   isAgentSessionHostStatusPresentation
-} from '../../../src/shared/agent-session-host-status-rows'
-import { withoutPendingNativeChatVisualDirectiveTail } from '../../../src/shared/native-chat/native-chat-visual-directive'
-import { isAgentSessionAttachmentStorePath } from '../../../src/shared/agent-session-attachments'
-import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
+} from '../../../../../src/shared/agent-session-host-status-rows'
+import { withoutPendingNativeChatVisualDirectiveTail } from '../../../../../src/shared/native-chat/native-chat-visual-directive'
+import { isAgentSessionAttachmentStorePath } from '../../../../../src/shared/agent-session-attachments'
+import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
 import {
   isRenderableImageUri,
   readStoredChatImage
-} from './native-chat/visual/mobile-native-chat-image-preview'
-import type { RpcClient } from '../transport/rpc-client'
+} from '../visual/mobile-native-chat-image-preview'
+import type { RpcClient } from '../../../transport/rpc-client'
 import {
   CHAT_PROSE_SCALE,
   scaledType,
   styles,
   TEXT_SIZE
 } from './mobile-native-chat-message-styles'
-import type { MobileNativeChatVisualRender } from './native-chat/visual/mobile-native-chat-visual-context'
+import type { MobileNativeChatVisualRender } from '../visual/mobile-native-chat-visual-context'
 
 export function Prose({
   block,

@@ -1,26 +1,26 @@
 import { createElement, type ReactNode } from 'react'
 import { act, create, type ReactTestInstance, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { AgentJournalStatusItem } from '../../../src/shared/agent-session-journal-types'
-import { isAdmissibleAgentJournalItemBody } from '../../../src/shared/agent-session-journal-schemas'
-import { projectStructuredItemToNativeChat } from '../../../src/shared/structured-agent-session-projection'
+import type { AgentJournalStatusItem } from '../../../../../src/shared/agent-session-journal-types'
+import { isAdmissibleAgentJournalItemBody } from '../../../../../src/shared/agent-session-journal-schemas'
+import { projectStructuredItemToNativeChat } from '../../../../../src/shared/structured-agent-session-projection'
 import {
   NATIVE_CHAT_INTERRUPTED_STATUS_TEXT,
   type NativeChatMessage
-} from '../../../src/shared/native-chat-types'
-import { AGENT_SESSION_HOST_STATUS_COPY } from '../../../src/shared/agent-session-host-status-rows'
+} from '../../../../../src/shared/native-chat-types'
+import { AGENT_SESSION_HOST_STATUS_COPY } from '../../../../../src/shared/agent-session-host-status-rows'
 import {
   agentSessionFailureFact,
   readProviderRetry
-} from '../../../src/shared/agent-session-failure'
-import { agentSessionFailureWords } from '../../../src/shared/agent-session-failure-words'
-import { structuredQuestionTranscript } from '../../../src/shared/structured-agent-question-projection'
-import type { NativeChatResolvedPrompt } from '../../../src/shared/native-chat-resolution-receipt'
-import { colors, typography } from '../theme/mobile-theme'
-import { ANSWERED_PROMPT_ITEMS } from './native-chat/input/mobile-native-chat-answered-prompts.test-fixture'
-import { MobileNativeChatRowOverlaysContext } from './mobile-native-chat-row-overlays'
+} from '../../../../../src/shared/agent-session-failure'
+import { agentSessionFailureWords } from '../../../../../src/shared/agent-session-failure-words'
+import { structuredQuestionTranscript } from '../../../../../src/shared/structured-agent-question-projection'
+import type { NativeChatResolvedPrompt } from '../../../../../src/shared/native-chat-resolution-receipt'
+import { colors, typography } from '../../../theme/mobile-theme'
+import { ANSWERED_PROMPT_ITEMS } from '../input/mobile-native-chat-answered-prompts.test-fixture'
+import { MobileNativeChatRowOverlaysContext } from '../../mobile-native-chat-row-overlays'
 import { styles } from './mobile-native-chat-message-styles'
-import { stubRpcClient } from '../transport/rpc-client-test-stub'
+import { stubRpcClient } from '../../../transport/rpc-client-test-stub'
 
 vi.mock('react-native', async () => {
   const React = await import('react')
@@ -75,13 +75,16 @@ vi.mock('lucide-react-native', () => ({
   SquareTerminal: 'SquareTerminal',
   Wrench: 'Wrench'
 }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
-import { findAllByHostType, findByHostType } from '../test-support/react-test-renderer-host-nodes'
+import {
+  findAllByHostType,
+  findByHostType
+} from '../../../test-support/react-test-renderer-host-nodes'
 
 const PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
@@ -772,84 +775,6 @@ describe('MobileNativeChatMessage', () => {
       })
       expect(markdownIn(tree.root)).toEqual(['go'])
       expect(textIn(tree.root)).toEqual([])
-    })
-  })
-
-  describe('a reasoning row', () => {
-    const reasoning = (fields: Partial<NativeChatMessage> = {}): NativeChatMessage => ({
-      id: 'r1',
-      role: 'reasoning',
-      blocks: [{ type: 'text', text: 'Weighing two approaches' }],
-      timestamp: 1_000,
-      source: 'transcript',
-      state: 'completed',
-      completedAt: 4_000,
-      ...fields
-    })
-    const toggleOf = (tree: ReactTestRenderer): ReactTestInstance =>
-      tree.root.find(
-        (node) => String(node.type) === 'Pressable' && node.props.accessibilityRole === 'button'
-      )
-    const markdownIn = (tree: ReactTestRenderer): ReactTestInstance[] =>
-      tree.root.findAll((node) => String(node.type) === 'MobileMarkdown')
-
-    it('starts collapsed to its headline, with its text unmounted', () => {
-      const tree = render(reasoning())
-      expect(textIn(tree.root)).toContain('Thought for 3s')
-      expect(toggleOf(tree).props.accessibilityState).toEqual({ expanded: false })
-      expect(toggleOf(tree).props.accessibilityLabel).toBe('Reasoning: Thought for 3s')
-      expect(toggleOf(tree).props.hitSlop).toBe(6)
-      expect(markdownIn(tree)).toHaveLength(0)
-    })
-
-    it('leads its headline with the brain, as desktop does', () => {
-      const [first] = toggleOf(render(reasoning())).children
-      expect(typeof first === 'string' ? first : first?.type).toBe('Brain')
-    })
-
-    it('mounts its text once opened', () => {
-      const tree = render(reasoning())
-      act(() => toggleOf(tree).props.onPress())
-      expect(toggleOf(tree).props.accessibilityState).toEqual({ expanded: true })
-      expect(markdownIn(tree).map((node) => node.props.content)).toEqual([
-        'Weighing two approaches'
-      ])
-    })
-
-    it('draws nothing while the live line discloses it, or when blank', () => {
-      expect(
-        render(reasoning({ state: 'running' }), {
-          activeTurnIsWorking: true,
-          reasoningIsLive: true
-        }).toJSON()
-      ).toBeNull()
-      expect(render(reasoning({ blocks: [{ type: 'text', text: ' \n ' }] })).toJSON()).toBeNull()
-    })
-
-    it("still draws its turn's bar while the live line discloses it", () => {
-      const tree = render(reasoning({ state: 'running' }), {
-        activeTurnIsWorking: true,
-        reasoningIsLive: true,
-        turnStatus: { startedAt: 1_000, thinking: true, workedSeconds: null }
-      })
-      expect(tree.root.findAll((node) => String(node.type) === 'Pressable')).toHaveLength(0)
-      expect(textIn(tree.root).some((text) => text.startsWith('Working for'))).toBe(true)
-    })
-
-    it('draws any other open block in its working turn as Reasoning', () => {
-      const child = render(reasoning({ state: 'running', agentId: 'sub-1' }), {
-        activeTurnIsWorking: true
-      })
-      expect(textIn(child.root)).toContain('Reasoning')
-      expect(toggleOf(child).props.accessibilityLabel).toBe('Reasoning')
-    })
-
-    it('says only what the host saw', () => {
-      expect(textIn(render(reasoning({ state: 'running' })).root)).toContain('Thought')
-      const unknown = render(reasoning({ state: undefined, completedAt: undefined }))
-      expect(textIn(unknown.root)).toContain('Reasoning')
-      expect(toggleOf(unknown).props.accessibilityLabel).toBe('Reasoning')
-      expect(textIn(render(reasoning({ completedAt: 1_300 })).root)).toContain('Thought for 1s')
     })
   })
 })

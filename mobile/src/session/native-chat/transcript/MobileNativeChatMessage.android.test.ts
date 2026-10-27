@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from 'react'
 import { act, create, type ReactTestInstance, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { NativeChatMessage } from '../../../src/shared/native-chat-types'
+import type { NativeChatMessage } from '../../../../../src/shared/native-chat-types'
 
 // Run the long-press actions-sheet path separately from the iOS inline-selection suite.
 vi.mock('react-native', async () => {
@@ -54,16 +54,16 @@ vi.mock('lucide-react-native', () => ({
   SquareTerminal: 'SquareTerminal',
   Wrench: 'Wrench'
 }))
-vi.mock('../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
+vi.mock('../../../components/MobileMarkdown', () => ({ MobileMarkdown: 'MobileMarkdown' }))
 vi.mock('./MobileNativeChatMessageActionsSheet', () => ({
   MobileNativeChatMessageActionsSheet: 'MessageActionsSheet'
 }))
-vi.mock('./native-chat/visual/MobileNativeChatImageViewer', () => ({
+vi.mock('../visual/MobileNativeChatImageViewer', () => ({
   MobileNativeChatImageViewer: 'ImageViewer'
 }))
 
 import { MobileNativeChatMessage } from './MobileNativeChatMessage'
-import { MobileNativeChatRowOverlaysHost } from './MobileNativeChatRowOverlaysHost'
+import { MobileNativeChatRowOverlaysHost } from '../../MobileNativeChatRowOverlaysHost'
 
 const inChat = (...rows: NativeChatMessage[]) =>
   createElement(
