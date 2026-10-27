@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { extractPendingAsk } from './native-chat-ask'
-import type { NativeChatMessage } from './native-chat-types'
+import type { NativeChatMessage } from '../../native-chat-types'
 
 type Block = NativeChatMessage['blocks'][number]
 

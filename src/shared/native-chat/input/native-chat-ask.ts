@@ -4,17 +4,13 @@ import type {
   AskQuestion,
   InteractiveQuestionParser
 } from './native-chat-ask-types'
-import { isInterruptedStatusMessage, type NativeChatMessage } from './native-chat-types'
+import { isInterruptedStatusMessage, type NativeChatMessage } from '../../native-chat-types'
 import {
   CODEX_ASYNC_QUESTION_TOOL,
   parseCodexAsyncQuestionsInput
-} from './codex-async-question-input'
-
-export type { AskOption, AskPrompt, AskQuestion, InteractiveQuestionParser }
+} from '../../codex-async-question-input'
 
 const QUESTION_TOOL_PARSERS = new Map<string, InteractiveQuestionParser>()
-
-export { nativeChatAskDismissKey } from './native-chat-ask-dismiss-key'
 
 export function registerQuestionTool(toolName: string, parser: InteractiveQuestionParser): void {
   QUESTION_TOOL_PARSERS.set(toolName, parser)
@@ -223,12 +219,3 @@ export function resolveNativeChatAsk(args: {
 }): AskPrompt | null {
   return args.liveAsk ?? (args.transcriptSettled ? extractPendingAsk(args.messages) : null)
 }
-
-export {
-  buildAskAnswerKeys,
-  buildCodexAskAnswerKeys,
-  formatAskAnswer,
-  hasAskAnswer,
-  type AskAnswerKeyGroup,
-  type AskAnswerSelection
-} from './native-chat-ask-answer'

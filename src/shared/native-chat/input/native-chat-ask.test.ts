@@ -3,13 +3,9 @@ import {
   NATIVE_CHAT_INTERRUPTED_STATUS_TEXT,
   type NativeChatBlock,
   type NativeChatMessage
-} from './native-chat-types'
-import {
-  extractPendingAsk,
-  nativeChatAskDismissKey,
-  parseAskFromStatus,
-  resolveNativeChatAsk
-} from './native-chat-ask'
+} from '../../native-chat-types'
+import { extractPendingAsk, parseAskFromStatus, resolveNativeChatAsk } from './native-chat-ask'
+import { nativeChatAskDismissKey } from '../../native-chat-ask-dismiss-key'
 
 function message(id: string, blocks: NativeChatBlock[]): NativeChatMessage {
   return { id, role: 'assistant', blocks, timestamp: 1, source: 'transcript' }
