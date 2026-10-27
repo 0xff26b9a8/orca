@@ -1,9 +1,9 @@
 import { rangeForParsedLinkOnRow } from './terminal-link-row-range'
-import type { IBufferLine, IBufferRange } from '@xterm/xterm'
 import type { WrappedLogicalLine } from './wrapped-terminal-link-ranges'
+import type { TerminalLinkBuffer, TerminalLinkBufferRange } from './terminal-link-buffer'
 
 export function terminalLogicalLinkHasOscLink(
-  buffer: { getLine(y: number): IBufferLine | undefined },
+  buffer: TerminalLinkBuffer,
   logicalLine: WrappedLogicalLine,
   startIndex: number,
   endIndex: number
@@ -15,8 +15,8 @@ export function terminalLogicalLinkHasOscLink(
 }
 
 function terminalRangeHasOscLink(
-  buffer: { getLine(y: number): IBufferLine | undefined },
-  range: IBufferRange
+  buffer: TerminalLinkBuffer,
+  range: TerminalLinkBufferRange
 ): boolean {
   for (let y = range.start.y; y <= range.end.y; y++) {
     const line = buffer.getLine(y - 1)
