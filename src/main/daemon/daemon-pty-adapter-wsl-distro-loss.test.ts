@@ -168,6 +168,21 @@ describe('a WSL bridge pane exit', () => {
     expect(exits[1]).not.toHaveProperty('hostLost')
   })
 
+  // awin: a terminate exited each bridge pane with -1, never 0; a user's `exit` gives 0.
+  it('reads no boot id for a clean exit, which stays an exit even across a reboot', async () => {
+    bootIds = ['boot-1', 'boot-2']
+    const exits = collectExits()
+    const id = await spawnBridgePane()
+    await waitFor(() => readBootId.mock.calls.length === 1)
+
+    subprocesses[0]!._simulateExit(0)
+
+    await waitFor(() => exits.length > 0)
+    expect(exits[0]).toMatchObject({ id, code: 0 })
+    expect(exits[0]).not.toHaveProperty('hostLost')
+    expect(readBootId).toHaveBeenCalledOnce()
+  })
+
   it('stays a normal exit when the running list cannot answer', async () => {
     running = async () => ({ status: 'unavailable' })
     const exits = collectExits()

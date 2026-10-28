@@ -250,11 +250,18 @@ export class DaemonPtyAdapter extends DaemonPtyDaemonRecovery implements IPtyPro
     wslDistro: string,
     exitAt: number
   ): Promise<void> {
-    const verdict = await classifyWslBridgeExit(wslDistro, exitAt, this.readRunningWslDistros, () =>
-      this.wslBridgeBootIdentity.rebootedSinceSpawn(sessionId, wslDistro)
+    // A terminate never exits 0 (awin: -1 for each bridge pane; `exit`/`exit 0` gave 0), so a clean
+    // exit skips the boot-id read and stays an exit.
+    const verdict = await classifyWslBridgeExit(
+      wslDistro,
+      exitAt,
+      this.readRunningWslDistros,
+      async () =>
+        exit.code !== 0 &&
+        (await this.wslBridgeBootIdentity.rebootedSinceSpawn(sessionId, wslDistro))
     )
     // Lost, or booted again since the spawn, keeps the tab; an unanswered check reads as an exit.
-    // The code lets a verify run show which codes a terminate yields (only 1 is on record).
+    // The code shows a verify run which codes a terminate yields.
     console.info(
       `[pty] WSL bridge exit: ${verdict} (distro ${wslDistro}, code ${exit.code}, probe ${Math.round(performance.now() - exitAt)}ms)`
     )
