@@ -363,6 +363,10 @@
         "openManageSessions": "Open Manage Sessions",
         "administratorSearchDescription": "See Orca’s Windows permissions or restart with administrator approval.",
         "administratorApproval": "Windows will ask for approval. Use your usual account."
+      },
+      "wordSeparators": {
+        "description": "Characters treated as word boundaries for double-click selection, including space.",
+        "noSpaceHint": "No space included — double-click will select across spaces."
       }
     },
     "appearance": {
@@ -8592,7 +8596,6 @@
           "a016ffbeed": "Auto uses Windows PowerShell now and switches to PowerShell 7+ when installed.",
           "5ed5c95344": "Choose between Windows PowerShell and PowerShell 7+ for new terminal panes.",
           "3d88af864d": "Choose whether the PowerShell shell option launches Windows PowerShell or PowerShell 7+ for new terminal panes.",
-          "8a956cc91e": "Characters treated as word boundaries for double-click selection.",
           "4bebcc2b2c": "Word Separators",
           "12e06178fa": "rows",
           "907b0b9d3e": "Custom",

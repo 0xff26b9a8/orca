@@ -8439,7 +8439,6 @@
           "a016ffbeed": "Auto utilise Windows PowerShell pour le moment et bascule vers PowerShell 7+ une fois installé.",
           "5ed5c95344": "Choisissez entre Windows PowerShell et PowerShell 7+ pour les nouveaux volets de terminal.",
           "3d88af864d": "Choisissez si l'option de shell PowerShell lance Windows PowerShell ou PowerShell 7+ pour les nouveaux volets de terminal.",
-          "8a956cc91e": "Caractères traités comme séparateurs de mots pour la sélection par double-clic.",
           "4bebcc2b2c": "Séparateurs de mots",
           "12e06178fa": "lignes",
           "907b0b9d3e": "Personnalisé",

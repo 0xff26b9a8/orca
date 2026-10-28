@@ -8226,7 +8226,6 @@
           "a016ffbeed": "Auto は現在 Windows PowerShell を使用し、インストールされると PowerShell 7 以降に切り替わります。",
           "5ed5c95344": "新規ターミナルペインについては、Windows PowerShell と PowerShell 7+ のどちらかを選択します。",
           "3d88af864d": "PowerShell シェルオプションで、新規ターミナルペインに対して Windows PowerShell を起動するか PowerShell 7+ を起動するかを選択します。",
-          "8a956cc91e": "文字はダブルクリック選択の単語境界として扱われます。",
           "4bebcc2b2c": "単語の区切り文字",
           "12e06178fa": "行",
           "907b0b9d3e": "カスタム",
