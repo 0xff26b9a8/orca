@@ -36,7 +36,12 @@ type PreparedLocalSshPartition = {
   proxyEndpoint: BrowserRouteProxyEndpoint
 }
 
-const preparedByIdentityKey = new Map<string, Promise<PreparedLocalSshPartition>>()
+type PendingLocalSshPartition = {
+  targetId: string
+  promise: Promise<PreparedLocalSshPartition>
+}
+
+const preparedByIdentityKey = new Map<string, PendingLocalSshPartition>()
 const preparedByPartition = new Map<string, PreparedLocalSshPartition>()
 const partitionBySession = new WeakMap<Session, string>()
 
@@ -77,15 +82,16 @@ export async function prepareLocalSshBrowserPartition(input: {
   ])
   let pending = preparedByIdentityKey.get(identityKey)
   if (!pending) {
-    pending = prepareFresh(input)
+    const promise = prepareFresh(input)
+    pending = { targetId: input.targetId, promise }
     preparedByIdentityKey.set(identityKey, pending)
-    pending.catch(() => {
+    promise.catch(() => {
       if (preparedByIdentityKey.get(identityKey) === pending) {
         preparedByIdentityKey.delete(identityKey)
       }
     })
   }
-  const prepared = await pending
+  const prepared = await pending.promise
   return { partition: prepared.partition }
 }
 
@@ -191,7 +197,10 @@ export async function releaseLocalSshBrowserPartitionsForTarget(targetId: string
   app.on('web-contents-created', invalidateContents)
   try {
     for (const [identityKey, pending] of preparedByIdentityKey) {
-      const prepared = await pending.catch(() => null)
+      if (pending.targetId !== targetId) {
+        continue
+      }
+      const prepared = await pending.promise.catch(() => null)
       if (prepared?.targetId === targetId) {
         preparedByIdentityKey.delete(identityKey)
         preparedByPartition.delete(prepared.partition)
