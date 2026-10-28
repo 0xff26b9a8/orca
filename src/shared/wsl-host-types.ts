@@ -53,6 +53,8 @@ export type WslHostDeferredUpdate = {
 export type WslHostCapability = {
   /** False when the packaged orcad template is missing, so no WSL host can deploy or connect. */
   serverFiles: boolean
+  /** False in serve-only: saved hosts work, but no host is added and no project moved. Absent from older mains. */
+  acceptsNewWork?: boolean
 }
 
 /**
