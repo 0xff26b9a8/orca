@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WSL_HOSTS_INTERNAL_GATE_ENV } from '../../shared/wsl-host-internal-gate'
+import { configureWslHostsGate, resetWslHostsGateForTests } from '../wsl/wsl-host-gate'
 import { wslMoveCutoverFixture as cutover } from '../persistence/__fixtures__/wsl-mover/wsl-move-cutover-fixture'
 import { seedWslMoveCutover } from '../persistence/__fixtures__/wsl-mover/wsl-move-journal-seeding'
 import { listWslMoveCutovers } from '../persistence/moving-wsl-projects/wsl-move-cutover-journal'
@@ -93,6 +94,28 @@ describe('WSL move IPC', () => {
       invoke('wslMove:recordStoreRewritten', { migrationId: 'move-1', storeId: 'renderer-a' })
     ).toEqual({ recorded: false, reason: 'gated-off' })
     expect(listWslMoveCutovers(userDataPath)[0]?.rewrittenStores).toEqual([])
+  })
+
+  it('keeps listing unfinished moves and pending rewrites in serve-only, and nothing when closed', () => {
+    rmSync(userDataPath, { recursive: true, force: true })
+    userDataPath = mkdtempSync(join(tmpdir(), 'wsl-move-ipc-'))
+    seedWslMoveCutover(
+      userDataPath,
+      cutover('move-2', 'destination-committed', { automationsToReenable: ['automation-1'] })
+    )
+    const open = invoke('wslMove:listUnfinished')
+    expect(open).toEqual([expect.objectContaining({ migrationId: 'move-2' })])
+    const pending = invoke('wslMove:listPendingRendererRewrites')
+    vi.stubEnv(WSL_HOSTS_INTERNAL_GATE_ENV, '')
+    expect(invoke('wslMove:listUnfinished')).toEqual([])
+
+    configureWslHostsGate({ hasSavedWslHost: () => false, hasWslMoveCutover: () => true })
+    try {
+      expect(invoke('wslMove:listUnfinished')).toEqual(open)
+      expect(invoke('wslMove:listPendingRendererRewrites')).toEqual(pending)
+    } finally {
+      resetWslHostsGateForTests()
+    }
   })
 
   it('writes the window storage to disk before the ledger entry', () => {

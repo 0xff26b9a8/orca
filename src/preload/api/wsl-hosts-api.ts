@@ -9,7 +9,10 @@ import {
   type WslHostServerStop,
   type WslHostStatus
 } from '../../shared/wsl-host-types'
-import { isWslHostsInternalGateOpen } from '../../shared/wsl-host-internal-gate'
+import {
+  hasWslHostsServeOnlyArgument,
+  isWslHostsInternalGateOpen
+} from '../../shared/wsl-host-internal-gate'
 
 export type WslHostsPreloadApi = {
   getCapability: () => Promise<WslHostCapability>
@@ -51,9 +54,11 @@ const wslHostsApi: WslHostsPreloadApi = {
 /** Undefined hides every WSL host surface in the renderer; main refuses the calls regardless. */
 export function getWslHostsApi(
   env: Readonly<Record<string, string | undefined>> = process.env,
-  platform: NodeJS.Platform = process.platform
+  platform: NodeJS.Platform = process.platform,
+  argv: readonly string[] = process.argv
 ): WslHostsPreloadApi | undefined {
-  if (!isWslHostsInternalGateOpen(env)) {
+  // Serve-only: main found saved WSL work behind the closed gate and stamped this window's argv.
+  if (!isWslHostsInternalGateOpen(env) && !hasWslHostsServeOnlyArgument(argv)) {
     return undefined
   }
   return platform === 'win32' || env.ORCA_E2E_FAKE_WSL_HOSTS ? wslHostsApi : undefined

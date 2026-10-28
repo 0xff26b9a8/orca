@@ -28,7 +28,7 @@ import {
 import type { WslMoveDriverDeps } from '../persistence/moving-wsl-projects/wsl-move-driver-ports'
 import { listUnfinishedWslMoves } from '../persistence/moving-wsl-projects/wsl-move-host-automations-rewrite'
 import { runTrackedWslMove } from '../telemetry/wsl-move-telemetry'
-import { wslHostsGateOpen } from '../wsl/wsl-host-gate'
+import { wslHostsGateOpen, wslHostsServing } from '../wsl/wsl-host-gate'
 import type { WslMoveUndoPorts } from './wsl-move-undo-wiring'
 import { releaseWslMovedProjectHere } from './wsl-move-release-here'
 
@@ -126,7 +126,7 @@ function registerWslMoveDriverHandlers(
     }
   )
   ipcMain.handle('wslMove:listUnfinished', (): WslMoveUnfinished[] =>
-    wslHostsGateOpen() ? listUnfinishedWslMoves(getUserDataPath()) : []
+    wslHostsServing() ? listUnfinishedWslMoves(getUserDataPath()) : []
   )
   ipcMain.handle(
     'wslMove:cancel',
@@ -147,8 +147,8 @@ function registerWslMoveUseHereHandler(
   ipcMain.handle(
     'wslMove:useProjectHereAgain',
     async (event: { sender?: WebContents }, request: unknown): Promise<WslMoveUseLocallyResult> => {
-      // Gate first: with it closed, nothing is read.
-      if (!wslHostsGateOpen()) {
+      // Gate first: with it closed, nothing is read. Serve-only keeps the way back.
+      if (!wslHostsServing()) {
         return { released: false, reason: 'gated-off' }
       }
       const sender = event.sender

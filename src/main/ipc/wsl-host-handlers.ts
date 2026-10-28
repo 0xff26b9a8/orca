@@ -18,7 +18,11 @@ import { WslHostService } from '../wsl/wsl-host-service'
 import { WslHostVisibleWorkByWindow } from './wsl-host-visible-work-windows'
 import type { WslHostAutomationWake } from '../wsl/wsl-host-automation-wake'
 import { createWslHostAutomationWake } from './wsl-host-automation-wake-wiring'
-import { wslHostsGateOpen } from '../wsl/wsl-host-gate'
+import {
+  WSL_HOSTS_NEW_WORK_PAUSED_MESSAGE,
+  wslHostsGateOpen,
+  wslHostsServing
+} from '../wsl/wsl-host-gate'
 import { getWslHostService, setWslHostService } from '../wsl/wsl-host-service-instance'
 import { retireRemovedRuntimeEnvironment } from './runtime-environments/runtime-environment-removal-cleanup'
 import { getRuntimeEnvironmentStatus } from './runtime-environments/runtime-environment-status-probe'
@@ -108,8 +112,8 @@ type WslHostHandlerArgs = {
 }
 
 function createService(args: WslHostHandlerArgs): WslHostService | null {
-  // A closed gate must prevent service adoption, WSL spawns and reconnects.
-  if (!wslHostsGateOpen()) {
+  // A closed gate must prevent service adoption, WSL spawns and reconnects; serve-only keeps saved hosts.
+  if (!wslHostsServing()) {
     return null
   }
   const fake = readFakeWslHostsConfig()
@@ -224,6 +228,10 @@ export function registerWslHostHandlers(args: WslHostHandlerArgs): void {
       _event,
       request: { distro: string; startIfStopped?: boolean }
     ): Promise<WslHostAddResult> => {
+      // Serve-only keeps saved hosts working but admits none.
+      if (!wslHostsGateOpen()) {
+        return { ok: false, kind: 'disabled', message: WSL_HOSTS_NEW_WORK_PAUSED_MESSAGE }
+      }
       const result = await wsl.add(request)
       if (result.ok) {
         noteWslHostUserAction({ kind: 'added', distro: request.distro })
