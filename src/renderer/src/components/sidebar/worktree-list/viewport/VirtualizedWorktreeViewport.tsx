@@ -28,6 +28,8 @@ import { useWorktreeSidebarScrollSuppression } from './use-scroll-suppression'
 import { EMPTY_PROJECT_GROUPS, type VirtualizedWorktreeViewportProps } from './viewport-props'
 import { useWorktreeDropCommitContext } from '../drag/use-drop-commit-context'
 import { buildWorktreeVirtualRowContext } from './virtual-row-context'
+import type { RepoHeaderProjectActions } from '../rows/repo-header-project-actions'
+import { getRepoOwnerWorktreeVisibilityDefaults } from '../../../../store/worktree-visibility-defaults-by-host'
 import { renderWorktreeVirtualRow } from '../rows/virtual-row-dispatch'
 
 const EMPTY_HOST_OPTIONS: NonNullable<VirtualizedWorktreeViewportProps['hostOptions']> = []
@@ -68,6 +70,40 @@ export const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktr
     projectGrouping: props.projectGrouping
   })
   const newCardStyle = settings?.experimentalNewWorktreeCardStyle === true
+  const {
+    handleOpenRepoSettings,
+    handleOpenWorktreeVisibility,
+    handleCreateGroupFromRepo,
+    handleMoveProjectToGroup,
+    handleRemoveProjectFromGroup,
+    handleRemoveProject,
+    handleCreateForRepo
+  } = props
+  // Why stable: a new object re-renders every project header's menu tree on each workspace switch.
+  const projectActions = useMemo<RepoHeaderProjectActions>(
+    () => ({
+      getWorktreeVisibilityDefaults: (repo) =>
+        getRepoOwnerWorktreeVisibilityDefaults(repo, settings, worktreeVisibilityDefaultsByHost),
+      onOpenRepoSettings: handleOpenRepoSettings,
+      onOpenWorktreeVisibility: handleOpenWorktreeVisibility,
+      onCreateGroupFromRepo: handleCreateGroupFromRepo,
+      onMoveProjectToGroup: handleMoveProjectToGroup,
+      onRemoveProjectFromGroup: handleRemoveProjectFromGroup,
+      onRemoveProject: handleRemoveProject,
+      onCreateForRepo: handleCreateForRepo
+    }),
+    [
+      settings,
+      worktreeVisibilityDefaultsByHost,
+      handleOpenRepoSettings,
+      handleOpenWorktreeVisibility,
+      handleCreateGroupFromRepo,
+      handleMoveProjectToGroup,
+      handleRemoveProjectFromGroup,
+      handleRemoveProject,
+      handleCreateForRepo
+    ]
+  )
 
   const reveal = useSidebarRevealHighlight()
   const scrollSuppression = useWorktreeSidebarScrollSuppression(scrollRef)
@@ -308,7 +344,7 @@ export const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktr
     virtualization,
     measureVirtualRowElement,
     settings,
-    worktreeVisibilityDefaultsByHost,
+    projectActions,
     newCardStyle,
     folderBackedProjectGroupIds,
     projectGroups,
