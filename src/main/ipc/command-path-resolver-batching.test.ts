@@ -120,6 +120,32 @@ describe('bounded PATH detection', () => {
     expect(statFile).toHaveBeenCalledTimes(inventory.length)
   })
 
+  it('closes a Unicode listing early and lets candidate stats decide filename equivalence', async () => {
+    let scanned = 0
+    let closed = false
+    openDirectory.mockResolvedValue({
+      async *[Symbol.asyncIterator]() {
+        try {
+          for (const name of ['cruſh', ...inventory]) {
+            scanned++
+            yield { name }
+          }
+        } finally {
+          closed = true
+        }
+      }
+    })
+    executableFiles(new Set(['/front/crush']))
+    await expect(
+      findCommandsOnLocalPath(['crush', ...inventory], {
+        ...options,
+        env: { PATH: '/front' }
+      })
+    ).resolves.toEqual(new Set(['crush']))
+    expect(scanned).toBe(1)
+    expect(closed).toBe(true)
+  })
+
   it.each([true, false])(
     'delegates folded POSIX matches to volume case semantics (%s)',
     async (caseSensitive) => {

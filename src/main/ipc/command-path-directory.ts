@@ -16,6 +16,10 @@ export async function readDetectionDirectory(dir: string): Promise<Map<string, s
         // Large directories cost less to probe by candidate than to enumerate in full.
         return null
       }
+      if (/[^\p{ASCII}]/u.test(entry.name)) {
+        // Filesystem Unicode equivalence can exceed JavaScript normalization and case folding.
+        return null
+      }
       names.set(directoryNameKey(entry.name), entry.name)
     }
     return names

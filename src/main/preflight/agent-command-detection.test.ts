@@ -63,18 +63,21 @@ describe('detectAgentCommandsOnHost install-dir fallback', () => {
     }
   )
 
-  it.skipIf(process.platform === 'win32')(
-    'preserves actual volume case behavior when PATH fallback is skipped',
-    async () => {
+  it.skipIf(process.platform === 'win32').each([
+    ['AgEnT-PrObE', 'agent-probe'],
+    ['cruſh', 'crush']
+  ])(
+    'preserves filesystem equivalence for %s when looking up %s with PATH fallback skipped',
+    async (filename, command) => {
       const dir = await mkdtemp(path.join(tmpdir(), 'agent-detection-case-'))
       try {
-        await writeFile(path.join(dir, 'AgEnT-PrObE'), '#!/bin/sh\n')
-        await chmod(path.join(dir, 'AgEnT-PrObE'), 0o755)
+        await writeFile(path.join(dir, filename), '#!/bin/sh\n')
+        await chmod(path.join(dir, filename), 0o755)
         vi.stubEnv('PATH', dir)
-        const commands = ['agent-probe', 'missing-a', 'missing-b', 'missing-c', 'missing-d']
-        const expected = await isCommandOnLocalPath('agent-probe')
+        const commands = [command, 'missing-a', 'missing-b', 'missing-c', 'missing-d']
+        const expected = await isCommandOnLocalPath(command)
         await expect(detectAgentCommandsOnHost(commands)).resolves.toEqual(
-          new Set(expected ? ['agent-probe'] : [])
+          new Set(expected ? [command] : [])
         )
         expect(detectInstallDirs).toHaveBeenCalledWith(
           expected ? commands.slice(1) : commands,

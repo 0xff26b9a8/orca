@@ -207,6 +207,8 @@ export async function findCommandsOnLocalPath(
 
   const env = options.env ?? process.env
   const isAbsolute = isWin ? path.win32.isAbsolute : path.posix.isAbsolute
+  // Native Windows joining preserves UNC roots; POSIX hosts retain synthetic lookups.
+  const joinPath = isWin ? path.join : path.posix.join
   const pathDirs = (readEnvCaseInsensitive(env, 'PATH') ?? '')
     .split(isWin ? ';' : ':')
     // The install-dir fallback also searches trimmed PATH entries.
@@ -239,7 +241,7 @@ export async function findCommandsOnLocalPath(
             continue
           }
           // POSIX stat must decide volume case sensitivity, even for a folded-name match.
-          const candidate = path.posix.join(dir, isWin ? (listed ?? wanted) : wanted)
+          const candidate = joinPath(dir, isWin ? (listed ?? wanted) : wanted)
           const candidateKey = isWin ? candidate.toLowerCase() : candidate
           if (seenCandidates.has(candidateKey)) {
             continue
