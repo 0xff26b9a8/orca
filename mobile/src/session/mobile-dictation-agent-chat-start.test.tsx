@@ -25,7 +25,9 @@ vi.mock('@orca/expo-two-way-audio', () => ({
     return true
   },
   requestMicrophonePermissionsAsync: async () => ({ granted: true }),
-  tearDown: () => {},
+  tearDown: () => {
+    device.recording = false
+  },
   toggleRecording: (recording: boolean) => {
     device.recording = recording
     return true
