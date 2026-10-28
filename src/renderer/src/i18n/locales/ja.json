@@ -5033,7 +5033,7 @@
           "loadedChangedPaths": "読み込まれた変更済みパス",
           "unresolvedConflict": "未解決の競合",
           "moreLoadedPaths": "ほかに読み込まれたパスが{{value0}}件",
-          "changeCount_one": "未コミットまたは未追跡の変更: 1 件",
+          "changeCount_one": "未コミットまたは未追跡の変更: {{count}} 件",
           "changeCount_other": "未コミットまたは未追跡の変更: {{count}} 件",
           "changes": "未コミットまたは未追跡の変更があります"
         },
@@ -5062,11 +5062,11 @@
           "294de4aeb2": "表示数を減らす",
           "collapseAriaLabel": "{{repo}} の非表示のワークツリー一覧を折りたたむ",
           "expandAriaLabel": "{{repo}} の非表示のワークツリー一覧を展開",
-          "hiding_one": "1 件のワークツリーを非表示中",
+          "hiding_one": "{{count}} 件のワークツリーを非表示中",
           "hiding_other": "{{count}} 件のワークツリーを非表示中",
-          "hidingInRepo_one": "{{repo}} の 1 件のワークツリーを非表示中",
+          "hidingInRepo_one": "{{repo}} の {{count}} 件のワークツリーを非表示中",
           "hidingInRepo_other": "{{repo}} の {{count}} 件のワークツリーを非表示中",
-          "keepHiddenAriaLabel_one": "{{repo}} で検出されたワークツリー 1 件を非表示のままにする（プロジェクトメニューから再表示できます）",
+          "keepHiddenAriaLabel_one": "{{repo}} で検出されたワークツリー {{count}} 件を非表示のままにする（プロジェクトメニューから再表示できます）",
           "keepHiddenAriaLabel_other": "{{repo}} で検出されたワークツリー {{count}} 件を非表示のままにする（プロジェクトメニューから再表示できます）",
           "keepHiddenTooltip": "非表示のままにする（プロジェクトメニューから再表示できます）",
           "repoOnHost": "{{repo}}（{{host}}）"
@@ -5161,7 +5161,7 @@
           "d9f2db2738": "プロジェクトの設定",
           "a5bb8c5135": "これに保存されました",
           "savedSetupCommand": "セットアップコマンドを保存しました。",
-          "savedWithSkippedFields_one": "未対応の項目を 1 件スキップしました。セットアップコマンドを保存しました。",
+          "savedWithSkippedFields_one": "未対応の項目を {{count}} 件スキップしました。セットアップコマンドを保存しました。",
           "savedWithSkippedFields_other": "未対応の項目を {{count}} 件スキップしました。セットアップコマンドを保存しました。"
         },
         "SetupScriptPromptCardViews": {
@@ -6261,11 +6261,11 @@
           "markUnread": "未読にする"
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "1 件のワークスペースを削除",
+          "deleteCount_one": "{{count}} 件のワークスペースを削除",
           "deleteCount_other": "{{count}} 件のワークスペースを削除",
           "deleteSelected": "選択した項目を削除",
           "sleep": "スリープ",
-          "sleepCount_one": "1 件のワークスペースをスリープ",
+          "sleepCount_one": "{{count}} 件のワークスペースをスリープ",
           "sleepCount_other": "{{count}} 件のワークスペースをスリープ"
         },
         "addRepoBusyLabels": {
@@ -7111,7 +7111,7 @@
           "choose_file": "ファイルを選択",
           "choose_folder": "フォルダーを選択",
           "loading": "Warp テーマを読み込み中…",
-          "found_theme_one": "1 件のテーマが見つかりました",
+          "found_theme_one": "{{value0}} 件のテーマが見つかりました",
           "found_theme_other": "{{value0}} 件のテーマが見つかりました",
           "found_in_source": "（{{value0}}）",
           "clear_all": "すべてクリア",
@@ -7124,16 +7124,16 @@
           "skipped_files": "スキップされたファイル",
           "more_skipped_files": "他 {{value0}} 件のファイルがスキップされました。",
           "cancel": "キャンセル",
-          "import_theme_one": "1 件のテーマをインポート",
+          "import_theme_one": "{{value0}} 件のテーマをインポート",
           "import_theme_other": "{{value0}} 件のテーマをインポート",
           "import_themes": "テーマをインポート"
         },
         "useWarpThemeImport": {
           "unknown_error": "不明なエラー",
-          "imported_one": "1 件のテーマをインポートしました",
+          "imported_one": "{{value0}} 件のテーマをインポートしました",
           "imported_other": "{{value0}} 件のテーマをインポートしました",
           "import_failed": "テーマのインポートに失敗しました",
-          "over_limit_one": "これらのテーマをインポートすると、カスタムターミナルテーマの上限（{{value0}} 件）を超えます。新規テーマを 1 件選択解除して、もう一度お試しください。",
+          "over_limit_one": "これらのテーマをインポートすると、カスタムターミナルテーマの上限（{{value0}} 件）を超えます。新規テーマを {{value1}} 件選択解除して、もう一度お試しください。",
           "over_limit_other": "これらのテーマをインポートすると、カスタムターミナルテーマの上限（{{value0}} 件）を超えます。新規テーマを {{value1}} 件選択解除して、もう一度お試しください。"
         },
         "YamlThemeImportButton": {
@@ -10468,7 +10468,7 @@
           }
         },
         "computerUseSummary": {
-          "permissionsRequired_one": "Agent がアプリのウィンドウを操作するには、1 件の権限が必要です。",
+          "permissionsRequired_one": "Agent がアプリのウィンドウを操作するには、{{value0}} 件の権限が必要です。",
           "permissionsRequired_other": "Agent がアプリのウィンドウを操作するには、{{value0}} 件の権限が必要です。",
           "checkingTitle": "コンピュータ操作へのアクセスを確認しています。",
           "checkingDescription": "Orca が、コンピュータ操作ヘルパーの macOS プライバシー権限を確認しています。",

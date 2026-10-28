@@ -5033,7 +5033,7 @@
           "loadedChangedPaths": "已加载的更改路径",
           "unresolvedConflict": "未解决的冲突",
           "moreLoadedPaths": "以及另外 {{value0}} 个已加载的路径",
-          "changeCount_one": "1 处未提交或未跟踪的更改",
+          "changeCount_one": "{{count}} 处未提交或未跟踪的更改",
           "changeCount_other": "{{count}} 处未提交或未跟踪的更改",
           "changes": "未提交或未跟踪的更改"
         },
@@ -5062,11 +5062,11 @@
           "294de4aeb2": "显示较少",
           "collapseAriaLabel": "折叠 {{repo}} 的隐藏工作树",
           "expandAriaLabel": "展开 {{repo}} 的隐藏工作树",
-          "hiding_one": "已隐藏 1 个检测到的工作树",
+          "hiding_one": "已隐藏 {{count}} 个检测到的工作树",
           "hiding_other": "已隐藏 {{count}} 个检测到的工作树",
-          "hidingInRepo_one": "已隐藏 {{repo}} 中的 1 个检测到的工作树",
+          "hidingInRepo_one": "已隐藏 {{repo}} 中的 {{count}} 个检测到的工作树",
           "hidingInRepo_other": "已隐藏 {{repo}} 中的 {{count}} 个检测到的工作树",
-          "keepHiddenAriaLabel_one": "为 {{repo}} 保留 1 个检测到的工作树为隐藏状态；可从项目菜单恢复",
+          "keepHiddenAriaLabel_one": "为 {{repo}} 保留 {{count}} 个检测到的工作树为隐藏状态；可从项目菜单恢复",
           "keepHiddenAriaLabel_other": "为 {{repo}} 保留 {{count}} 个检测到的工作树为隐藏状态；可从项目菜单恢复",
           "keepHiddenTooltip": "保持隐藏 - 从项目菜单恢复",
           "repoOnHost": "{{host}} 上的 {{repo}}"
@@ -5161,7 +5161,7 @@
           "d9f2db2738": "项目的设置",
           "a5bb8c5135": "保存在这个",
           "savedSetupCommand": "已保存设置命令。",
-          "savedWithSkippedFields_one": "已跳过 1 个不受支持的字段。设置命令已保存。",
+          "savedWithSkippedFields_one": "已跳过 {{count}} 个不受支持的字段。设置命令已保存。",
           "savedWithSkippedFields_other": "已跳过 {{count}} 个不受支持的字段。设置命令已保存。"
         },
         "SetupScriptPromptCardViews": {
@@ -6261,11 +6261,11 @@
           "markUnread": "标为未读"
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "删除 1 个工作区",
+          "deleteCount_one": "删除 {{count}} 个工作区",
           "deleteCount_other": "删除 {{count}} 个工作区",
           "deleteSelected": "删除所选",
           "sleep": "休眠",
-          "sleepCount_one": "休眠 1 个工作区",
+          "sleepCount_one": "休眠 {{count}} 个工作区",
           "sleepCount_other": "休眠 {{count}} 个工作区"
         },
         "addRepoBusyLabels": {
@@ -10328,7 +10328,7 @@
           "choose_file": "选择文件",
           "choose_folder": "选择文件夹",
           "loading": "正在加载 Warp 主题...",
-          "found_theme_one": "找到 1 个主题",
+          "found_theme_one": "找到 {{value0}} 个主题",
           "found_theme_other": "找到 {{value0}} 个主题",
           "found_in_source": " 位于 {{value0}}",
           "clear_all": "全部清除",
@@ -10341,16 +10341,16 @@
           "skipped_files": "已跳过文件",
           "more_skipped_files": "还有 {{value0}} 个已跳过的文件。",
           "cancel": "取消",
-          "import_theme_one": "导入 1 个主题",
+          "import_theme_one": "导入 {{value0}} 个主题",
           "import_theme_other": "导入 {{value0}} 个主题",
           "import_themes": "导入主题"
         },
         "useWarpThemeImport": {
           "unknown_error": "未知错误",
-          "imported_one": "已导入 1 个主题",
+          "imported_one": "已导入 {{value0}} 个主题",
           "imported_other": "已导入 {{value0}} 个主题",
           "import_failed": "导入主题失败",
-          "over_limit_one": "导入这些主题会超出 {{value0}} 个自定义终端主题的上限。请取消选择 1 个新主题后重试。",
+          "over_limit_one": "导入这些主题会超出 {{value0}} 个自定义终端主题的上限。请取消选择 {{value1}} 个新主题后重试。",
           "over_limit_other": "导入这些主题会超出 {{value0}} 个自定义终端主题的上限。请取消选择 {{value1}} 个新主题后重试。"
         },
         "YamlThemeImportButton": {
@@ -10468,7 +10468,7 @@
           }
         },
         "computerUseSummary": {
-          "permissionsRequired_one": "在智能体可操作应用窗口前需要 1 项权限。",
+          "permissionsRequired_one": "在智能体可操作应用窗口前需要 {{value0}} 项权限。",
           "permissionsRequired_other": "在智能体可操作应用窗口前需要 {{value0}} 项权限。",
           "checkingTitle": "正在检查计算机控制访问权限。",
           "checkingDescription": "Orca 正在检查计算机控制助手的 macOS 隐私权限。",

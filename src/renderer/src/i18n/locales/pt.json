@@ -6007,7 +6007,7 @@
           "choose_file": "Escolher Arquivo",
           "choose_folder": "Escolher Pasta",
           "loading": "Carregando temas do Warp...",
-          "found_theme_one": "1 tema encontrado",
+          "found_theme_one": "{{value0}} tema encontrado",
           "found_theme_other": "{{value0}} temas encontrados",
           "found_in_source": " em {{value0}}",
           "clear_all": "Limpar tudo",
@@ -6020,7 +6020,7 @@
           "skipped_files": "Arquivos ignorados",
           "more_skipped_files": "mais {{value0}} arquivos ignorados.",
           "cancel": "Cancelar",
-          "import_theme_one": "Importar 1 Tema",
+          "import_theme_one": "Importar {{value0}} Tema",
           "import_theme_other": "Importar {{value0}} Temas",
           "import_themes": "Importar Temas"
         },
@@ -7442,7 +7442,7 @@
           "readyTitle": "O Uso do Computador está pronto.",
           "readyDescription": "Os agentes podem inspecionar e operar janelas de apps quando você solicitar.",
           "permissionsTitle": "Conclua a configuração para usar apps locais.",
-          "permissionsRequired_one": "1 permissão é necessária antes que os agentes possam operar janelas de apps.",
+          "permissionsRequired_one": "{{value0}} permissão é necessária antes que os agentes possam operar janelas de apps.",
           "permissionsRequired_other": "{{value0}} permissões são necessárias antes que os agentes possam operar janelas de apps."
         },
         "LinearAgentSkillPane": {
@@ -7652,10 +7652,10 @@
         },
         "useWarpThemeImport": {
           "unknown_error": "Erro desconhecido",
-          "imported_one": "1 tema importado",
+          "imported_one": "{{value0}} tema importado",
           "imported_other": "{{value0}} temas importados",
           "import_failed": "Falha ao importar temas",
-          "over_limit_one": "Importar estes temas excederia o limite de {{value0}} temas de terminal personalizados. Desmarque 1 tema novo e tente novamente.",
+          "over_limit_one": "Importar estes temas excederia o limite de {{value0}} temas de terminal personalizados. Desmarque {{value1}} tema novo e tente novamente.",
           "over_limit_other": "Importar estes temas excederia o limite de {{value0}} temas de terminal personalizados. Desmarque {{value1}} temas novos e tente novamente."
         },
         "ManageSessionKillDialog": {
@@ -10879,11 +10879,11 @@
           "294de4aeb2": "Mostrar menos",
           "collapseAriaLabel": "Recolher worktrees ocultas de {{repo}}",
           "expandAriaLabel": "Expandir worktrees ocultas de {{repo}}",
-          "hiding_one": "Ocultando 1 worktree descoberta",
+          "hiding_one": "Ocultando {{count}} worktree descoberta",
           "hiding_other": "Ocultando {{count}} worktrees descobertas",
-          "hidingInRepo_one": "Ocultando 1 worktree descoberta em {{repo}}",
+          "hidingInRepo_one": "Ocultando {{count}} worktree descoberta em {{repo}}",
           "hidingInRepo_other": "Ocultando {{count}} worktrees descobertas em {{repo}}",
-          "keepHiddenAriaLabel_one": "Manter 1 worktree descoberta oculta para {{repo}}; recupere-a pelo menu do projeto",
+          "keepHiddenAriaLabel_one": "Manter {{count}} worktree descoberta oculta para {{repo}}; recupere-a pelo menu do projeto",
           "keepHiddenAriaLabel_other": "Manter {{count}} worktrees descobertas ocultas para {{repo}}; recupere-as pelo menu do projeto",
           "keepHiddenTooltip": "Manter oculto - recupere pelo menu do projeto",
           "repoOnHost": "{{repo}} em {{host}}"
@@ -10999,7 +10999,7 @@
           "d9f2db2738": "configurações do projeto",
           "a5bb8c5135": "Salvo nestas",
           "savedSetupCommand": "O comando de configuração foi salvo.",
-          "savedWithSkippedFields_one": "1 campo não compatível foi ignorado. O comando de configuração foi salvo.",
+          "savedWithSkippedFields_one": "{{count}} campo não compatível foi ignorado. O comando de configuração foi salvo.",
           "savedWithSkippedFields_other": "{{count}} campos não compatíveis foram ignorados. O comando de configuração foi salvo."
         },
         "FolderWorkspaceComposerDialog": {
@@ -11276,7 +11276,7 @@
           "loadedChangedPaths": "Caminhos alterados carregados",
           "unresolvedConflict": "Conflito não resolvido",
           "moreLoadedPaths": "e mais {{value0}} caminhos carregados",
-          "changeCount_one": "1 alteração não commitada ou não rastreada",
+          "changeCount_one": "{{count}} alteração não commitada ou não rastreada",
           "changeCount_other": "{{count}} alterações não commitadas ou não rastreadas",
           "changes": "Alterações não commitadas ou não rastreadas"
         },
@@ -11393,11 +11393,11 @@
           "markUnread": "Marcar como não lido"
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "Excluir 1 Espaço de Trabalho",
+          "deleteCount_one": "Excluir {{count}} Espaço de Trabalho",
           "deleteCount_other": "Excluir {{count}} Espaços de Trabalho",
           "deleteSelected": "Excluir Selecionados",
           "sleep": "Suspender",
-          "sleepCount_one": "Suspender 1 Espaço de Trabalho",
+          "sleepCount_one": "Suspender {{count}} Espaço de Trabalho",
           "sleepCount_other": "Suspender {{count}} Espaços de Trabalho"
         },
         "addRepoBusyLabels": {

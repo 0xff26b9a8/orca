@@ -5067,7 +5067,7 @@
           "loadedChangedPaths": "Rutas modificadas cargadas",
           "unresolvedConflict": "Conflicto sin resolver",
           "moreLoadedPaths": "y {{value0}} rutas cargadas más",
-          "changeCount_one": "1 cambio sin confirmar o sin seguimiento",
+          "changeCount_one": "{{count}} cambio sin confirmar o sin seguimiento",
           "changeCount_other": "{{count}} cambios sin confirmar o sin seguimiento",
           "changes": "Cambios sin confirmar o sin seguimiento"
         },
@@ -5096,11 +5096,11 @@
           "294de4aeb2": "Mostrar menos",
           "collapseAriaLabel": "Contraer worktrees ocultos de {{repo}}",
           "expandAriaLabel": "Expandir worktrees ocultos de {{repo}}",
-          "hiding_one": "Ocultando 1 worktree detectado",
+          "hiding_one": "Ocultando {{count}} worktree detectado",
           "hiding_other": "Ocultando {{count}} worktrees detectados",
-          "hidingInRepo_one": "Ocultando 1 worktree detectado en {{repo}}",
+          "hidingInRepo_one": "Ocultando {{count}} worktree detectado en {{repo}}",
           "hidingInRepo_other": "Ocultando {{count}} worktrees detectados en {{repo}}",
-          "keepHiddenAriaLabel_one": "Mantener oculto 1 worktree detectado de {{repo}}; recupéralo desde el menú del proyecto",
+          "keepHiddenAriaLabel_one": "Mantener oculto {{count}} worktree detectado de {{repo}}; recupéralo desde el menú del proyecto",
           "keepHiddenAriaLabel_other": "Mantener ocultos {{count}} worktrees detectados de {{repo}}; recupéralos desde el menú del proyecto",
           "keepHiddenTooltip": "Mantener oculto: recupéralo desde el menú del proyecto",
           "repoOnHost": "{{repo}} en {{host}}"
@@ -5195,7 +5195,7 @@
           "d9f2db2738": "ajustes del proyecto",
           "a5bb8c5135": "Guardado en este",
           "savedSetupCommand": "Se guardó el comando de configuración.",
-          "savedWithSkippedFields_one": "Se omitió 1 campo no compatible. Se guardó el comando de configuración.",
+          "savedWithSkippedFields_one": "Se omitió {{count}} campo no compatible. Se guardó el comando de configuración.",
           "savedWithSkippedFields_other": "Se omitieron {{count}} campos no compatibles. Se guardó el comando de configuración."
         },
         "SetupScriptPromptCardViews": {
@@ -6277,11 +6277,11 @@
           "markUnread": "Marcar como no leído"
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "Eliminar 1 espacio de trabajo",
+          "deleteCount_one": "Eliminar {{count}} espacio de trabajo",
           "deleteCount_other": "Eliminar {{count}} espacios de trabajo",
           "deleteSelected": "Eliminar seleccionados",
           "sleep": "Suspender",
-          "sleepCount_one": "Suspender 1 espacio de trabajo",
+          "sleepCount_one": "Suspender {{count}} espacio de trabajo",
           "sleepCount_other": "Suspender {{count}} espacios de trabajo"
         },
         "addRepoBusyLabels": {
@@ -10344,7 +10344,7 @@
           "choose_file": "Elegir archivo",
           "choose_folder": "Elegir carpeta",
           "loading": "Cargando temas de Warp...",
-          "found_theme_one": "Se encontró 1 tema",
+          "found_theme_one": "Se encontró {{value0}} tema",
           "found_theme_other": "Se encontraron {{value0}} temas",
           "found_in_source": " en {{value0}}",
           "clear_all": "Borrar selección",
@@ -10357,16 +10357,16 @@
           "skipped_files": "Archivos omitidos",
           "more_skipped_files": "{{value0}} archivos omitidos más.",
           "cancel": "Cancelar",
-          "import_theme_one": "Importar 1 tema",
+          "import_theme_one": "Importar {{value0}} tema",
           "import_theme_other": "Importar {{value0}} temas",
           "import_themes": "Importar temas"
         },
         "useWarpThemeImport": {
           "unknown_error": "Error desconocido",
-          "imported_one": "Se importó 1 tema",
+          "imported_one": "Se importó {{value0}} tema",
           "imported_other": "Se importaron {{value0}} temas",
           "import_failed": "No se pudieron importar los temas",
-          "over_limit_one": "Importar estos temas superaría el límite de {{value0}} temas personalizados de terminal. Deselecciona 1 tema nuevo e inténtalo de nuevo.",
+          "over_limit_one": "Importar estos temas superaría el límite de {{value0}} temas personalizados de terminal. Deselecciona {{value1}} tema nuevo e inténtalo de nuevo.",
           "over_limit_other": "Importar estos temas superaría el límite de {{value0}} temas personalizados de terminal. Deselecciona {{value1}} temas nuevos e inténtalo de nuevo."
         },
         "YamlThemeImportButton": {
@@ -10484,7 +10484,7 @@
           }
         },
         "computerUseSummary": {
-          "permissionsRequired_one": "Se requiere 1 permiso antes de que los agentes puedan operar ventanas de apps.",
+          "permissionsRequired_one": "Se requiere {{value0}} permiso antes de que los agentes puedan operar ventanas de apps.",
           "permissionsRequired_other": "Se requieren {{value0}} permisos antes de que los agentes puedan operar ventanas de apps.",
           "checkingTitle": "Comprobando el acceso a Computer Use.",
           "checkingDescription": "Orca está comprobando los permisos de privacidad de macOS para el helper de Computer Use.",

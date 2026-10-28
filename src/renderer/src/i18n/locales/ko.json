@@ -5033,7 +5033,7 @@
           "loadedChangedPaths": "불러온 변경된 경로",
           "unresolvedConflict": "해결되지 않은 충돌",
           "moreLoadedPaths": "불러온 경로 {{value0}}개 더",
-          "changeCount_one": "커밋되지 않았거나 추적되지 않는 변경 1개",
+          "changeCount_one": "커밋되지 않았거나 추적되지 않는 변경 {{count}}개",
           "changeCount_other": "커밋되지 않았거나 추적되지 않는 변경 {{count}}개",
           "changes": "커밋되지 않았거나 추적되지 않는 변경 사항"
         },
@@ -5062,11 +5062,11 @@
           "294de4aeb2": "간략히 표시",
           "collapseAriaLabel": "{{repo}}의 숨겨진 워크트리 접기",
           "expandAriaLabel": "{{repo}}의 숨겨진 워크트리 펼치기",
-          "hiding_one": "발견된 워크트리 1개 숨김",
+          "hiding_one": "발견된 워크트리 {{count}}개 숨김",
           "hiding_other": "발견된 워크트리 {{count}}개 숨김",
-          "hidingInRepo_one": "{{repo}}에서 발견된 워크트리 1개 숨김",
+          "hidingInRepo_one": "{{repo}}에서 발견된 워크트리 {{count}}개 숨김",
           "hidingInRepo_other": "{{repo}}에서 발견된 워크트리 {{count}}개 숨김",
-          "keepHiddenAriaLabel_one": "{{repo}}에서 발견된 워크트리 1개를 숨김 상태로 유지합니다. 프로젝트 메뉴에서 복구할 수 있습니다",
+          "keepHiddenAriaLabel_one": "{{repo}}에서 발견된 워크트리 {{count}}개를 숨김 상태로 유지합니다. 프로젝트 메뉴에서 복구할 수 있습니다",
           "keepHiddenAriaLabel_other": "{{repo}}에서 발견된 워크트리 {{count}}개를 숨김 상태로 유지합니다. 프로젝트 메뉴에서 복구할 수 있습니다",
           "keepHiddenTooltip": "숨김 유지 - 프로젝트 메뉴에서 복구",
           "repoOnHost": "{{host}}의 {{repo}}"
@@ -5161,7 +5161,7 @@
           "d9f2db2738": "프로젝트 설정",
           "a5bb8c5135": "여기에 저장됨",
           "savedSetupCommand": "설정 명령을 저장했습니다.",
-          "savedWithSkippedFields_one": "지원되지 않는 필드 1개를 건너뛰었습니다. 설정 명령을 저장했습니다.",
+          "savedWithSkippedFields_one": "지원되지 않는 필드 {{count}}개를 건너뛰었습니다. 설정 명령을 저장했습니다.",
           "savedWithSkippedFields_other": "지원되지 않는 필드 {{count}}개를 건너뛰었습니다. 설정 명령을 저장했습니다."
         },
         "SetupScriptPromptCardViews": {
@@ -6261,11 +6261,11 @@
           "markUnread": "읽지 않음으로 표시"
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "워크스페이스 1개 삭제",
+          "deleteCount_one": "워크스페이스 {{count}}개 삭제",
           "deleteCount_other": "워크스페이스 {{count}}개 삭제",
           "deleteSelected": "선택 항목 삭제",
           "sleep": "슬립",
-          "sleepCount_one": "워크스페이스 1개 슬립",
+          "sleepCount_one": "워크스페이스 {{count}}개 슬립",
           "sleepCount_other": "워크스페이스 {{count}}개 슬립"
         },
         "addRepoBusyLabels": {
@@ -10328,7 +10328,7 @@
           "choose_file": "파일 선택",
           "choose_folder": "폴더 선택",
           "loading": "Warp 테마 로드 중...",
-          "found_theme_one": "테마 1개를 찾았습니다.",
+          "found_theme_one": "테마 {{value0}}개를 찾았습니다.",
           "found_theme_other": "테마 {{value0}}개를 찾았습니다.",
           "found_in_source": "{{value0}}에서",
           "clear_all": "모두 지우기",
@@ -10341,16 +10341,16 @@
           "skipped_files": "건너뛴 파일",
           "more_skipped_files": "건너뛴 파일 {{value0}}개 더 있음",
           "cancel": "취소",
-          "import_theme_one": "테마 1개 가져오기",
+          "import_theme_one": "테마 {{value0}}개 가져오기",
           "import_theme_other": "테마 {{value0}}개 가져오기",
           "import_themes": "테마 가져오기"
         },
         "useWarpThemeImport": {
           "unknown_error": "알 수 없는 오류",
-          "imported_one": "테마 1개를 가져왔습니다.",
+          "imported_one": "테마 {{value0}}개를 가져왔습니다.",
           "imported_other": "테마 {{value0}}개를 가져왔습니다.",
           "import_failed": "테마를 가져오지 못했습니다.",
-          "over_limit_one": "이 테마를 가져오면 사용자 지정 터미널 테마 {{value0}}개 제한을 초과합니다. 새 테마 1개를 선택 해제하고 다시 시도하세요.",
+          "over_limit_one": "이 테마를 가져오면 사용자 지정 터미널 테마 {{value0}}개 제한을 초과합니다. 새 테마 {{value1}}개를 선택 해제하고 다시 시도하세요.",
           "over_limit_other": "이 테마들을 가져오면 사용자 지정 터미널 테마 {{value0}}개 제한을 초과합니다. 새 테마 {{value1}}개를 선택 해제하고 다시 시도하세요."
         },
         "YamlThemeImportButton": {
@@ -10468,7 +10468,7 @@
           }
         },
         "computerUseSummary": {
-          "permissionsRequired_one": "agents가 앱 창을 조작하려면 먼저 1 권한이 필요합니다.",
+          "permissionsRequired_one": "agents가 앱 창을 조작하려면 먼저 {{value0}} 권한이 필요합니다.",
           "permissionsRequired_other": "agents가 앱 창을 조작하려면 먼저 {{value0}} 권한이 필요합니다.",
           "checkingTitle": "Computer Use 액세스 확인 중입니다.",
           "checkingDescription": "Orca가 Computer Use 도우미의 macOS 개인정보 보호 권한을 확인하고 있습니다.",

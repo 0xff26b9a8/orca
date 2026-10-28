@@ -5259,7 +5259,7 @@
           "loadedChangedPaths": "Chemins modifiés chargés",
           "unresolvedConflict": "Conflit non résolu",
           "moreLoadedPaths": "et {{value0}} autres chemins chargés",
-          "changeCount_one": "1 modification non commitée ou non suivie",
+          "changeCount_one": "{{count}} modification non commitée ou non suivie",
           "changeCount_other": "{{count}} modifications non commitées ou non suivies",
           "changes": "Modifications non commitées ou non suivies"
         },
@@ -5288,11 +5288,11 @@
           "294de4aeb2": "Afficher moins",
           "collapseAriaLabel": "Réduire les worktrees masqués de {{repo}}",
           "expandAriaLabel": "Développer les worktrees masqués de {{repo}}",
-          "hiding_one": "1 worktree détecté masqué",
+          "hiding_one": "{{count}} worktree détecté masqué",
           "hiding_other": "{{count}} worktrees détectés masqués",
-          "hidingInRepo_one": "1 worktree détecté masqué dans {{repo}}",
+          "hidingInRepo_one": "{{count}} worktree détecté masqué dans {{repo}}",
           "hidingInRepo_other": "{{count}} worktrees détectés masqués dans {{repo}}",
-          "keepHiddenAriaLabel_one": "Garder 1 worktree détecté masqué pour {{repo}} ; récupérez-le depuis le menu du projet",
+          "keepHiddenAriaLabel_one": "Garder {{count}} worktree détecté masqué pour {{repo}} ; récupérez-le depuis le menu du projet",
           "keepHiddenAriaLabel_other": "Garder {{count}} worktrees détectés masqués pour {{repo}} ; récupérez-les depuis le menu du projet",
           "keepHiddenTooltip": "Garder masqué - récupérable depuis le menu du projet",
           "repoOnHost": "{{repo}} sur {{host}}"
@@ -5387,7 +5387,7 @@
           "d9f2db2738": "paramètres du projet",
           "a5bb8c5135": "Enregistré dans les",
           "savedSetupCommand": "Commande de setup enregistrée.",
-          "savedWithSkippedFields_one": "1 champ non pris en charge ignoré. Commande de setup enregistrée.",
+          "savedWithSkippedFields_one": "{{count}} champ non pris en charge ignoré. Commande de setup enregistrée.",
           "savedWithSkippedFields_other": "{{count}} champs non pris en charge ignorés. Commande de setup enregistrée."
         },
         "SetupScriptPromptCardViews": {
@@ -6454,11 +6454,11 @@
           "markUnread": "Marquer comme non lu"
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "Supprimer 1 espace de travail",
+          "deleteCount_one": "Supprimer {{count}} espace de travail",
           "deleteCount_other": "Supprimer {{count}} espaces de travail",
           "deleteSelected": "Supprimer la sélection",
           "sleep": "Mettre en veille",
-          "sleepCount_one": "Mettre en veille 1 espace de travail",
+          "sleepCount_one": "Mettre en veille {{count}} espace de travail",
           "sleepCount_other": "Mettre en veille {{count}} espaces de travail"
         },
         "addRepoBusyLabels": {
@@ -7319,7 +7319,7 @@
           "choose_file": "Choisir un fichier",
           "choose_folder": "Choisir un dossier",
           "loading": "Chargement des thèmes Warp...",
-          "found_theme_one": "1 thème trouvé",
+          "found_theme_one": "{{value0}} thème trouvé",
           "found_theme_other": "{{value0}} thèmes trouvés",
           "found_in_source": " dans {{value0}}",
           "clear_all": "Tout effacer",
@@ -7332,16 +7332,16 @@
           "skipped_files": "Fichiers ignorés",
           "more_skipped_files": "{{value0}} autres fichiers ignorés.",
           "cancel": "Annuler",
-          "import_theme_one": "Importer 1 thème",
+          "import_theme_one": "Importer {{value0}} thème",
           "import_theme_other": "Importer {{value0}} thèmes",
           "import_themes": "Importer des thèmes"
         },
         "useWarpThemeImport": {
           "unknown_error": "Erreur inconnue",
-          "imported_one": "1 thème importé",
+          "imported_one": "{{value0}} thème importé",
           "imported_other": "{{value0}} thèmes importés",
           "import_failed": "Échec de l'importation des thèmes",
-          "over_limit_one": "Importer ces thèmes dépasserait la limite de {{value0}} thèmes de terminal personnalisés. Désélectionnez 1 nouveau thème et réessayez.",
+          "over_limit_one": "Importer ces thèmes dépasserait la limite de {{value0}} thèmes de terminal personnalisés. Désélectionnez {{value1}} nouveau thème et réessayez.",
           "over_limit_other": "Importer ces thèmes dépasserait la limite de {{value0}} thèmes de terminal personnalisés. Désélectionnez {{value1}} nouveaux thèmes et réessayez."
         },
         "YamlThemeImportButton": {
@@ -10658,7 +10658,7 @@
           "readyTitle": "Computer Use est prêt.",
           "readyDescription": "Les agents peuvent inspecter et manipuler des fenêtres d'applications à votre demande.",
           "permissionsTitle": "Terminez la configuration pour utiliser les applications locales.",
-          "permissionsRequired_one": "1 autorisation requise avant que les agents puissent manipuler des fenêtres d'applications.",
+          "permissionsRequired_one": "{{value0}} autorisation requise avant que les agents puissent manipuler des fenêtres d'applications.",
           "permissionsRequired_other": "{{value0}} autorisations requises avant que les agents puissent manipuler des fenêtres d'applications."
         },
         "providerAccountScope": {

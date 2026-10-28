@@ -308,9 +308,9 @@
           "syncedServerSingular": "Synced {{count}} server"
         },
         "WarpThemeImportModal": {
-          "found_theme_one": "Found 1 theme",
+          "found_theme_one": "Found {{value0}} theme",
           "found_theme_other": "Found {{value0}} themes",
-          "import_theme_one": "Import 1 Theme",
+          "import_theme_one": "Import {{value0}} Theme",
           "import_theme_other": "Import {{value0}} Themes"
         },
         "agent-awake-copy": {
@@ -387,7 +387,7 @@
           }
         },
         "computerUseSummary": {
-          "permissionsRequired_one": "1 permission required before agents can operate app windows.",
+          "permissionsRequired_one": "{{value0}} permission required before agents can operate app windows.",
           "permissionsRequired_other": "{{value0}} permissions required before agents can operate app windows."
         },
         "sshHostServer": {
@@ -427,23 +427,23 @@
           }
         },
         "useWarpThemeImport": {
-          "imported_one": "Imported 1 theme",
+          "imported_one": "Imported {{value0}} theme",
           "imported_other": "Imported {{value0}} themes",
-          "over_limit_one": "Importing these themes would exceed the {{value0}} custom terminal theme limit. Deselect 1 new theme and try again.",
+          "over_limit_one": "Importing these themes would exceed the {{value0}} custom terminal theme limit. Deselect {{value1}} new theme and try again.",
           "over_limit_other": "Importing these themes would exceed the {{value0}} custom terminal theme limit. Deselect {{value1}} new themes and try again."
         }
       },
       "sidebar": {
         "DeleteWorktreeDirtyChangeHint": {
-          "changeCount_one": "1 uncommitted or untracked change",
+          "changeCount_one": "{{count}} uncommitted or untracked change",
           "changeCount_other": "{{count}} uncommitted or untracked changes"
         },
         "ImportedWorktreesVisibilityLine": {
-          "hidingInRepo_one": "Hiding 1 discovered worktree in {{repo}}",
+          "hidingInRepo_one": "Hiding {{count}} discovered worktree in {{repo}}",
           "hidingInRepo_other": "Hiding {{count}} discovered worktrees in {{repo}}",
-          "hiding_one": "Hiding 1 discovered worktree",
+          "hiding_one": "Hiding {{count}} discovered worktree",
           "hiding_other": "Hiding {{count}} discovered worktrees",
-          "keepHiddenAriaLabel_one": "Keep 1 discovered worktree hidden for {{repo}}; recover from the project menu",
+          "keepHiddenAriaLabel_one": "Keep {{count}} discovered worktree hidden for {{repo}}; recover from the project menu",
           "keepHiddenAriaLabel_other": "Keep {{count}} discovered worktrees hidden for {{repo}}; recover from the project menu"
         },
         "PreservedBranchBatchReviewDialog": {
@@ -451,7 +451,7 @@
           "a0f9863597_other": "Force Delete {{count}} Branches"
         },
         "SetupScriptPromptCard": {
-          "savedWithSkippedFields_one": "1 unsupported field skipped. Saved the setup command.",
+          "savedWithSkippedFields_one": "{{count}} unsupported field skipped. Saved the setup command.",
           "savedWithSkippedFields_other": "{{count}} unsupported fields skipped. Saved the setup command."
         },
         "preserved": {
@@ -473,9 +473,9 @@
           }
         },
         "workspaceBatchActionLabels": {
-          "deleteCount_one": "Delete 1 Workspace",
+          "deleteCount_one": "Delete {{count}} Workspace",
           "deleteCount_other": "Delete {{count}} Workspaces",
-          "sleepCount_one": "Sleep 1 Workspace",
+          "sleepCount_one": "Sleep {{count}} Workspace",
           "sleepCount_other": "Sleep {{count}} Workspaces"
         }
       },
