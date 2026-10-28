@@ -42,7 +42,11 @@ export type StagedGeneration = {
 export type GenerationStore = {
   readActiveGeneration(hostKey: string): Promise<ActiveGeneration | null>
   openReusableAssets(hostKey: string): Promise<MobileWebBundleReusableAssets>
-  stageGeneration(hostKey: string, result: MobileWebBundleFetchResult): Promise<StagedGeneration>
+  stageGeneration(
+    hostKey: string,
+    result: MobileWebBundleFetchResult,
+    signal?: AbortSignal
+  ): Promise<StagedGeneration>
   commitGeneration(staged: StagedGeneration): Promise<ActiveGeneration>
   abortStagedGeneration(staged: StagedGeneration): Promise<void>
   sweepStagedGenerations(): Promise<void>
@@ -157,8 +161,12 @@ export function createGenerationStore(options: {
 
   async function stage(
     hostKey: string,
-    result: MobileWebBundleFetchResult
+    result: MobileWebBundleFetchResult,
+    signal?: AbortSignal
   ): Promise<StagedGeneration> {
+    if (signal?.aborted) {
+      throw new Error('generation staging was aborted')
+    }
     const manifest = result.manifest
     const directory = joinUri(stagingRoot(hostKey), manifest.buildId)
     const reused = new Set(result.reused)
@@ -272,7 +280,7 @@ export function createGenerationStore(options: {
   return {
     readActiveGeneration: (hostKey) => serialize(() => openActive(hostKey)),
     openReusableAssets: (hostKey) => serialize(() => openReusable(hostKey)),
-    stageGeneration: (hostKey, result) => serialize(() => stage(hostKey, result)),
+    stageGeneration: (hostKey, result, signal) => serialize(() => stage(hostKey, result, signal)),
     commitGeneration: (staged) => serialize(() => commit(staged)),
     abortStagedGeneration: (staged) =>
       serialize(() => fs.delete(requireIssuedHandle(staged).directory)),
