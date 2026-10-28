@@ -189,7 +189,8 @@ jobs:
       fail-fast: false
       matrix:
         node: ${{ fromJSON(inputs.node_versions) }}
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    # Free hosted runner: ~1.2 min of work finishes well inside the ~7 min unit shards it runs beside.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     steps:
