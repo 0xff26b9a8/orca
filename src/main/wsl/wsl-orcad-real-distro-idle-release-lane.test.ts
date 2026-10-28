@@ -29,7 +29,22 @@ import { WSL_DISTRO_HOLDER_POLL_SECONDS } from './wsl-distro-holder-command'
 import { wslDistroHolderKey } from './wsl-distro-holder-record'
 import { WslOrcadConnectionManager, type WslOrcadConnection } from './wsl-orcad-connection'
 import { defaultWslOrcadEnvironmentId, deployAndLaunchWslOrcad } from './wsl-orcad-deploy'
+import {
+  createWslOrcadEnsureTrace,
+  medianWslOrcadEnsurePhases,
+  summarizeWslOrcadEnsurePhases,
+  type WslOrcadEnsureMark,
+  type WslOrcadEnsurePhases
+} from './wsl-orcad-ensure-phase-trace'
 import { createWslOrcadHostTransport } from './wsl-orcad-host-transport'
+import { ORCAD_LOG_FILENAME } from '../managed-server/install/orcad-remote-host-support'
+import {
+  ORCAD_STARTUP_TIMING_ENV,
+  ORCAD_STARTUP_TIMING_PREFIX
+} from '../orcad/orcad-startup-timing'
+import { quotePosixShell } from '../../shared/shell-argument-quoting'
+import { verifyWslOrcadIdentity } from './wsl-orcad-pairing-identity'
+import { listenWslOrcadStdioBridge } from './wsl-orcad-stdio-bridge'
 
 const RUN = process.env.ORCA_RUN_WSL_ORCAD_LANE === '1'
 const PLAIN = process.env.ORCA_WSL_ORCAD_LANE_PLAIN_DISTRO ?? 'orca-lane-plain'
@@ -48,6 +63,8 @@ const commandLog: string[] = []
 receipt.commandLog = commandLog
 let holder: WslDistroHolder
 let manager: WslOrcadConnectionManager
+/** Set only while a restart's ensure is measured. */
+let ensureTrace: ReturnType<typeof createWslOrcadEnsureTrace> | null = null
 
 function installLaneAppEnvironment(): void {
   const { version } = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8'))
@@ -76,16 +93,30 @@ function launchTemplates(): Map<string, string> {
 
 function createManager(): void {
   const templates = launchTemplates()
+  const traced = <T>(start: WslOrcadEnsureMark, end: WslOrcadEnsureMark, run: () => Promise<T>) =>
+    ensureTrace ? ensureTrace.span(start, end, run) : run()
   manager = new WslOrcadConnectionManager({
-    holder,
+    holder: {
+      ...holder,
+      ensureHeld: (distro) => traced('holder-start', 'holder-end', () => holder.ensureHeld(distro))
+    },
+    listen: (transport, options) =>
+      traced('bridge-start', 'bridge-end', () => listenWslOrcadStdioBridge(transport, options)),
+    verifyIdentity: (offer, readiness) =>
+      traced('pairing-start', 'pairing-end', () => verifyWslOrcadIdentity(offer, readiness)),
     // Logs every guest command with its time, to match the zombie's start time to one step.
     createTransport: (target) => {
       const transport = createWslOrcadHostTransport({ target })
       const log = (path: string, command: string): void => {
+        ensureTrace?.command(command)
         commandLog.push(`${Math.round(performance.now())} ${path} ${command.slice(0, 160)}`)
       }
       return {
         ...transport,
+        orcadLaunchEnv: async (launch) => [
+          ...((await transport.orcadLaunchEnv?.(launch)) ?? []),
+          [ORCAD_STARTUP_TIMING_ENV, '1']
+        ],
         exec: (command, options) => {
           log('exec', command)
           return transport.exec(command, options)
@@ -99,10 +130,12 @@ function createManager(): void {
       }
     },
     deployAndLaunch: (distro, options) =>
-      deployAndLaunchWslOrcad(distro, {
-        ...options,
-        templateDir: templates.get(wslDistroHolderKey(distro))
-      })
+      traced('deploy-start', 'deploy-end', () =>
+        deployAndLaunchWslOrcad(distro, {
+          ...options,
+          templateDir: templates.get(wslDistroHolderKey(distro))
+        })
+      )
   })
 }
 
@@ -293,12 +326,34 @@ function outputProbe(): { command: string; token: string } {
   return { command: `printf 'COLD_%s\\n' ${nonce}`, token: `COLD_${nonce}` }
 }
 
+/** The newest startup timing line orcad logged; null when none parses. */
+async function readOrcadStartupTiming(): Promise<unknown> {
+  const line = await guest(
+    `grep -hF ${quotePosixShell(ORCAD_STARTUP_TIMING_PREFIX)} "$HOME"/.orca-remote/orcad-*/${ORCAD_LOG_FILENAME} 2>/dev/null | tail -n 1`
+  )
+  try {
+    return JSON.parse(
+      line.slice(line.indexOf(ORCAD_STARTUP_TIMING_PREFIX) + ORCAD_STARTUP_TIMING_PREFIX.length)
+    )
+  } catch {
+    return null
+  }
+}
+
 /** (a) WSL host: holder boots the distro, orcad deploys and starts, a terminal spawns and prints. */
-async function restartThroughHost(repoPath: string): Promise<Receipt> {
+async function restartThroughHost(
+  repoPath: string
+): Promise<Receipt & { phases: WslOrcadEnsurePhases | null }> {
   await terminatePlain()
   createManager()
+  const trace = createWslOrcadEnsureTrace()
+  ensureTrace = trace
   const started = performance.now()
-  const connection = await manager.ensure(PLAIN)
+  trace.mark('ensure-start')
+  const connection = await manager.ensure(PLAIN).finally(() => {
+    trace.mark('ensure-end')
+    ensureTrace = null
+  })
   const ensureMs = Math.round(performance.now() - started)
   const created = await rpc<{ terminal: { handle: string } }>(connection, 'terminal.create', {
     worktree: `path:${repoPath}`
@@ -322,9 +377,16 @@ async function restartThroughHost(repoPath: string): Promise<Receipt> {
     100
   )
   const firstOutputMs = Math.round(performance.now() - started)
+  const orcadStartup = await readOrcadStartupTiming()
   await rpc(connection, 'terminal.close', { terminal: created.terminal.handle }).catch(() => {})
   await manager.dispose()
-  return { ensureMs, terminalCreatedMs: createdMs - ensureMs, firstOutputMs }
+  return {
+    ensureMs,
+    terminalCreatedMs: createdMs - ensureMs,
+    firstOutputMs,
+    phases: summarizeWslOrcadEnsurePhases(trace.events),
+    orcadStartup
+  }
 }
 
 /**
@@ -352,7 +414,7 @@ async function distroRestartBaseline(): Promise<void> {
   const repoPath = (await guest('cd "$HOME/wsl-orcad-lane-repo" && pwd')).trim()
   // One unrecorded bridge run warms the WSL VM, which the idle phase let shut down.
   await restartThroughBridgeExec()
-  const host: Receipt[] = []
+  const host: Awaited<ReturnType<typeof restartThroughHost>>[] = []
   const bridge: Receipt[] = []
   for (let i = 0; i < 3; i++) {
     host.push(await restartThroughHost(repoPath))
@@ -365,6 +427,7 @@ async function distroRestartBaseline(): Promise<void> {
     bridgeExecLowerBound: bridge,
     medianHostFirstOutputMs: median(host, 'firstOutputMs'),
     medianHostEnsureMs: median(host, 'ensureMs'),
+    medianHostPhases: medianWslOrcadEnsurePhases(host.map((run) => run.phases)),
     medianBridgeExecLowerBoundMs: median(bridge, 'firstOutputMs')
   }
   await terminatePlain()
