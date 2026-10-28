@@ -187,6 +187,7 @@ jobs:
         if: runner.os == 'Linux'
         with:
           bun-version-file: config/.bun-version
+          no-cache: true
       - name: Build the last Bun orcad for the cross-runtime tests
         id: bun-orcad
         background: true
