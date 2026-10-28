@@ -13,6 +13,7 @@ import jaCatalogUrl from './locales/ja.json?url'
 import koCatalogUrl from './locales/ko.json?url'
 import ptCatalogUrl from './locales/pt.json?url'
 import zhCatalogUrl from './locales/zh.json?url'
+import zhHantCatalogUrl from './locales/zh-Hant.json?url'
 import { isPseudoLocalizationLocale, pseudoLocalizeString } from './pseudo-localization'
 import { advanceTranslationResourceVersion } from './translation-resource-version'
 import { DEFAULT_LOCALE, resolveUiLocale } from './supported-languages'
@@ -33,7 +34,8 @@ const NON_DEFAULT_LOCALE_URLS: Record<Exclude<SupportedUiLocale, 'en'>, string> 
   ja: jaCatalogUrl,
   ko: koCatalogUrl,
   pt: ptCatalogUrl,
-  zh: zhCatalogUrl
+  zh: zhCatalogUrl,
+  'zh-Hant': zhHantCatalogUrl
 }
 
 function localeCatalogUrl(language: string): string | undefined {
@@ -72,6 +74,8 @@ void i18n
   .init({
     fallbackLng: DEFAULT_LOCALE,
     lng: DEFAULT_LOCALE,
+    // Default 'all' expands zh-Hant to [zh-Hant, zh, en], so missing keys would render Simplified.
+    load: 'currentOnly',
     // Serve eager English from resources while the backend lazily supplies other languages.
     partialBundledLanguages: true,
     resources: {

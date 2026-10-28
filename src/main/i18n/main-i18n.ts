@@ -28,7 +28,8 @@ const LAZY_LOCALE_LOADERS: Record<
   ja: () => import('../../renderer/src/i18n/locales/ja.json'),
   ko: () => import('../../renderer/src/i18n/locales/ko.json'),
   pt: () => import('../../renderer/src/i18n/locales/pt.json'),
-  zh: () => import('../../renderer/src/i18n/locales/zh.json')
+  zh: () => import('../../renderer/src/i18n/locales/zh.json'),
+  'zh-Hant': () => import('../../renderer/src/i18n/locales/zh-Hant.json')
 }
 
 const lazyLocaleBackend: BackendModule = {
@@ -57,6 +58,8 @@ export async function ensureMainI18n(): Promise<I18nInstance> {
     await mainI18n.use(lazyLocaleBackend).init({
       fallbackLng: DEFAULT_UI_LOCALE,
       lng: DEFAULT_UI_LOCALE,
+      // Keep zh-Hant from falling back to Simplified zh before English.
+      load: 'currentOnly',
       // Seed English as loaded; partialBundledLanguages allows lazy non-English catalogs.
       partialBundledLanguages: true,
       resources: {
