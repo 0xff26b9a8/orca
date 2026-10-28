@@ -4434,8 +4434,6 @@
           "ad6c529693": "Contas de Provedores de IA",
           "ec1ba547f7": "Gerencie agentes de IA, defina um padrão e personalize comandos.",
           "8afa676615": "Agentes",
-          "add3b97ee6": "\"",
-          "3c88ec55d6": "Nenhuma configuração encontrada para \"",
           "c7ad095d96": "Carregando configurações...",
           "acc7bbdefd": "Pressione ESC novamente para sair das configurações",
           "43b68e10f0": "Você tem alterações não salvas do Autor de IA do Git. Sair vai descartá-las.",
@@ -4454,7 +4452,8 @@
           "linearTitle": "Linear",
           "linearDescription": "Como o Linear funciona no Orca, checklist de configuração, skill de agente e exemplos de prompts.",
           "tasksDescription": "Conecte provedores, instale a skill do Linear e escolha o que aparece em Tarefas.",
-          "remoteServersDescription": "Execute o Orca em outra máquina e trabalhe nela por aqui."
+          "remoteServersDescription": "Execute o Orca em outra máquina e trabalhe nela por aqui.",
+          "noSettingsFoundForQuery": "Nenhuma configuração encontrada para \"{{value0}}\""
         },
         "experimental": {
           "search": {
