@@ -12934,7 +12934,8 @@
             "discardFailedSingular": "Failed to discard {{count}} file",
             "discardFailedPlural": "Failed to discard {{count}} files",
             "noteCountSingular": "{{count}} note",
-            "noteCountPlural": "{{count}} notes"
+            "noteCountPlural": "{{count}} notes",
+            "statusReadFailed": "Git could not read this workspace. Changes shown may be out of date."
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "Could not start the selected agent.",
