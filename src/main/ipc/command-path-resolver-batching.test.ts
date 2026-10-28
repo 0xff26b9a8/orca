@@ -12,6 +12,11 @@ vi.mock('node:fs/promises', () => ({
   constants: { X_OK: 1 }
 }))
 
+// Keep listing-policy tests local; the worker suite exercises the real Dirent boundary.
+vi.mock('./command-path-directory-worker-client', async () => ({
+  readDetectionDirectoryViaWorker: (await import('./command-path-directory')).readDetectionDirectory
+}))
+
 import { findCommandsOnLocalPath } from './command-path-resolver'
 
 const inventory = Array.from({ length: 30 }, (_, i) => `agent-${i}`)

@@ -4,7 +4,8 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import { getExecutableNames } from '../../shared/node-cli-command-resolution'
 import { forEachWithConcurrency } from '../../shared/map-with-concurrency'
-import { directoryNameKey, readDetectionDirectory } from './command-path-directory'
+import { directoryNameKey } from './command-path-directory'
+import { readDetectionDirectoryViaWorker } from './command-path-directory-worker-client'
 
 export type ResolveCommandOptions = {
   /** Defaults to `process.platform`. Lets tests exercise the win32 lookup on posix. */
@@ -230,7 +231,7 @@ export async function findCommandsOnLocalPath(
     const names =
       !isWin && bareCommands.size <= DIRECT_DETECTION_COMMAND_LIMIT
         ? null
-        : await readDetectionDirectory(dir)
+        : await readDetectionDirectoryViaWorker(dir)
     await Promise.all(
       [...bareCommands].map(async (command) => {
         const seenCandidates = new Set<string>()

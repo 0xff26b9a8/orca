@@ -19,6 +19,10 @@ vi.mock('node:fs/promises', async (importOriginal) => ({
   opendir: openDirectory,
   stat: statFile
 }))
+vi.mock('../ipc/command-path-directory-worker-client', async () => ({
+  readDetectionDirectoryViaWorker: (await import('../ipc/command-path-directory'))
+    .readDetectionDirectory
+}))
 vi.mock('../../shared/local-agent-install-dir-detection', () => ({
   detectCommandsInInstallDirs: detectInstallDirs
 }))
