@@ -8,7 +8,6 @@ import { recoverInterruptedOrcadActivation } from '../managed-server/activation/
 import { readOrcadActivationRecord } from '../managed-server/activation/orcad-activation-record-store'
 import { readOrcadActivationTransaction } from '../managed-server/activation/orcad-activation-transaction-store'
 import { materializeOrcadArtifact } from '../orcad/orcad-artifact-materializer'
-import { OrcadHostUnsupportedError } from '../orcad/orcad-host-unavailable'
 import type { OrcadHostTransport } from '../ssh/orcad-host-transport'
 import { ORCAD_ACTIVATION_POLICY_REFUSED_CODE } from '../ssh/orcad-installed-activation'
 import { orcadBoundPort } from '../managed-server/lifecycle/orcad-managed-bound-port'
@@ -38,6 +37,7 @@ import { joinRemotePath } from '../ssh/ssh-remote-platform'
 import { readLocalFullVersion } from '../managed-server/install/remote-versioned-install'
 import { createWslDistroHolder, type WslDistroHolder } from './wsl-distro-holder'
 import { wslDistroHolderKey } from './wsl-distro-holder-record'
+import { refuseMissingWslDistro, WslDistroVersion1Error } from './wsl-distro-unsupported'
 import { readWslDistroRegistryIdShared } from './wsl-distro-registry-id'
 import type { WslOrcadHostTarget } from './wsl-orcad-host-target'
 import { createWslOrcadHostTransport, type WslOrcadHostTransport } from './wsl-orcad-host-transport'
@@ -134,12 +134,9 @@ async function launchOverTransport(
   const { signal } = options
   let ownBuildVersion: string | null = null
   const conn = withOwnBuildLaunchEnv(transport, () => ownBuildVersion)
-  const kernel = await execCommand(conn, 'uname -r', { signal })
+  const kernel = await execCommand(conn, 'uname -r', { signal }).catch(refuseMissingWslDistro(name))
   if (isWsl1KernelRelease(kernel)) {
-    throw new OrcadHostUnsupportedError(
-      `The WSL 1 distro ${name} isn’t supported by Orca’s server. ` +
-        `Convert it with: wsl --set-version ${name} 2`
-    )
+    throw new WslDistroVersion1Error(name)
   }
   // Acquire a holder before launch or WSL can idle-stop orcad's distro.
   const holder = options.holder ?? createWslDistroHolder({ userDataPath: userDataPath() })
