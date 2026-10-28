@@ -1438,6 +1438,8 @@ jobs:
       # Why the merge commit, unlike `e2e`: a gate must test what lands on main, not a stale head.
       ref: ${{ github.sha }}
       test_files: '["tests/e2e/workspace-layout-oracle-headless.spec.ts","tests/e2e/workspace-layout-oracle.spec.ts"]'
+      # Two ~3.6 min halves of the 21 window scenarios keep this gate off the PR's critical path.
+      changed_e2e_test_shards: '["1/2","2/2"]'
       run_changed_e2e: true
       needs_build: true
       artifact_suffix: -layout-oracle
