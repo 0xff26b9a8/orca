@@ -19128,7 +19128,7 @@
       "subagents_other": "{{count}} subagents"
     },
     "terminal": {
-      "closed": "No live terminal — this agent's pane has closed.",
+      "previewUnavailable": "No preview available — open the workspace to view this agent.",
       "remotePreviewUnavailable": "No preview for this remote session — open the workspace to view the terminal.",
       "focusWorktree": "Open worktree",
       "close": "Close"

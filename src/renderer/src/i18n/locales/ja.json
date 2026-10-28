@@ -18831,7 +18831,6 @@
       "subagents_other": "{{count}} 個のサブ Agent"
     },
     "terminal": {
-      "closed": "実行中のターミナルがありません。この Agent のペインは閉じられています。",
       "focusWorktree": "ワークツリーを開く",
       "close": "閉じる",
       "remotePreviewUnavailable": "このリモートセッションにはプレビューがありません。ワークスペースを開いてターミナルを表示してください。"

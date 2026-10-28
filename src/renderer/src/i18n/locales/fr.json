@@ -19011,7 +19011,6 @@
       "subagents_other": "{{count}} sous-agents"
     },
     "terminal": {
-      "closed": "Pas de terminal en direct — le volet de cet agent est fermé.",
       "focusWorktree": "Ouvrir le worktree",
       "close": "Fermer",
       "remotePreviewUnavailable": "Aucun aperçu pour cette session à distance — ouvrez l'espace de travail pour afficher le terminal."

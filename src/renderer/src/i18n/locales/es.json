@@ -18832,7 +18832,6 @@
       "subagents_other": "{{count}} subagentes"
     },
     "terminal": {
-      "closed": "No hay terminal activa: el panel de este agente se ha cerrado.",
       "focusWorktree": "Open worktree",
       "close": "Close",
       "remotePreviewUnavailable": "No hay vista previa para esta sesión remota: abre el espacio de trabajo para ver la terminal."
