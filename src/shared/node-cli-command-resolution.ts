@@ -13,7 +13,7 @@ type ResolveCommandOptions = {
   skipPathSearch?: boolean
 }
 
-function getExecutableNames(platform: NodeJS.Platform, commandName: string): string[] {
+export function getExecutableNames(platform: NodeJS.Platform, commandName: string): string[] {
   if (platform === 'win32') {
     return [`${commandName}.cmd`, `${commandName}.exe`, `${commandName}.bat`, commandName]
   }

@@ -21,16 +21,14 @@ export async function detectAgentCommandsOnHost(
   if (wslTarget) {
     return detectWslCommandsOnPath(wslTarget, commands)
   }
-  // One directory read per PATH entry replaces a stat per command-extension candidate (#34636).
+  // Bounded directory scans avoid repeated probes for missing commands (#34636).
   const onPathCommands = await findCommandsOnLocalPath(commands, {
     env: buildLocalPreflightEnv()
   })
   const missedCommands = commands.filter((cmd) => !onPathCommands.has(cmd))
   // Resolve cold-GUI install dirs once; use the same WSL-filtered PATH while retaining process PATH elsewhere.
   const guestMounts = readGuestWindowsDriveMounts()
-  // The batch already proved these commands absent on the PATH it searched, and that
-  // PATH is a superset of the fallback's (merged persisted PATH on Windows, the same
-  // filtered PATH on a WSL host), so the fallback scans install directories only.
+  // The batch includes the fallback's PATH normalization and Windows executable names.
   const installDirCommands = detectCommandsInInstallDirs(
     missedCommands,
     guestMounts.length > 0 ? buildLocalPreflightEnv(guestMounts)?.PATH : undefined,
