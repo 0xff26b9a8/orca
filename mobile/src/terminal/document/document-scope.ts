@@ -95,6 +95,7 @@ export type TerminalDocumentState = {
   sel: TerminalDocumentSelection | null
   longPressTimer: ReturnType<typeof setTimeout> | null
   longPressOrigin: TerminalDocumentTouchOrigin | null
+  interactionActive: boolean
   tapCandidate: TerminalDocumentTapCandidate | null
   bottomRowBackdrop: string
   surface: HTMLElement | null
@@ -219,6 +220,7 @@ function createTerminalDocumentState(): TerminalDocumentState {
     sel: null,
     longPressTimer: null,
     longPressOrigin: null,
+    interactionActive: true,
     tapCandidate: null,
     wheelAccumDeltaY: 0,
     bottomRowBackdrop: '',
@@ -253,6 +255,7 @@ function createTerminalDocumentState(): TerminalDocumentState {
     scheduledFrames: [],
     framesStopped: false,
     touchGesture: {
+      active: false,
       lastX: 0,
       lastY: 0,
       lastTime: 0,
