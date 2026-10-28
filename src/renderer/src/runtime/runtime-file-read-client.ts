@@ -16,7 +16,8 @@ import {
   assertExternalSshReadOwnership,
   canReadRelativeRuntimeFile,
   getRemoteFileArgs,
-  hasRemoteRuntimeOwner
+  hasRemoteRuntimeOwner,
+  localAccess
 } from './runtime-file-routing'
 import { toRuntimeWorktreeSelector } from './runtime-worktree-selector'
 import { chatScratchFileAddress } from './runtime-chat-scratch-file-address'
@@ -24,6 +25,7 @@ import { isAgentSessionAttachmentStorePath } from '../../../shared/agent-session
 import type { LocalFileAccess } from '../../../shared/local-file-access'
 import {
   isHostFileOutsideWorkspaces,
+  readHostFilePreview,
   readHostFileOutsideWorkspaces
 } from './runtime-terminal-artifact-read'
 import {
@@ -40,13 +42,7 @@ const REMOTE_DOWNLOAD_UPDATE_REQUIRED_MESSAGE =
 
 type RemoteFileDownloadArgs = NonNullable<ReturnType<typeof getRemoteFileArgs>>
 
-// Why local only: an SSH read is the remote host's to check, and its relay never sees this field.
-export function localAccess(
-  connectionId: string | undefined,
-  access: LocalFileAccess | undefined
-): { access?: LocalFileAccess } {
-  return access && !connectionId ? { access } : {}
-}
+export { localAccess } from './runtime-file-routing'
 
 export async function readRuntimeFileContent({
   target,
@@ -144,7 +140,7 @@ export async function readRuntimeFilePreview(
     context.expectedExternalSshTargetId
   )
   const remoteArgs = getRemoteFileArgs(context, filePath)
-  const runtimeTarget = context.target
+  const { target: runtimeTarget, worktreeId } = context
   // Paired-server chat attachments live outside worktrees; owning server reads them. Older method_not_found keeps preview fallback.
   if (
     !remoteArgs &&
@@ -159,6 +155,13 @@ export async function readRuntimeFilePreview(
     )
   }
   if (!remoteArgs) {
+    if (access?.kind === 'chat-image' && runtimeTarget.kind === 'environment' && worktreeId) {
+      return readHostFilePreview({
+        target: runtimeTarget,
+        worktreeId,
+        absolutePath: filePath
+      })
+    }
     if (hasRemoteRuntimeOwner(context)) {
       throw new Error('Remote file is outside the owning runtime worktree')
     }
