@@ -32,6 +32,7 @@ import { HistoryReader } from './history-reader'
 import type { PtyBackgroundStreamEvent } from '../providers/pty-provider-contract'
 import type { DaemonPtyRouterDataEvent, DaemonPtyRouterExitEvent } from './daemon-pty-router-events'
 import type { ReadRunningWslDistros } from './daemon-wsl-bridge-exit'
+import { WslBridgeBootIdentity } from './daemon-wsl-bridge-boot-identity'
 
 export type PendingDaemonSpawnOperation = {
   exitsBySessionId: Map<string, { code: number; incarnationId?: string }[]>
@@ -62,6 +63,8 @@ export type DaemonPtyAdapterOptions = {
   respawn?: (reason: DaemonRespawnReason) => Promise<void | (() => void)>
   /** Test seam; production reads the shared, coalesced `wsl --list --running`. */
   readRunningWslDistros?: ReadRunningWslDistros
+  /** Test seam; production reads each distro's boot id through the background-work gate. */
+  wslBridgeBootIdentity?: WslBridgeBootIdentity
 }
 
 export type DaemonRespawnReason =
@@ -83,6 +86,7 @@ export type DaemonIdleRetirementResult =
 
 export abstract class DaemonPtyRuntimeState {
   protected readonly readRunningWslDistros: ReadRunningWslDistros | undefined
+  protected readonly wslBridgeBootIdentity: WslBridgeBootIdentity
   readonly protocolVersion: number
   protected socketPath: string
   protected tokenPath: string
@@ -209,6 +213,7 @@ export abstract class DaemonPtyRuntimeState {
     }
     this.initialCwds.delete(sessionId)
     this.wslDistrosBySessionId.delete(sessionId)
+    this.wslBridgeBootIdentity.forget(sessionId)
     this.wslPaneKeysBySessionId.delete(sessionId)
     this.sessionIncarnations.delete(sessionId)
   }
@@ -239,6 +244,7 @@ export abstract class DaemonPtyRuntimeState {
     this.historyReader = opts.historyPath ? new HistoryReader(opts.historyPath) : null
     this.respawnFn = opts.respawn ?? null
     this.readRunningWslDistros = opts.readRunningWslDistros
+    this.wslBridgeBootIdentity = opts.wslBridgeBootIdentity ?? new WslBridgeBootIdentity()
     this.runtimeDir = opts.runtimeDir ?? opts.profileScope ?? null
     this.packagedAppVersion = opts.packagedAppVersion ?? null
     this.supportsCheckpoints = this.protocolVersion >= 4
