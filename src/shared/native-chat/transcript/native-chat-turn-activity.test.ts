@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { AgentJournalItemBody, AgentJournalRenderItem } from './agent-session-journal-types'
+import type {
+  AgentJournalItemBody,
+  AgentJournalRenderItem
+} from '../../agent-session-journal-types'
 import { selectStructuredAgentTurnActivity } from './native-chat-turn-activity'
 
 function item(sequence: number, body: AgentJournalItemBody): AgentJournalRenderItem {
