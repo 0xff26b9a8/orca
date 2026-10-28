@@ -4,7 +4,8 @@ import type { Repo } from '../../../shared/repo-types'
 const mocks = vi.hoisted(() => ({
   handlers: new Map<string, (event: unknown, args: unknown) => unknown>(),
   hasHooksFile: vi.fn((_path: string) => false),
-  blocked: vi.fn<(path: string) => Promise<{ distro: string; state: 'stopped' } | null>>()
+  blocked:
+    vi.fn<(path: string) => Promise<{ distro: string; state: 'stopped' | 'unverifiable' } | null>>()
 }))
 
 vi.mock('electron', () => ({
@@ -44,9 +45,20 @@ describe('hooks:check on a stopped WSL distro', () => {
       status: 'error',
       hasHooks: false,
       hooks: null,
-      mayNeedUpdate: false
+      mayNeedUpdate: false,
+      unavailable: 'wsl-distro-stopped'
     })
     expect(mocks.blocked).toHaveBeenCalledWith(UNC)
+    expect(mocks.hasHooksFile).not.toHaveBeenCalled()
+  })
+
+  it('leaves an unverifiable distro a plain error, which a retry may clear', async () => {
+    mocks.blocked.mockResolvedValue({ distro: 'Ubuntu', state: 'unverifiable' })
+
+    const result = await check({ background: true })
+
+    expect(result).toMatchObject({ status: 'error' })
+    expect(result).not.toHaveProperty('unavailable')
     expect(mocks.hasHooksFile).not.toHaveBeenCalled()
   })
 

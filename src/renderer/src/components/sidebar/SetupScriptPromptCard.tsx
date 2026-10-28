@@ -9,7 +9,8 @@ import {
   formatCandidateSource,
   isSetupScriptPromptDismissed,
   ignoresSharedSetupScripts,
-  inspectSetupScriptPromptState
+  inspectSetupScriptPromptState,
+  isSilentSetupScriptPromptState
 } from '@/lib/setup-script-prompt'
 import { checkRuntimeHooks, inspectRuntimeSetupScriptImports } from '@/runtime/runtime-hooks-client'
 import { isGitRepoKind } from '../../../../shared/repo-kind'
@@ -381,8 +382,7 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
     return null
   }
 
-  // Mobile-scope inspection is permanently forbidden; the global banner explains it, and retrying would probe on every focus.
-  if (renderedPromptState.status === 'forbidden') {
+  if (isSilentSetupScriptPromptState(renderedPromptState)) {
     return null
   }
 

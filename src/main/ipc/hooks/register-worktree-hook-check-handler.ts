@@ -37,8 +37,16 @@ export function registerWorktreeHookCheckHandler(context: WorktreeIpcContext): v
       }
 
       // A render-driven check must not open a stopped distro's `\\wsl.localhost` paths (E9).
-      if (args.background && (await blockedWslDistroForPath(repo.path))) {
-        return { status: 'error', hasHooks: false, hooks: null, mayNeedUpdate: false }
+      const blocked = args.background ? await blockedWslDistroForPath(repo.path) : null
+      if (blocked) {
+        return {
+          status: 'error',
+          hasHooks: false,
+          hooks: null,
+          mayNeedUpdate: false,
+          // A stopped distro answers once it runs again; an unverifiable one is worth a retry.
+          ...(blocked.state === 'stopped' ? { unavailable: 'wsl-distro-stopped' as const } : {})
+        }
       }
 
       const has = hasHooksFile(repo.path)
