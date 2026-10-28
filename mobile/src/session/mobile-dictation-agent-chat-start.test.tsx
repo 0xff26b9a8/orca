@@ -37,6 +37,9 @@ vi.mock('expo-keep-awake', () => ({
   activateKeepAwakeAsync: async () => {},
   deactivateKeepAwake: async () => {}
 }))
+vi.mock('../platform/clipboard', () => ({
+  useClipboardWriter: () => ({ writeText: async () => {} })
+}))
 vi.mock('expo-router', () => ({ useFocusEffect: () => {} }))
 vi.mock('../platform/haptics', () => ({ triggerError: () => {} }))
 vi.mock('./use-mobile-native-chat-readability', () => ({
