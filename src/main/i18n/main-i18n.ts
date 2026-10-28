@@ -6,6 +6,10 @@ import i18next, {
   type TOptions
 } from 'i18next'
 
+import {
+  resolvePluralFamilyKey,
+  withPluralCategoriesFromOther
+} from '../../shared/i18n-plural-family'
 import { isPseudoLocalizationLocale, pseudoLocalizeString } from '../../shared/pseudo-localization'
 import { DEFAULT_UI_LOCALE, resolveUiLocale, type SupportedUiLocale } from '../../shared/ui-locale'
 import { UI_LANGUAGE_SYSTEM, type UiLanguage } from '../../shared/ui-language'
@@ -28,6 +32,7 @@ const LAZY_LOCALE_LOADERS: Record<
   ja: () => import('../../renderer/src/i18n/locales/ja.json'),
   ko: () => import('../../renderer/src/i18n/locales/ko.json'),
   pt: () => import('../../renderer/src/i18n/locales/pt.json'),
+  ru: () => import('../../renderer/src/i18n/locales/ru.json'),
   zh: () => import('../../renderer/src/i18n/locales/zh.json'),
   'zh-Hant': () => import('../../renderer/src/i18n/locales/zh-Hant.json')
 }
@@ -43,7 +48,14 @@ const lazyLocaleBackend: BackendModule = {
       return
     }
     loader().then(
-      (mod) => callback(null, mod.default),
+      (mod) =>
+        callback(
+          null,
+          withPluralCategoriesFromOther(
+            mod.default,
+            new Intl.PluralRules(language).resolvedOptions().pluralCategories
+          )
+        ),
       (error) => callback(error instanceof Error ? error : new Error(String(error)), false)
     )
   }
@@ -136,7 +148,7 @@ export function setMainPluginLanguagePacks(
 export function translateMain(key: string, fallback: string, options?: TOptions): string {
   // Menu registration can precede async initialization; use the English fallback then.
   const raw = initialized
-    ? mainI18n.t(key, { defaultValue: fallback, ...options })
+    ? mainI18n.t(resolvePluralFamilyKey(key, options), { defaultValue: fallback, ...options })
     : interpolateFallback(fallback, options)
   const value = typeof raw === 'string' && raw.length > 0 ? raw : fallback
   return isPseudoLocalizationLocale(mainI18n.language) ? pseudoLocalizeString(value) : value

@@ -7,8 +7,15 @@ import {
   normalizeUiLocaleTag,
   shouldShowLanguageSwitcher
 } from './ui-locale'
+import { UI_LANGUAGE_RUSSIAN, UI_LANGUAGE_SYSTEM } from './ui-language'
 
 describe('ui-locale', () => {
+  it.each(['ru', 'ru-RU', 'ru-KZ', 'ru_RU.UTF-8'])('resolves Russian %s', (tag) => {
+    expect(detectUiLanguage([tag], 'native')).toMatchObject({ locale: 'ru', status: 'supported' })
+    expect(resolveUiLocale(UI_LANGUAGE_SYSTEM, tag)).toBe('ru')
+    expect(resolveUiLocale(UI_LANGUAGE_RUSSIAN, 'en-US')).toBe('ru')
+    expect(shouldShowLanguageSwitcher(detectUiLanguage([tag], 'native'))).toBe(true)
+  })
   it('maps Traditional Chinese system locales to zh-Hant and keeps Simplified on zh', () => {
     for (const tag of ['zh-TW', 'zh-HK', 'zh-MO', 'zh-Hant']) {
       expect(normalizeSupportedUiLocale(tag)).toBe('zh-Hant')

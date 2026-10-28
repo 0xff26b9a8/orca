@@ -8,6 +8,7 @@ import {
   UI_LANGUAGE_JAPANESE,
   UI_LANGUAGE_KOREAN,
   UI_LANGUAGE_PORTUGUESE,
+  UI_LANGUAGE_RUSSIAN,
   UI_LANGUAGE_SPANISH,
   UI_LANGUAGE_SYSTEM,
   normalizeUiLanguage
@@ -24,6 +25,7 @@ describe('normalizeUiLanguage', () => {
     expect(normalizeUiLanguage(UI_LANGUAGE_SPANISH)).toBe('es')
     expect(normalizeUiLanguage(UI_LANGUAGE_FRENCH)).toBe('fr')
     expect(normalizeUiLanguage(UI_LANGUAGE_PORTUGUESE)).toBe('pt')
+    expect(normalizeUiLanguage(UI_LANGUAGE_RUSSIAN)).toBe('ru')
   })
 
   it('falls back unknown values to system', () => {
