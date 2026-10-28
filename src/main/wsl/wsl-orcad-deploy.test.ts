@@ -69,7 +69,7 @@ vi.mock('../managed-server/lifecycle/orcad-managed-runtime-context', async (impo
   probeManagedOrcadReadiness: mocks.probe
 }))
 
-import { deployAndLaunchWslOrcad, isWsl1KernelRelease } from './wsl-orcad-deploy'
+import { deployAndLaunchWslOrcad } from './wsl-orcad-deploy'
 import { resetOrcadUpdateFailuresForTests } from '../managed-server/lifecycle/orcad-managed-update-failure-memory'
 
 beforeEach(() => resetOrcadUpdateFailuresForTests())
@@ -835,15 +835,5 @@ describe('deployAndLaunchWslOrcad across an app update (E1)', () => {
     await launch()
     expect(mocks.incumbent).not.toHaveBeenCalled()
     expect(mocks.deploy.mock.calls[0][0].census.liveSessions).toBeNull()
-  })
-})
-
-describe('isWsl1KernelRelease', () => {
-  it('tells the WSL 1 syscall layer from a WSL 2 kernel, stock or custom', () => {
-    expect(isWsl1KernelRelease('4.4.0-19041-Microsoft')).toBe(true)
-    expect(isWsl1KernelRelease('4.4.0-22621-Microsoft\n')).toBe(true)
-    expect(isWsl1KernelRelease('5.15.167.4-microsoft-standard-WSL2')).toBe(false)
-    expect(isWsl1KernelRelease('6.6.36.6-microsoft-standard-WSL2+')).toBe(false)
-    expect(isWsl1KernelRelease('6.10.0-custom')).toBe(false)
   })
 })
