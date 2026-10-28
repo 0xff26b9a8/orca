@@ -1,3 +1,4 @@
+import { abortWhenRendererGone } from '../../ipc/renderer-lifetime-abort'
 import { forgetBrowserExtensionContextLifetime } from './browser-extension-context-lifetime'
 import { webFrameMain } from 'electron'
 import {
@@ -152,14 +153,14 @@ export function setFrameListening(
   setListenerFilters(context.filters, key, active ? filters : undefined)
   if (!trackedWebContents.has(webContents)) {
     trackedWebContents.add(webContents)
-    webContents.once('destroyed', () => {
-      for (const sessionState of stateBySession.values()) {
-        for (const [candidateKey, candidate] of sessionState.frames) {
-          if (candidate.webContentsId === webContents.id) {
-            sessionState.frames.delete(candidateKey)
-          }
+    const { session: webSession, id: webContentsId } = webContents
+    abortWhenRendererGone(webContents).signal.addEventListener('abort', () => {
+      trackedWebContents.delete(webContents)
+      stateBySession.get(webSession)?.frames.forEach((candidate, candidateKey, frames) => {
+        if (candidate.webContentsId === webContentsId) {
+          frames.delete(candidateKey)
         }
-      }
+      })
     })
   }
 }
@@ -205,11 +206,8 @@ export function dispatchToWorkerWhenListening(
     return
   }
   const key = eventKey(namespace, event)
-  const context = ensureWorkerContext(
-    state,
-    extensionId,
-    `${getChromeExtensionOrigin(extensionId)}/`
-  )
+  const scope = `${getChromeExtensionOrigin(extensionId)}/`
+  const context = ensureWorkerContext(state, extensionId, scope)
   const payload: BrowserExtensionEventPayload = { namespace, event, args }
   if (context.events.has(key)) {
     deliverToWorker(sess, context, key, payload, startWorker)
