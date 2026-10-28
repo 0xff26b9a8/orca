@@ -1030,6 +1030,16 @@
       "unstagedFilesIncludingUntrackedDescription_other": "This will revert unstaged changes and permanently delete any untracked files among these {{count}} files. This cannot be undone."
     }
   },
+  "stats": {
+    "usageBreakdown": {
+      "events_one": "{{count}} event",
+      "events_other": "{{count}} events",
+      "sessions_one": "{{count}} session",
+      "sessions_other": "{{count}} sessions",
+      "turns_one": "{{count}} turn",
+      "turns_other": "{{count}} turns"
+    }
+  },
   "taskProviders": {
     "linear": {
       "truncated": {
