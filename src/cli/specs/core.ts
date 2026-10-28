@@ -137,11 +137,13 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
       ['worktree', 'delete']
     ],
     destructive: true,
-    summary: 'Remove a worktree from Orca and git',
+    summary: 'Remove a Git worktree or a folder workspace entry from Orca',
     usage:
       'orca worktree rm --worktree <selector> [--force] [--run-hooks] [--allow-failed-archive-hook] [--json]',
     allowedFlags: [...GLOBAL_FLAGS, 'worktree', 'force', 'run-hooks', 'allow-failed-archive-hook'],
     notes: [
+      'For a non-root folder workspace, removes its Orca entry and stops its sessions without deleting the folder or touching Git. The folder project root cannot be removed with this command.',
+      'Use --worktree "id:<full-instance-id>" with the full id from orca worktree list --json to select one folder workspace; several entries can share the same path.',
       'Repo-defined orca.yaml archive hooks are skipped unless --run-hooks is passed.',
       'With --run-hooks, a failed archive hook blocks the removal: nothing is stopped, deleted or deregistered, and the command exits non-zero with error code worktree_archive_hook_failed. --force does not waive this.',
       'Pass --allow-failed-archive-hook to delete anyway after the hook has run and failed; the waived failure is reported back on result.archiveHookOverride. It requires --run-hooks and is rejected without it, because with no hook running there is no failure to waive.',
