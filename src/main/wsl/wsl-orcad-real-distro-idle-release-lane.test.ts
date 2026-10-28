@@ -22,6 +22,8 @@ import { execCommand } from '../ssh/remote-exec/remote-exec-command'
 import { readConfirmedRunningWslDistros } from '../wsl-background-distro-gate'
 import { readWindowsProcessTableFresh } from '../windows/windows-process-table'
 import { resolveWslInteropSpawnCwd } from '../wsl-interop-spawn-directory'
+import { buildWslExecArgs, buildWslLoginShellCommand } from '../../shared/wsl-login-shell-command'
+import { resolveWslExecutablePath } from './wsl-executable-path'
 import { createWslDistroHolder, type WslDistroHolder } from './wsl-distro-holder'
 import { WSL_DISTRO_HOLDER_POLL_SECONDS } from './wsl-distro-holder-command'
 import { wslDistroHolderKey } from './wsl-distro-holder-record'
@@ -269,6 +271,105 @@ async function idleReleasePhase(): Promise<void> {
   ).catch(() => vmWorkingSetKiB())
 }
 
+async function wslExe(args: string[], timeoutMs = 120_000) {
+  const result = await runProcess({
+    program: resolveWslExecutablePath(),
+    args,
+    cwd: resolveWslInteropSpawnCwd(),
+    env: { ...process.env, WSL_UTF8: '1' },
+    timeoutMs
+  })
+  return { code: result.code, output: `${result.stdout}${result.stderr}` }
+}
+
+async function terminatePlain(): Promise<void> {
+  expect((await wslExe(['--terminate', PLAIN])).code).toBe(0)
+  await waitFor('the distro to stop', async () => ((await plainRunning()) ? null : true), 60_000)
+}
+
+/** printf splits the token, so the typed command's echo never matches what the shell prints. */
+function outputProbe(): { command: string; token: string } {
+  const nonce = Math.random().toString(36).slice(2, 10)
+  return { command: `printf 'COLD_%s\\n' ${nonce}`, token: `COLD_${nonce}` }
+}
+
+/** (a) WSL host: holder boots the distro, orcad deploys and starts, a terminal spawns and prints. */
+async function restartThroughHost(repoPath: string): Promise<Receipt> {
+  await terminatePlain()
+  createManager()
+  const started = performance.now()
+  const connection = await manager.ensure(PLAIN)
+  const ensureMs = Math.round(performance.now() - started)
+  const created = await rpc<{ terminal: { handle: string } }>(connection, 'terminal.create', {
+    worktree: `path:${repoPath}`
+  })
+  const createdMs = Math.round(performance.now() - started)
+  const probe = outputProbe()
+  await rpc(connection, 'terminal.send', {
+    terminal: created.terminal.handle,
+    text: probe.command,
+    enter: true
+  })
+  await waitFor(
+    'the host terminal to print the probe',
+    async () => {
+      const read = await rpc<{ terminal: { tail?: unknown[] } }>(connection, 'terminal.read', {
+        terminal: created.terminal.handle
+      })
+      return (read.terminal.tail ?? []).map(String).join('\n').includes(probe.token) ? true : null
+    },
+    120_000,
+    100
+  )
+  const firstOutputMs = Math.round(performance.now() - started)
+  await rpc(connection, 'terminal.close', { terminal: created.terminal.handle }).catch(() => {})
+  await manager.dispose()
+  return { ensureMs, terminalCreatedMs: createdMs - ensureMs, firstOutputMs }
+}
+
+/**
+ * (b) Old bridge lower bound: one non-PTY `wsl.exe --exec` into the login shell. The real bridge
+ * also starts ConPTY and paints, so this undercounts its first paint.
+ */
+async function restartThroughBridgeExec(): Promise<Receipt> {
+  await terminatePlain()
+  const probe = outputProbe()
+  const started = performance.now()
+  const result = await wslExe(
+    // The same login-shell pick Orca's own WSL commands use (bash/zsh run -ilc, so rc files load).
+    buildWslExecArgs(PLAIN, ['sh', '-c', buildWslLoginShellCommand(probe.command)])
+  )
+  const firstOutputMs = Math.round(performance.now() - started)
+  expect(result.output).toContain(probe.token)
+  return { firstOutputMs }
+}
+
+/**
+ * Distro restart (VM warm) to first command output, median of 3 each, alternating so neither path
+ * always runs on a warmer VM.
+ */
+async function distroRestartBaseline(): Promise<void> {
+  const repoPath = (await guest('cd "$HOME/wsl-orcad-lane-repo" && pwd')).trim()
+  // One unrecorded bridge run warms the WSL VM, which the idle phase let shut down.
+  await restartThroughBridgeExec()
+  const host: Receipt[] = []
+  const bridge: Receipt[] = []
+  for (let i = 0; i < 3; i++) {
+    host.push(await restartThroughHost(repoPath))
+    bridge.push(await restartThroughBridgeExec())
+  }
+  const median = (runs: Receipt[], key: string): number =>
+    runs.map((run) => Number(run[key])).toSorted((a, b) => a - b)[1] ?? 0
+  receipt.distroRestartToFirstOutput = {
+    host,
+    bridgeExecLowerBound: bridge,
+    medianHostFirstOutputMs: median(host, 'firstOutputMs'),
+    medianHostEnsureMs: median(host, 'ensureMs'),
+    medianBridgeExecLowerBoundMs: median(bridge, 'firstOutputMs')
+  }
+  await terminatePlain()
+}
+
 describe.runIf(RUN && process.platform === 'win32')('WSL distro idle release', () => {
   beforeAll(() => {
     mkdirSync(USER_DATA, { recursive: true })
@@ -289,5 +390,12 @@ describe.runIf(RUN && process.platform === 'win32')('WSL distro idle release', (
     'keeps a distro with a live terminal, then lets it stop once orcad idle-exits',
     idleReleasePhase,
     RELEASE_BUDGET_MS + 2 * HELD_WITH_TERMINAL_MS + 6 * 60_000
+  )
+
+  // After the idle phase: six distro restarts plus a warm-up, each bounded.
+  it(
+    'measures distro restart to first output for the WSL host and an old-bridge exec lower bound',
+    distroRestartBaseline,
+    20 * 60_000
   )
 })
