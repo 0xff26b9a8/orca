@@ -52,7 +52,9 @@ export async function resolveOrcadRemoteContext<Target extends OrcadHostTarget =
   target: Target,
   connection: OrcadHostTransport,
   signal?: AbortSignal,
-  detectedHost?: RemoteHostPlatform
+  detectedHost?: RemoteHostPlatform,
+  /** A login home the caller already read on this host; only login-home placement uses it. */
+  knownLoginHome?: string
 ): Promise<OrcadRemoteContext<Target>> {
   const host = detectedHost ?? (await detectRemoteHostPlatform(connection, { signal }))
   if (!host) {
@@ -65,7 +67,8 @@ export async function resolveOrcadRemoteContext<Target extends OrcadHostTarget =
   const remote = { conn: connection, host, signal }
   const { orcadHome: remoteHome, userDataDir } = await resolveOrcadMachineHome(
     remote,
-    !isWslOrcadHostTarget(target)
+    !isWslOrcadHostTarget(target),
+    knownLoginHome
   )
   const serverTarget = await resolveOrcadRuntimeTarget({
     conn: connection,
@@ -103,12 +106,13 @@ export async function resolveOrcadRemoteContext<Target extends OrcadHostTarget =
 /** Resolve per-machine state for shared POSIX homes; Windows and WSL retain login-home placement. */
 export async function resolveOrcadMachineHome(
   remote: OrcadRemoteExecTarget,
-  keyByMachine: boolean
+  keyByMachine: boolean,
+  knownLoginHome?: string
 ): Promise<{ loginHome: string; orcadHome: string; userDataDir: string }> {
   const { host } = remote
   if (!keyByMachine || isWindowsRemoteHost(host)) {
     const loginHome = normalizeRemoteHome(
-      await execOrcadRemote(remote, readRemoteHomeCommand(host)),
+      knownLoginHome ?? (await execOrcadRemote(remote, readRemoteHomeCommand(host))),
       host
     )
     if (!validateRemoteHome(loginHome, host)) {
