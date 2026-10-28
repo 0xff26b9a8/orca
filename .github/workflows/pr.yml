@@ -579,7 +579,8 @@ jobs:
       needs.code_paths.result == 'success' &&
       needs.code_paths.outputs.git_compatibility == 'true' &&
       needs.preflight.result == 'success'
-    runs-on: ubuntu-24.04
+    # Three parallel lanes (two through Docker) exceed real-Git test timeouts on 4-vCPU hosted runners.
+    runs-on: blacksmith-4vcpu-ubuntu-2404
 
     steps:
       - name: Checkout
