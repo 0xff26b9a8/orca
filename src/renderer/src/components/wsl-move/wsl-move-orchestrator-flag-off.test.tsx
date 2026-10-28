@@ -35,6 +35,10 @@ vi.mock('@/store', () => ({
 }))
 vi.mock('../sidebar/AddRemoteHostDialog', () => ({ AddRemoteHostDialog: () => null }))
 vi.mock('../sidebar/HostRemoveDialog', () => ({ HostRemoveDialog: () => null }))
+// The host's quit prompt reads the app's confirmation dialog, which App provides.
+vi.mock('../confirmation-dialog-context', () => ({
+  useConfirmationDialog: () => async () => true
+}))
 
 const { WslHostsSection } = await import('../settings/WslHostsSection')
 const { WslMoveDialogHost } = await import('./WslMoveDialog')

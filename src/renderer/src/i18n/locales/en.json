@@ -67,7 +67,10 @@
       "useHereHostAutomations": "Orca couldn't turn off this project's automations on the {{distro}} host, so they could run twice. Connect the host in Settings, then try again.",
       "useHereUnsavedTitle": "Save your files first",
       "useHereUnsavedDescription": "Bringing {{name}} back reloads this window. Save or close these files first: {{files}}",
-      "automationRunsOnHost": "Runs on the {{distro}} host"
+      "automationRunsOnHost": "Runs on the {{distro}} host",
+      "quitDuringMoveTitle": "Quit while a project is moving?",
+      "quitDuringMoveDescription": "A project is moving to its WSL host. Quit anyway? The move will be undone at next launch.",
+      "quitDuringMoveConfirm": "Quit anyway"
     },
     "startupWorktreeRefresh": {
       "loading": "Discovering workspaces…",
