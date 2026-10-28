@@ -21851,5 +21851,100 @@
       "chat": "Chat",
       "agents": "Agentes"
     }
+  },
+  "gpuFallback": {
+    "recoveredLaunch": {
+      "keepSafeButton": "Manter o modo gráfico seguro",
+      "tryHardwareButton": "Tentar a aceleração por hardware",
+      "title": "O modo gráfico seguro está ativo",
+      "message": "O Orca se recuperou no modo gráfico seguro.",
+      "detail": "O modo gráfico seguro foi ativado após falhas gráficas repetidas. Mantenha-o para ter mais estabilidade, ou reinicie e tente a aceleração por hardware novamente."
+    },
+    "restartPrompt": {
+      "restartButton": "Reiniciar no modo gráfico seguro",
+      "keepRunningButton": "Continuar executando",
+      "title": "Reiniciar o Orca no modo gráfico seguro?",
+      "message": "O processo gráfico do Orca falhou repetidamente.",
+      "detail": "O modo gráfico seguro desativa a aceleração por hardware e o WebGL nesta versão do Orca. Terminais e conteúdo 3D podem ser renderizados mais lentamente. \"Continuar executando\" não altera as configurações gráficas."
+    }
+  },
+  "localBuild": {
+    "chooseTitle": "Escolha um build local do Orca",
+    "chooseButton": "Escolher build",
+    "manifestFilter": "Manifesto de atualização do Orca",
+    "sameVersionError": "Este build tem a mesma versão do app em execução. Execute pn build:mac novamente para criar um build com uma versão única.",
+    "noLiveTerminals": "Nenhum terminal ativo precisa ser reconectado.",
+    "liveTerminals_one": "{{count}} terminal ativo será reconectado após reiniciar.",
+    "liveTerminals_other": "{{count}} terminais ativos serão reconectados após reiniciar.",
+    "confirmTitle": "Usar o build local do Orca?",
+    "schemaCompatibility": "Os cards de espaço de trabalho e as configurações são compatíveis com o esquema de estado {{schemaVersion}}.",
+    "signatureRequirement": "O build precisa ter a mesma assinatura de código válida do Orca, ou a instalação será interrompida.",
+    "useButton": "Usar build local",
+    "cancelButton": "Cancelar"
+  },
+  "profileState": {
+    "startupRecovery": {
+      "quitButton": "Sair",
+      "copyCommandButton": "Copiar comando de recuperação",
+      "copyCommandDetail": "Copie o comando de recuperação e execute-o depois que o Orca fechar.",
+      "quitDetail": "Saia do Orca e defina qual estado do perfil é o válido antes de tentar novamente.",
+      "title": "Não é possível abrir o estado do perfil do Orca",
+      "message": "O Orca não consegue abrir este perfil com segurança."
+    },
+    "copyChoice": {
+      "lastSaved": "Salvo pela última vez em {{time}}.",
+      "useSqliteButton": "Usar SQLite (recomendado)",
+      "useJsonButton": "Usar JSON",
+      "quitButton": "Sair",
+      "title": "Escolher o estado do perfil",
+      "message": "Este perfil tem duas cópias salvas que não coincidem.",
+      "cause": "Isso costuma acontecer depois de abrir o perfil em uma versão mais antiga do Orca.",
+      "sqliteOption": "SQLite: o que esta versão do Orca salvou. As alterações feitas na versão mais antiga são descartadas.",
+      "jsonOption": "JSON: inclui as alterações feitas na versão mais antiga. As alterações que esta versão salvou desde então são descartadas.",
+      "archiveNote": "O Orca arquiva as duas cópias antes de trocar e depois reinicia."
+    },
+    "repairChoice": {
+      "sectionStartsEmpty": "{{section}}: não há backup legível, então começará vazio.",
+      "sectionRestored": "{{section}}: restaurado a partir do backup salvo em {{time}}.",
+      "projectsForgotten": "O Orca vai esquecer seus projetos e os detalhes dos espaços de trabalho deles. Os arquivos no disco não são alterados.",
+      "newerProjectsRemoved": "Os projetos adicionados depois desse backup serão removidos do Orca, junto com os detalhes dos espaços de trabalho deles. Os arquivos no disco não são alterados.",
+      "repairButton": "Reparar e reiniciar",
+      "quitButton": "Sair",
+      "title": "Reparar perfil",
+      "message": "Parte do estado salvo deste perfil está danificada.",
+      "restUnchanged": "Todo o resto continua como está.",
+      "damagedCopyKept": "O Orca guarda uma cópia do arquivo danificado na pasta de dados dele e depois reinicia."
+    },
+    "recoveryNotApplied": {
+      "quitButton": "Sair",
+      "title": "O Orca não conseguiu concluir a recuperação deste perfil",
+      "message": "O Orca não conseguiu aplicar o estado de perfil selecionado.",
+      "reopenDetail": "Abra o Orca novamente para escolher de novo."
+    },
+    "writeFailure": {
+      "title": "O salvamento parou",
+      "message": "O Orca parou de salvar este perfil.",
+      "indeterminateDetail": "O Orca não conseguiu confirmar se sua alteração mais recente foi salva. Novas alterações não serão salvas até você reiniciar o Orca.",
+      "safeDetail": "As alterações salvas antes deste ponto estão seguras. Novas alterações não serão salvas até você reiniciar o Orca.",
+      "okButton": "OK"
+    },
+    "section": {
+      "projects": "Projetos",
+      "projectGroups": "Grupos de projetos",
+      "folderWorkspaces": "Espaços de trabalho de pasta",
+      "reviewComments": "Comentários de revisão",
+      "workspaceDetails": "Detalhes do espaço de trabalho",
+      "settings": "Configurações",
+      "windowLayout": "Layout da janela",
+      "openTabs": "Abas e terminais abertos",
+      "sshHosts": "Hosts SSH",
+      "automations": "Automações",
+      "automationHistory": "Histórico de automações",
+      "onboarding": "Progresso da integração",
+      "other": "Outro estado salvo do app"
+    }
+  },
+  "startupFailure": {
+    "title": "Não foi possível iniciar o Orca"
   }
 }

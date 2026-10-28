@@ -21932,5 +21932,100 @@
       "chat": "チャット",
       "agents": "Agent"
     }
+  },
+  "gpuFallback": {
+    "recoveredLaunch": {
+      "keepSafeButton": "セーフグラフィックモードを維持",
+      "tryHardwareButton": "ハードウェアアクセラレーションを試す",
+      "title": "セーフグラフィックモードが有効です",
+      "message": "Orca はセーフグラフィックモードで復旧しました。",
+      "detail": "グラフィックのクラッシュが繰り返されたため、セーフグラフィックモードが有効になりました。安定性のために維持するか、再起動してハードウェアアクセラレーションをもう一度試してください。"
+    },
+    "restartPrompt": {
+      "restartButton": "セーフグラフィックモードで再起動",
+      "keepRunningButton": "このまま実行",
+      "title": "Orca をセーフグラフィックモードで再起動しますか？",
+      "message": "Orca のグラフィックプロセスが繰り返しクラッシュしています。",
+      "detail": "セーフグラフィックモードでは、この Orca バージョンのハードウェアアクセラレーションと WebGL が無効になります。ターミナルや 3D コンテンツの描画が遅くなる場合があります。「このまま実行」を選ぶと、グラフィック設定は変更されません。"
+    }
+  },
+  "profileState": {
+    "startupRecovery": {
+      "quitButton": "終了",
+      "copyCommandButton": "復旧コマンドをコピー",
+      "copyCommandDetail": "復旧コマンドをコピーし、Orca が終了してから実行してください。",
+      "quitDetail": "Orca を終了し、どのプロファイル状態を正とするかを解決してから再試行してください。",
+      "title": "Orca のプロファイル状態を開けません",
+      "message": "Orca はこのプロファイルを安全に開けません。"
+    },
+    "copyChoice": {
+      "lastSaved": "最終保存: {{time}}。",
+      "useSqliteButton": "SQLite を使用（推奨）",
+      "useJsonButton": "JSON を使用",
+      "quitButton": "終了",
+      "title": "プロファイル状態を選択",
+      "message": "このプロファイルには、一致しない保存コピーが 2 つあります。",
+      "cause": "これは通常、古いバージョンの Orca でプロファイルを開いた後に発生します。",
+      "sqliteOption": "SQLite: このバージョンの Orca が保存した内容です。古いバージョンで行った変更は破棄されます。",
+      "jsonOption": "JSON: 古いバージョンで行った変更を含みます。それ以降にこのバージョンが保存した変更は破棄されます。",
+      "archiveNote": "Orca は切り替える前に両方のコピーをアーカイブし、その後再起動します。"
+    },
+    "repairChoice": {
+      "sectionStartsEmpty": "{{section}}: 読み取れるバックアップがないため、空の状態から始まります。",
+      "sectionRestored": "{{section}}: {{time}} に保存されたバックアップから復元されます。",
+      "projectsForgotten": "Orca はプロジェクトとそのワークスペースの詳細を忘れます。ディスク上のファイルには影響しません。",
+      "newerProjectsRemoved": "そのバックアップ以降に追加したプロジェクトは、ワークスペースの詳細とともに Orca から削除されます。ディスク上のファイルには影響しません。",
+      "repairButton": "修復して再起動",
+      "quitButton": "終了",
+      "title": "プロファイルを修復",
+      "message": "このプロファイルの保存状態の一部が破損しています。",
+      "restUnchanged": "それ以外はすべて現在のまま維持されます。",
+      "damagedCopyKept": "Orca は破損したファイルのコピーをデータフォルダーに保存してから再起動します。"
+    },
+    "recoveryNotApplied": {
+      "quitButton": "終了",
+      "title": "Orca はこのプロファイルの復旧を完了できませんでした",
+      "message": "Orca は選択したプロファイル状態を適用できませんでした。",
+      "reopenDetail": "Orca を再度開いて、もう一度選択してください。"
+    },
+    "writeFailure": {
+      "title": "保存が停止しました",
+      "message": "Orca はこのプロファイルの保存を停止しました。",
+      "indeterminateDetail": "Orca は最新の変更が保存されたかどうかを確認できませんでした。Orca を再起動するまで、新しい変更は保存されません。",
+      "safeDetail": "この時点までに保存された変更は安全です。Orca を再起動するまで、新しい変更は保存されません。",
+      "okButton": "OK"
+    },
+    "section": {
+      "projects": "プロジェクト",
+      "projectGroups": "プロジェクトグループ",
+      "folderWorkspaces": "フォルダーワークスペース",
+      "reviewComments": "レビューコメント",
+      "workspaceDetails": "ワークスペースの詳細",
+      "settings": "設定",
+      "windowLayout": "ウィンドウのレイアウト",
+      "openTabs": "開いているタブとターミナル",
+      "sshHosts": "SSH ホスト",
+      "automations": "自動化",
+      "automationHistory": "自動化の履歴",
+      "onboarding": "オンボーディングの進行状況",
+      "other": "その他の保存済みアプリ状態"
+    }
+  },
+  "startupFailure": {
+    "title": "Orca を起動できませんでした"
+  },
+  "localBuild": {
+    "chooseTitle": "ローカルの Orca ビルドを選択",
+    "chooseButton": "ビルドを選択",
+    "manifestFilter": "Orca 更新マニフェスト",
+    "sameVersionError": "このビルドは実行中のアプリと同じバージョンです。pn build:mac をもう一度実行して、固有のバージョンのビルドを作成してください。",
+    "noLiveTerminals": "再接続が必要な実行中のターミナルはありません。",
+    "liveTerminals_one": "実行中のターミナル {{count}} 個が再起動後に再接続されます。",
+    "liveTerminals_other": "実行中のターミナル {{count}} 個が再起動後に再接続されます。",
+    "confirmTitle": "ローカルの Orca ビルドを使用しますか？",
+    "schemaCompatibility": "ワークスペースカードと設定は、状態スキーマ {{schemaVersion}} と互換性があります。",
+    "signatureRequirement": "ビルドには Orca と同じ有効なコード署名が必要です。一致しない場合、インストールは停止します。",
+    "useButton": "ローカルビルドを使用",
+    "cancelButton": "キャンセル"
   }
 }

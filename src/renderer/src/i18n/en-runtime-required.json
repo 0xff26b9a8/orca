@@ -3505,6 +3505,10 @@
       "open": "Open workspace linked to {{key}}"
     }
   },
+  "localBuild": {
+    "liveTerminals_one": "{{count}} live terminal will reconnect after restart.",
+    "liveTerminals_other": "{{count}} live terminals will reconnect after restart."
+  },
   "menu": {
     "quitApp": "Quit {{appName}}"
   },
