@@ -75,7 +75,7 @@ function SetupScriptPromptCard(): React.JSX.Element | null {
       const hostId = getRepoExecutionHostId(repo)
       const inspection = await inspectSetupScriptPromptState({
         repo,
-        checkHooks: () => checkRuntimeHooks(hostId, repo.id),
+        checkHooks: () => checkRuntimeHooks(hostId, repo.id, { background: true }),
         inspectImports: () => inspectRuntimeSetupScriptImports(hostId, repo.id)
       })
       if (!cancelled) {
