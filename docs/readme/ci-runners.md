@@ -15,7 +15,7 @@ included minutes do not cover them.
 
 On Blacksmith, small routing and reporting jobs use 2 vCPUs; most test jobs use
 4; compilation and shared JavaScript builds use 8. Mac checks use the 6-vCPU
-Apple Silicon runners. Adhoc Mac packaging uses 12 vCPUs.
+Apple Silicon runners, including adhoc and release Mac packaging.
 
 Keep matrix platform keys separate from runner labels: platform keys select
 native slots, architectures, cache identities, and upload conditions.
