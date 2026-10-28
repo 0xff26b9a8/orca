@@ -6,7 +6,8 @@ Enterprise plan allows 500 concurrent jobs (50 macOS). Use Blacksmith only for:
 - PR critical-path jobs: unit test shards, preflight and typecheck, and `e2e.yml`.
 - Adhoc builds (a developer is waiting) and release packaging, including
   `release-mac-build.yml`.
-- Hardware-sensitive performance benchmarks.
+- Hardware-sensitive performance benchmarks. Operation-count contracts
+  (`performance-contracts.yml`) are not, and run hosted.
 
 Everything else, including hourly and daily dev builds and node-server lanes, runs
 on hosted `ubuntu-*`, `macos-15` and `windows-2022` images. Do not use paid GitHub
