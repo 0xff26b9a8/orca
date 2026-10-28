@@ -12038,7 +12038,8 @@
             "migration": "Not done: a move onto this server is unfinished. Resume it first.",
             "deferred": "Not done yet: the server isn’t ready for this. Try again later.",
             "failed": "Orca couldn’t finish this on the server. Try again.",
-            "defaultServer": "Not done: this server is the default host for new projects. Choose another one under New projects open on before stopping it."
+            "defaultServer": "Not done: this server is the default host for new projects. Choose another one under New projects open on before stopping it.",
+            "wslMoveRunning": "Not done: a project is moving onto this server. Orca updates it once the move finishes."
           },
           "reassurance": "Runs on each host, reached over your own SSH connection. Your code and files stay where they are. Only Orca’s list of projects, tabs and terminals moves to the host."
         },
@@ -20338,7 +20339,8 @@
         "manifestTooLarge": "there is more saved state than one move can carry",
         "hostUpdate": "the host needs an update first",
         "attemptsExhausted": "it didn't complete after several tries"
-      }
+      },
+      "finishPending": "An earlier move to the {{distro}} host is done there. Orca finishes it here when it restarts, or now with Check again."
     }
   },
   "onboarding": {
