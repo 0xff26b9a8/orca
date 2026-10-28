@@ -152,7 +152,10 @@ describe('preflight', () => {
       expect(isCommandOnLocalPathMock.mock.calls.map(([command]) => command)).not.toContain(
         'kiro-cli'
       )
-      expect(resolveCliCommandsMock).toHaveBeenCalledWith(expect.not.arrayContaining(['kiro-cli']))
+      expect(resolveCliCommandsMock).toHaveBeenCalledWith(
+        expect.not.arrayContaining(['kiro-cli']),
+        { skipPathSearch: true }
+      )
 
       isCommandOnLocalPathMock.mockClear()
       await expect(
