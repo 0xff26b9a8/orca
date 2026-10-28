@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { expect, vi } from 'vitest'
 import { z } from 'zod'
-import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session-mutation-envelope'
 import type { AgentJournalRenderItem } from '../../shared/agent-session-journal-types'
 import type {
   AgentSessionHistoryResult,
@@ -17,9 +16,11 @@ import { claudeSessionIdForOrcaSession } from '../claude/structured/claude-struc
 import { packagedClaudeChatScenario } from '../orcad/orcad-structured-chat-scenario'
 import { quotePosixShell } from '../../shared/shell-argument-quoting'
 import { wslClaudeChatScenario } from './wsl-orcad-chat-scenario'
+import { envelope } from './wsl-orcad-chat-envelope'
 import {
   expectWindowsDecoyReachable,
   expectWindowsDecoyUnrun,
+  expectWindowsOnlyChatRefused,
   probeWindowsDecoy
 } from './wsl-orcad-chat-windows-decoy'
 import {
@@ -32,20 +33,6 @@ import {
 export type ChatLane = WslChatHost & {
   pairing(): PairedRuntimeConnection
   reconnect(whileDisconnected: () => Promise<void>): Promise<void>
-}
-
-function envelope(
-  sessionId: string,
-  method: string,
-  fields: Record<string, unknown>,
-  fence: number | null
-) {
-  return {
-    sessionId,
-    expectedRuntimeFence: fence,
-    clientOperationId: `${Date.now()}-${randomUUID().replaceAll('-', '')}`,
-    payloadFingerprint: computeAgentSessionPayloadFingerprint({ sessionId, method, fields })
-  }
 }
 
 function assistantText(row: AgentJournalRenderItem): string {
@@ -301,7 +288,9 @@ export async function proveWslStructuredChat(lane: ChatLane) {
   const folder = await exerciseChat(lane, install, folderWorktree, folderPath)
   const decoy = await expectWindowsDecoyReachable(lane)
   await expectWindowsDecoyUnrun(lane, home)
-  // Recorded, not asserted: whether a Windows-only install is picked up is the open question.
   const windowsOnly = await probeWindowsDecoy(lane, install, gitWorktree)
-  return { git, folder, decoy, windowsOnly }
+  expect(windowsOnly.errors, JSON.stringify(windowsOnly)).toEqual([])
+  const windowsOnlyChat = await expectWindowsOnlyChatRefused(lane, gitWorktree)
+  await expectWindowsDecoyUnrun(lane, home)
+  return { git, folder, decoy, windowsOnly, windowsOnlyChat }
 }

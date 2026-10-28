@@ -1,5 +1,7 @@
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 import { quotePosixShell } from '../../shared/shell-argument-quoting'
+import { randomUUID } from 'node:crypto'
+import { envelope } from './wsl-orcad-chat-envelope'
 import type { ChatInstall, ChatLane } from './wsl-orcad-structured-chat-contract'
 
 /** Guest file the Windows-side `claude` decoy appends to each time anything runs it. */
@@ -55,7 +57,7 @@ function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-/** With no guest install left, whether orcad runs the Windows-side `claude`; records, never fails. */
+/** With no guest install left, whether orcad runs the Windows-side `claude`; records, the caller asserts. */
 export async function probeWindowsDecoy(lane: ChatLane, install: ChatInstall, worktree: string) {
   const errors: string[] = []
   const attempt = async <T>(step: () => Promise<T>): Promise<T | null> => {
@@ -82,4 +84,49 @@ export async function probeWindowsDecoy(lane: ChatLane, install: ChatInstall, wo
     await new Promise((resolve) => setTimeout(resolve, 5_000))
   }
   return { support, decoyRuns: runs, errors }
+}
+
+/**
+ * A chat with only a Windows `claude` must refuse, never start that copy: `cliMissing` when the
+ * chat's login PATH shows the Windows copy, else a plain ENOENT (Debian's /etc/profile resets PATH).
+ */
+const WINDOWS_ONLY_REFUSAL = /cliMissing|spawn claude ENOENT/u
+
+export async function expectWindowsOnlyChatRefused(lane: ChatLane, worktree: string) {
+  const sessionId = randomUUID()
+  const fields = { worktree, agent: 'claude' }
+  const outcome = (step: Promise<unknown>) =>
+    step.then(
+      (value) => value,
+      (error: unknown) => ({ thrown: errorText(error) })
+    )
+  const created = await outcome(
+    lane.rpc('agentSession.create', {
+      ...fields,
+      envelope: envelope(sessionId, 'agentSession.create', fields, null)
+    })
+  )
+  const body = { kind: 'message', role: 'user', blocks: [{ type: 'text', text: 'hello' }] }
+  const sent = await outcome(
+    lane.rpc('agentSession.send', {
+      body,
+      envelope: envelope(sessionId, 'agentSession.send', { body }, null)
+    })
+  )
+  let history: unknown = null
+  await vi
+    .waitFor(
+      async () => {
+        history = await outcome(
+          lane.rpc('agentSession.history', { sessionId, direction: 'tail', limit: 50 })
+        )
+        expect(JSON.stringify([created, sent, history])).toMatch(WINDOWS_ONLY_REFUSAL)
+      },
+      { timeout: 60_000, interval: 2_000 }
+    )
+    .catch(() => {})
+  await outcome(lane.rpc('agentSession.close', { sessionId }))
+  const seen = { created, sent, history }
+  expect(JSON.stringify(seen), JSON.stringify(seen)).toMatch(WINDOWS_ONLY_REFUSAL)
+  return seen
 }
