@@ -21129,7 +21129,8 @@
       "deleting": "Excluindo…",
       "confirm": "Excluir todas as worktrees listadas",
       "preservedBranches": "Algumas branches de worktrees aninhadas foram mantidas"
-    }
+    },
+    "setupTerminalTitle": "Configuração"
   },
   "projectBoard": {
     "noColumnField": "Esta visualização de quadro não tem um campo de seleção única ou iteração para agrupar, então o Orca está listando os itens.",
