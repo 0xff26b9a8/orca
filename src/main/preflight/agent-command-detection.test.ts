@@ -47,7 +47,7 @@ describe('detectAgentCommandsOnHost install-dir fallback', () => {
       } finally {
         process.env.PATH = original
       }
-      expect(detectInstallDirs).toHaveBeenCalledWith(['codex'], '/usr/bin')
+      expect(detectInstallDirs).toHaveBeenCalledWith(['codex'], '/usr/bin', { skipPathSearch: true })
     }
   )
 })

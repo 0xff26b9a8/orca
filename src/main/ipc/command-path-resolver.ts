@@ -219,27 +219,38 @@ export async function findCommandsOnLocalPath(
             ? new Map(names.map((name) => [name.toLowerCase(), name] as const))
             : new Set(names)
         }
-      } catch {
-        // Missing or unreadable directories hold no candidates; stat-per-candidate agreed.
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException | null)?.code
+        if (code === 'EACCES' || code === 'EPERM') {
+          // A searchable-but-unreadable directory still admits stat on known names;
+          // the per-candidate lookup found commands there, so probe them directly.
+          return { dir, names: null }
+        }
+        // Missing or dangling directories hold no candidates; stat-per-candidate agreed.
         return null
       }
     })
   )
 
-  const seenCandidates = new Set<string>()
   for (const command of bareCommands) {
     const extensions = isWin ? getWindowsExtensions(env, command) : ['']
+    // Deduplicate candidates per command: two commands (for example `tool` and
+    // `tool.CMD`) may resolve to the same on-disk file, and each must still be found.
+    const seenCandidates = new Set<string>()
     for (const listing of directoryListings) {
       if (!listing) {
         continue
       }
       for (const ext of extensions) {
         const wanted = command + ext
-        const onDisk = isWin
-          ? (listing.names as Map<string, string>).get(wanted.toLowerCase())
-          : (listing.names as Set<string>).has(wanted)
+        const onDisk =
+          listing.names === null
             ? wanted
-            : undefined
+            : isWin
+              ? (listing.names as Map<string, string>).get(wanted.toLowerCase())
+              : (listing.names as Set<string>).has(wanted)
+                ? wanted
+                : undefined
         if (onDisk === undefined) {
           continue
         }

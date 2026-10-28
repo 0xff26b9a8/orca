@@ -312,3 +312,41 @@ describe('findCommandsOnLocalPath', () => {
     })
   })
 })
+
+// An execute-only directory cannot be listed, but stat on known names still works.
+describe.skipIf(process.platform === 'win32')('findCommandsOnLocalPath unreadable PATH entry', () => {
+  let locked = ''
+  beforeAll(async () => {
+    locked = await mkdtemp(path.join(tmpdir(), 'cmd-batch-locked-'))
+    await writeFile(path.join(locked, 'runme'), '#!/bin/sh\n')
+    await chmod(path.join(locked, 'runme'), 0o755)
+    await chmod(locked, 0o111)
+  })
+  afterAll(async () => {
+    await chmod(locked, 0o755)
+    await rm(locked, { recursive: true, force: true })
+  })
+
+  it('probes known names directly when readdir is denied, like stat-per-candidate', async () => {
+    await expect(
+      findCommandsOnLocalPath(['runme'], { platform: 'linux', env: { PATH: locked } })
+    ).resolves.toEqual(new Set(['runme']))
+  })
+})
+
+describe('findCommandsOnLocalPath shared candidate names', () => {
+  it('finds both a bare command and its dotted form when they resolve to the same file', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'cmd-batch-shared-'))
+    try {
+      await writeFile(path.join(dir, 'tool.CMD'), '@echo off\n')
+      await expect(
+        findCommandsOnLocalPath(['tool', 'tool.CMD'], {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.CMD;.EXE' }
+        })
+      ).resolves.toEqual(new Set(['tool', 'tool.CMD']))
+    } finally {
+      await rm(dir, { recursive: true, force: true })
+    }
+  })
+})
