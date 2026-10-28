@@ -4,17 +4,21 @@
  * Reads go through the background-work gate (E9): only into a distro a fresh list says is running.
  */
 import { isWslDistroRunningForBackgroundWork } from '../wsl-background-distro-gate'
+import { onRunningWslDistrosStopped } from '../wsl-running-distro-cache'
 import { readWslDistroBootId } from '../wsl/wsl-distro-boot-id'
 
 export type WslBridgeBootIdentityDeps = {
   isRunning: (distro: string) => Promise<boolean>
   /** Null when the id could not be read. */
   readBootId: (distro: string) => Promise<string | null>
+  /** Confirmed running lists that no longer name a distro; returns an unsubscribe. */
+  onDistrosStopped?: (listener: (stopped: string[]) => void) => () => void
 }
 
 const PRODUCTION_DEPS: WslBridgeBootIdentityDeps = {
   isRunning: isWslDistroRunningForBackgroundWork,
-  readBootId: readWslDistroBootId
+  readBootId: readWslDistroBootId,
+  onDistrosStopped: onRunningWslDistrosStopped
 }
 
 function distroKey(distro: string): string {
@@ -31,6 +35,9 @@ export class WslBridgeBootIdentity {
     { distro: string; incarnationId: string | undefined; bootId: Promise<string | null> }
   >()
 
+  // Held only while a bridge pane lives, so an idle adapter keeps no listener.
+  private unsubscribeStops: (() => void) | null = null
+
   constructor(private readonly deps: WslBridgeBootIdentityDeps = PRODUCTION_DEPS) {}
 
   /** A spawn or reattach of `sessionId`; a new incarnation takes the distro's current boot id. */
@@ -44,6 +51,10 @@ export class WslBridgeBootIdentity {
     ) {
       return
     }
+    // A stop seen before the exit reaches us: a pane spawned meanwhile must not take the old id.
+    this.unsubscribeStops ??=
+      this.deps.onDistrosStopped?.((stopped) => stopped.forEach((name) => this.noteExit(name))) ??
+      null
     this.bySession.set(sessionId, { distro: key, incarnationId, bootId: this.distroBootId(distro) })
   }
 
@@ -83,6 +94,10 @@ export class WslBridgeBootIdentity {
     this.bySession.delete(sessionId)
     if (spawned && ![...this.bySession.values()].some(({ distro }) => distro === spawned.distro)) {
       this.byDistro.delete(spawned.distro)
+    }
+    if (this.bySession.size === 0) {
+      this.unsubscribeStops?.()
+      this.unsubscribeStops = null
     }
   }
 
