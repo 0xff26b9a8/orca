@@ -40,3 +40,23 @@ it('re-resolves only the changed tab until an owner input changes', async () => 
   expect(tabs[3].model.isDisposed()).toBe(true)
   expect(tabs[4].model.isDisposed()).toBe(false)
 })
+
+it('resolves no owners for rank-only worktree patches but does for owner changes', () => {
+  const { store, attach, add } = createModelLifetimeFixture()
+  add('ranked')
+  attach()
+  const resolve = vi.mocked(getEditorModelOwnerKey)
+  const patchRows = (patch: { sortOrder?: number; hostId?: 'runtime:env' }): void => {
+    const rows = store.getState().worktreesByRepo['model-fixture']
+    store.setState({
+      worktreesByRepo: { 'model-fixture': rows.map((row) => ({ ...row, ...patch })) }
+    })
+  }
+
+  resolve.mockClear()
+  patchRows({ sortOrder: 7 })
+  expect(resolve).not.toHaveBeenCalled()
+
+  patchRows({ hostId: 'runtime:env' })
+  expect(resolve).toHaveBeenCalled()
+})

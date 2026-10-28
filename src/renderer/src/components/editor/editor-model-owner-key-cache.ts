@@ -1,7 +1,7 @@
 import type { OpenFile } from '@/store/slices/editor'
 import type { EditorBufferViewIndex } from '@/store/slices/editor/buffers/editor-buffer-views'
 import {
-  EDITOR_BUFFER_ROUTE_INPUT_KEYS,
+  editorBufferRouteInputsEqual,
   type EditorBufferRouteState
 } from '@/store/slices/editor/buffers/editor-buffer-identity-cache'
 import { getEditorModelOwnerKey } from './editor-model-owner'
@@ -9,10 +9,7 @@ import { getEditorModelOwnerKey } from './editor-model-owner'
 type OwnerKeyState = EditorBufferRouteState & Partial<EditorBufferViewIndex>
 
 function ownerInputsEqual(a: OwnerKeyState, b: OwnerKeyState): boolean {
-  return (
-    a.editorBufferIdOf === b.editorBufferIdOf &&
-    EDITOR_BUFFER_ROUTE_INPUT_KEYS.every((key) => a[key] === b[key])
-  )
+  return a.editorBufferIdOf === b.editorBufferIdOf && editorBufferRouteInputsEqual(a, b)
 }
 
 function cachedOwnerKey(
