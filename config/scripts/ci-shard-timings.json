@@ -2125,7 +2125,6 @@
       "src/main/daemon/daemon-pty-adapter-cold-restore-seed.test.ts": 751,
       "src/main/daemon/daemon-pty-adapter-concurrent-recovery.test.ts": 700,
       "src/main/daemon/daemon-pty-adapter-daemon-recovery.test.ts": 1326,
-      "src/main/daemon/daemon-pty-adapter-full-disk-access.test.ts": 505,
       "src/main/daemon/daemon-pty-adapter-history-checkpoints.test.ts": 1460,
       "src/main/daemon/daemon-pty-adapter-history-recovery.test.ts": 1078,
       "src/main/daemon/daemon-pty-adapter-history-shutdown-admission.test.ts": 671,
