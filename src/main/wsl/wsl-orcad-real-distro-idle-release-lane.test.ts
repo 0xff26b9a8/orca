@@ -43,6 +43,7 @@ import {
   ORCAD_STARTUP_TIMING_PREFIX
 } from '../orcad/orcad-startup-timing'
 import { quotePosixShell } from '../../shared/shell-argument-quoting'
+import { ORCAD_LAUNCHER_FILENAME } from '../../shared/orcad-artifacts'
 import { verifyWslOrcadIdentity } from './wsl-orcad-pairing-identity'
 import { listenWslOrcadStdioBridge } from './wsl-orcad-stdio-bridge'
 
@@ -63,6 +64,9 @@ const commandLog: string[] = []
 receipt.commandLog = commandLog
 let holder: WslDistroHolder
 let manager: WslOrcadConnectionManager
+/** NODE_OPTIONS for the next orcad launch; set only for the one profiled restart. */
+let launchNodeOptions: string | null = null
+const PROFILE_DIR = '/tmp/orca-lane-orcad-profiles'
 /** Set only while a restart's ensure is measured. */
 let ensureTrace: ReturnType<typeof createWslOrcadEnsureTrace> | null = null
 
@@ -115,7 +119,8 @@ function createManager(): void {
         ...transport,
         orcadLaunchEnv: async (launch) => [
           ...((await transport.orcadLaunchEnv?.(launch)) ?? []),
-          [ORCAD_STARTUP_TIMING_ENV, '1']
+          [ORCAD_STARTUP_TIMING_ENV, '1'],
+          ...(launchNodeOptions ? [['NODE_OPTIONS', launchNodeOptions] as const] : [])
         ],
         exec: (command, options) => {
           log('exec', command)
@@ -407,6 +412,36 @@ async function restartThroughBridgeExec(): Promise<Receipt> {
 }
 
 /**
+ * One extra, unrecorded restart with orcad (and the Node children it starts) under --cpu-prof.
+ * Profiles are written on exit, so wait for the idle exit, then copy them into the receipts.
+ */
+async function profileOrcadRestart(repoPath: string): Promise<string[]> {
+  await guest(`rm -rf ${PROFILE_DIR}`)
+  launchNodeOptions = `--cpu-prof --cpu-prof-dir=${PROFILE_DIR}`
+  try {
+    await restartThroughHost(repoPath)
+  } finally {
+    launchNodeOptions = null
+  }
+  // procps is not in every lane rootfs; the bracket keeps grep from matching its own argv.
+  const serving = `for p in /proc/[0-9]*; do tr '\\0' ' ' < "$p/cmdline" 2>/dev/null; echo; done | grep -c '[${ORCAD_LAUNCHER_FILENAME[0]}]${ORCAD_LAUNCHER_FILENAME.slice(1)} --json' || true`
+  await waitFor(
+    'the profiled orcad to idle-exit',
+    async () => ((await guest(serving)).trim() === '0' ? true : null),
+    120_000,
+    1000
+  )
+  const names = (await guest(`ls ${PROFILE_DIR} 2>/dev/null || true`)).split('\n').filter(Boolean)
+  for (const name of names) {
+    writeFileSync(
+      join(RECEIPT_DIR, name),
+      await guest(`cat ${quotePosixShell(`${PROFILE_DIR}/${name}`)}`)
+    )
+  }
+  return names
+}
+
+/**
  * Distro restart (VM warm) to first command output, median of 3 each, alternating so neither path
  * always runs on a warmer VM.
  */
@@ -430,6 +465,7 @@ async function distroRestartBaseline(): Promise<void> {
     medianHostPhases: medianWslOrcadEnsurePhases(host.map((run) => run.phases)),
     medianBridgeExecLowerBoundMs: median(bridge, 'firstOutputMs')
   }
+  receipt.orcadStartupProfiles = await profileOrcadRestart(repoPath)
   await terminatePlain()
 }
 
@@ -455,10 +491,10 @@ describe.runIf(RUN && process.platform === 'win32')('WSL distro idle release', (
     RELEASE_BUDGET_MS + 2 * HELD_WITH_TERMINAL_MS + 6 * 60_000
   )
 
-  // After the idle phase: six distro restarts plus a warm-up, each bounded.
+  // After the idle phase: six distro restarts, a warm-up and one profiled restart, each bounded.
   it(
     'measures distro restart to first output for the WSL host and an old-bridge exec lower bound',
     distroRestartBaseline,
-    20 * 60_000
+    24 * 60_000
   )
 })
