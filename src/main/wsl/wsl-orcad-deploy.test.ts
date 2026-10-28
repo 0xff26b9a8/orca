@@ -58,6 +58,7 @@ vi.mock('../orcad/orcad-artifact-materializer', () => ({
 }))
 vi.mock('../ssh/orcad-remote-deploy', () => ({ deployOrcad: mocks.deploy }))
 vi.mock('../managed-server/lifecycle/orcad-managed-version-gc', () => ({
+  provenLiveDaemonVersion: () => null,
   pruneManagedOrcadVersions: mocks.prune
 }))
 vi.mock('../managed-server/lifecycle/orcad-managed-wake', () => ({

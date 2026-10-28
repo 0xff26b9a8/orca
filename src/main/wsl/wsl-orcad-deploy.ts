@@ -23,7 +23,7 @@ import { clearOrcadUpdateFailedThisLaunch } from '../managed-server/lifecycle/or
 import type { OrcadUpdateIntent } from '../managed-server/lifecycle/orcad-managed-update-decision'
 import type { OrcadActivationRecord } from '../managed-server/activation/orcad-activation-record'
 import { errorMessage } from '../../shared/error-message'
-import { pruneManagedOrcadVersions } from '../managed-server/lifecycle/orcad-managed-version-gc'
+import { pruneWslOrcadVersionsUntilClean } from './wsl-orcad-version-gc-memo'
 import { wakeAlreadyActiveOrcad } from '../ssh/orcad-already-active-wake'
 import { OrcadActiveReadinessError } from '../ssh/orcad-active-readiness'
 import { WslDistroNotRunningError } from './wsl-orcad-connection-errors'
@@ -279,7 +279,7 @@ async function launchOverTransport(
   } else {
     readiness = await probe()
   }
-  await pruneManagedOrcadVersions({
+  await pruneWslOrcadVersionsUntilClean(target.id, {
     slot,
     serverTarget: context.serverTarget,
     activeVersion: deployed.fullVersion,
