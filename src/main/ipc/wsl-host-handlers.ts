@@ -1,4 +1,5 @@
 import { BrowserWindow, ipcMain } from 'electron'
+import { abortWhenRendererGone } from './renderer-lifetime-abort'
 import { noteWslHostUserAction } from '../wsl/wsl-host-user-actions'
 import {
   WSL_HOST_STATUS_CHANNEL,
@@ -265,7 +266,12 @@ export function registerWslHostHandlers(args: WslHostHandlerArgs): void {
     const windowId = sender.id
     const ids = Array.isArray(request.environmentIds) ? request.environmentIds : []
     if (!visibleWork.has(windowId)) {
-      sender.once('destroyed', () => wsl.setVisibleWork(visibleWork.forget(windowId)))
+      const lifetime = abortWhenRendererGone(sender)
+      lifetime.signal.addEventListener(
+        'abort',
+        () => wsl.setVisibleWork(visibleWork.forget(windowId)),
+        { once: true }
+      )
     }
     wsl.setVisibleWork(visibleWork.report(windowId, ids))
   })
