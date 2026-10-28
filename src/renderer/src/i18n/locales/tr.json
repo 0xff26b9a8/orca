@@ -18416,7 +18416,6 @@
         "pausedSendFailedWaiting": "Gönderilemedi — ajan işi bitirdiğinde yeniden denemek için Gönder'e basın.",
         "save": "Kaydet",
         "editingMessage": "Mesaj düzenleniyor",
-        "cancelEditing": "Düzenlemeyi iptal et",
         "editChanged": "Siz düzenlerken bu mesaj değişti. Düzenlediğiniz metin sohbet kutusunda.",
         "editChangedPrompt": "Siz düzenlerken bu mesaj değişti. Ajana yanıt verdikten sonra düzenlediğiniz metin sohbet kutusuna getirilecek.",
         "editChangedNotSaved": "Siz düzenlerken bu mesaj değişti. Düzenlemeniz kaydedilmedi.",
@@ -18429,9 +18428,7 @@
         "collapse": "Daralt",
         "expand": "Genişlet",
         "queued": "Sıraya alındı",
-        "clearAll": "Tümünü temizle",
-        "pasteOrDropImages": "Görselleri yapıştırın veya bırakın",
-        "saveNeedsContent": "Kaydetmek için metin veya görsel ekleyin"
+        "clearAll": "Tümünü temizle"
       },
       "thought": "Düşündü",
       "thoughtForDuration": "{{duration}} boyunca düşündü",
