@@ -80,7 +80,6 @@ describe('isCommandOnLocalPath', () => {
       dir = await mkdtemp(path.join(tmpdir(), 'cmd-resolver-win32-'))
       // Match PATHEXT case in fixtures; real Windows handles filename case while Linux test filesystems do not.
       await writeFile(path.join(dir, 'tool.CMD'), '@echo off\n')
-      await writeFile(path.join(dir, 'literal-cli'), '')
     })
     afterAll(async () => {
       await rm(dir, { recursive: true, force: true })
@@ -113,14 +112,6 @@ describe('isCommandOnLocalPath', () => {
       ).resolves.toBe(true)
     })
 
-    it('matches an extensionless executable alongside PATHEXT candidates', async () => {
-      await expect(
-        isCommandOnLocalPath('literal-cli', {
-          platform: 'win32',
-          env: { Path: dir, PATHEXT: '.EXE' }
-        })
-      ).resolves.toBe(true)
-    })
   })
 
   // Executable-but-broken shims can shadow working binaries; retain later PATH candidates (#22975).
@@ -223,6 +214,7 @@ describe('isCommandOnLocalPath', () => {
     it('lists every PATHEXT permutation on win32, in resolver order', async () => {
       const dir = await mkdtemp(path.join(tmpdir(), 'cmd-list-win32-'))
       try {
+        await writeFile(path.join(dir, 'tool'), '')
         await writeFile(path.join(dir, 'tool.CMD'), '@echo off\n')
         await writeFile(path.join(dir, 'tool.EXE'), '')
         await expect(

@@ -29,12 +29,20 @@ function readEnvCaseInsensitive(env: NodeJS.ProcessEnv, key: string): string | u
   return undefined
 }
 
-function getWindowsExtensions(env: NodeJS.ProcessEnv): string[] {
+function getWindowsPathSearchExtensions(env: NodeJS.ProcessEnv, command: string): string[] {
   const pathext = readEnvCaseInsensitive(env, 'PATHEXT') ?? '.EXE;.CMD;.BAT;.COM'
   const extensions = pathext.split(';').filter((ext) => ext.length > 0)
-  // CLI fallback resolution also checks a literal executable name, even without an extension.
-  extensions.unshift('')
+  // Explicit extensions also permit exact-name matches alongside PATHEXT variants.
+  if (command.includes('.')) {
+    extensions.unshift('')
+  }
   return extensions
+}
+
+/** Agent CLI fallback also checks a literal executable name without an extension. */
+function getWindowsBatchDetectionExtensions(env: NodeJS.ProcessEnv, command: string): string[] {
+  const extensions = getWindowsPathSearchExtensions(env, command)
+  return extensions.includes('') ? extensions : ['', ...extensions]
 }
 
 type LocalCommandSelection = {
@@ -169,8 +177,8 @@ export async function isCommandOnLocalPath(
 
 /** Batched PATH lookup for detection: the subset of `commands` present on PATH.
  *  Reads each absolute PATH directory once instead of stat()ing every command-extension
- *  candidate (#34636); hits still go through `isExecutableFile`, so symlink, directory,
- *  permission and case semantics match `isCommandOnLocalPath`. */
+ *  candidate (#34636); hits still go through `isExecutableFile`, preserving symlink, directory,
+ *  permission and case semantics. It also matches literal Windows CLI names used by agent fallback. */
 export async function findCommandsOnLocalPath(
   commands: readonly string[],
   options: ResolveCommandOptions = {}
@@ -231,7 +239,7 @@ export async function findCommandsOnLocalPath(
   )
 
   for (const command of bareCommands) {
-    const extensions = isWin ? getWindowsExtensions(env) : ['']
+    const extensions = isWin ? getWindowsBatchDetectionExtensions(env, command) : ['']
     // Deduplicate candidates per command: two commands (for example `tool` and
     // `tool.CMD`) may resolve to the same on-disk file, and each must still be found.
     const seenCandidates = new Set<string>()
@@ -307,7 +315,7 @@ async function findLocalCommandPaths(
   const pathDirs = (readEnvCaseInsensitive(env, 'PATH') ?? '').split(delimiter)
   // Separators bypass PATH; Windows searches cwd first.
   const searchDirs = hasPathSeparator ? [''] : isWin ? [cwd, ...pathDirs] : pathDirs
-  const extensions = isWin ? getWindowsExtensions(env) : ['']
+  const extensions = isWin ? getWindowsPathSearchExtensions(env, command) : ['']
 
   const found: string[] = []
   const seen = new Set<string>()
