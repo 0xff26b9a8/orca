@@ -18469,7 +18469,9 @@
       "hostOutage": {
         "offline": "{{hostName}} is offline",
         "reconnecting": "{{hostName}} is reconnecting…",
-        "reconnect": "Reconnect"
+        "reconnect": "Reconnect",
+        "stopped": "{{distro}} is stopped",
+        "start": "Start"
       },
       "interruptedContinue": {
         "continue": "Continue",
