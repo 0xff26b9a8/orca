@@ -18463,7 +18463,6 @@
         "pausedSendFailedWaiting": "Couldn't send — press Send to retry once the agent finishes.",
         "save": "Save",
         "editingMessage": "Editing message",
-        "cancelEditing": "Cancel editing",
         "editChanged": "This message changed while you were editing. Your edit is in the chat box.",
         "editChangedPrompt": "This message changed while you were editing. Your edit will be in the chat box after you answer the agent.",
         "editChangedNotSaved": "This message changed while you were editing. Your edit wasn't saved.",
@@ -18477,8 +18476,8 @@
         "expand": "Expand",
         "queued": "Queued",
         "clearAll": "Clear all",
-        "pasteOrDropImages": "Paste or drop images",
-        "saveNeedsContent": "Add text or an image to save"
+        "editReturned": "Your edit is in the chat box.",
+        "commandsUnsupported": "Commands can't be saved in a queued message."
       },
       "thought": "Thought",
       "thoughtForDuration": "Thought for {{duration}}",

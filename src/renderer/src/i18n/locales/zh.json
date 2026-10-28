@@ -18099,7 +18099,6 @@
         "pausedSendFailedWaiting": "无法发送。智能体完成后，点按发送以重试。",
         "save": "保存",
         "editingMessage": "正在编辑消息",
-        "cancelEditing": "取消编辑",
         "editChanged": "你编辑时此消息已更改。你编辑的内容已放入聊天输入框。",
         "editChangedPrompt": "你编辑时此消息已更改。回答智能体后，你编辑的内容会出现在聊天输入框中。",
         "editChangedNotSaved": "你编辑时此消息已更改。你的编辑未保存。",
@@ -18112,9 +18111,7 @@
         "collapse": "收起",
         "expand": "展开",
         "queued": "已排队",
-        "clearAll": "全部清除",
-        "pasteOrDropImages": "粘贴或拖入图片",
-        "saveNeedsContent": "添加文字或图片后才能保存"
+        "clearAll": "全部清除"
       },
       "thought": "已思考",
       "thoughtForDuration": "思考了 {{duration}}",
