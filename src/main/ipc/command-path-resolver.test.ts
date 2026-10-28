@@ -80,6 +80,7 @@ describe('isCommandOnLocalPath', () => {
       dir = await mkdtemp(path.join(tmpdir(), 'cmd-resolver-win32-'))
       // Match PATHEXT case in fixtures; real Windows handles filename case while Linux test filesystems do not.
       await writeFile(path.join(dir, 'tool.CMD'), '@echo off\n')
+      await writeFile(path.join(dir, 'literal-cli'), '')
     })
     afterAll(async () => {
       await rm(dir, { recursive: true, force: true })
@@ -106,6 +107,15 @@ describe('isCommandOnLocalPath', () => {
     it('matches an exact name with extension already present', async () => {
       await expect(
         isCommandOnLocalPath('tool.CMD', {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.EXE' }
+        })
+      ).resolves.toBe(true)
+    })
+
+    it('matches an extensionless executable alongside PATHEXT candidates', async () => {
+      await expect(
+        isCommandOnLocalPath('literal-cli', {
           platform: 'win32',
           env: { Path: dir, PATHEXT: '.EXE' }
         })
@@ -279,6 +289,7 @@ describe('findCommandsOnLocalPath', () => {
       dir = await mkdtemp(path.join(tmpdir(), 'cmd-batch-win32-'))
       await writeFile(path.join(dir, 'tool.CMD'), '@echo off\n')
       await writeFile(path.join(dir, 'MiXeD.CmD'), '@echo off\n')
+      await writeFile(path.join(dir, 'literal-cli'), '')
     })
     afterAll(async () => {
       await rm(dir, { recursive: true, force: true })
@@ -310,6 +321,15 @@ describe('findCommandsOnLocalPath', () => {
         })
       ).resolves.toEqual(new Set(['mixed']))
     })
+
+    it('matches extensionless executable names checked by the agent fallback', async () => {
+      await expect(
+        findCommandsOnLocalPath(['literal-cli'], {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.EXE' }
+        })
+      ).resolves.toEqual(new Set(['literal-cli']))
+    })
   })
 })
 
@@ -319,7 +339,7 @@ describe.skipIf(process.platform === 'win32')('findCommandsOnLocalPath unreadabl
   beforeAll(async () => {
     locked = await mkdtemp(path.join(tmpdir(), 'cmd-batch-locked-'))
     await writeFile(path.join(locked, 'runme'), '#!/bin/sh\n')
-    await chmod(path.join(locked, 'runme'), 0o755)
+    await chmod(locked, 0o755)
     await chmod(locked, 0o111)
   })
   afterAll(async () => {

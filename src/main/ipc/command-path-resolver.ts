@@ -29,13 +29,11 @@ function readEnvCaseInsensitive(env: NodeJS.ProcessEnv, key: string): string | u
   return undefined
 }
 
-function getWindowsExtensions(env: NodeJS.ProcessEnv, command: string): string[] {
+function getWindowsExtensions(env: NodeJS.ProcessEnv): string[] {
   const pathext = readEnvCaseInsensitive(env, 'PATHEXT') ?? '.EXE;.CMD;.BAT;.COM'
   const extensions = pathext.split(';').filter((ext) => ext.length > 0)
-  // Explicit extensions also permit exact-name matches alongside PATHEXT variants.
-  if (command.includes('.')) {
-    extensions.unshift('')
-  }
+  // CLI fallback resolution also checks a literal executable name, even without an extension.
+  extensions.unshift('')
   return extensions
 }
 
@@ -233,7 +231,7 @@ export async function findCommandsOnLocalPath(
   )
 
   for (const command of bareCommands) {
-    const extensions = isWin ? getWindowsExtensions(env, command) : ['']
+    const extensions = isWin ? getWindowsExtensions(env) : ['']
     // Deduplicate candidates per command: two commands (for example `tool` and
     // `tool.CMD`) may resolve to the same on-disk file, and each must still be found.
     const seenCandidates = new Set<string>()
@@ -309,7 +307,7 @@ async function findLocalCommandPaths(
   const pathDirs = (readEnvCaseInsensitive(env, 'PATH') ?? '').split(delimiter)
   // Separators bypass PATH; Windows searches cwd first.
   const searchDirs = hasPathSeparator ? [''] : isWin ? [cwd, ...pathDirs] : pathDirs
-  const extensions = isWin ? getWindowsExtensions(env, command) : ['']
+  const extensions = isWin ? getWindowsExtensions(env) : ['']
 
   const found: string[] = []
   const seen = new Set<string>()
