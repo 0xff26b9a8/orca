@@ -5474,7 +5474,7 @@
           "5d1a5d51bb": "已停止 {{value0}} 上的进程",
           "c89f290e25": "已复制 {{value0}}",
           "d1113f4660": "无法打开浏览器",
-          "fed49903c9": "{{value0}} 直播 {{value1}}",
+          "fed49903c9": "{{value0}} 个正在运行的 {{value1}}",
           "unknownProcess": "未知进程"
         },
         "WorktreeContextMenu": {
