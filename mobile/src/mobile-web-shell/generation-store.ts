@@ -9,7 +9,7 @@ import type {
 } from '../transport/mobile-web-bundle-fetch'
 import { joinUri } from './generation-cache-uri'
 import { MANIFEST_FILE_NAME, requireStorablePath } from './generation-asset-path'
-import { copyCachedAsset, reusableAssetsOf } from './generation-reuse'
+import { reusableAssetsOf } from './generation-reuse'
 import type { GenerationDirectoryEntry, GenerationFileSystem } from './generation-store-file-system'
 import { isHostCacheKey } from './host-cache-key'
 import type { MobileWebShellUpdateFailure } from './mobile-web-shell-update-failure'
@@ -168,12 +168,12 @@ export function createGenerationStore(options: {
       bytes: reused.has(asset.path) ? null : requireExactBytes(result.assets.get(asset.path), asset)
     }))
     // Copy reused assets on the stage queue so sweeps and concurrent downloads cannot remove their source mid-copy.
-    const active = reused.size > 0 ? await readActive(hostKey) : null
+    const reusable = reusableAssetsOf(fs, reused.size > 0 ? await readActive(hostKey) : null)
     // Discard prior residue; fresh writes over a partial tree would not form a verified generation.
     await fs.delete(directory)
     try {
       for (const { asset, uri, bytes } of assets) {
-        await (bytes === null ? copyCachedAsset(fs, active, asset, uri) : fs.writeBytes(uri, bytes))
+        await (bytes === null ? reusable.copyTo(asset, uri) : fs.writeBytes(uri, bytes))
       }
       // Write the manifest last so interrupted trees cannot appear activated.
       await fs.writeText(joinUri(directory, MANIFEST_FILE_NAME), JSON.stringify(manifest))
