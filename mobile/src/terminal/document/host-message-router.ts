@@ -86,6 +86,7 @@ export function handleMsg(scope: TerminalDocumentScope, msg: TerminalHostMessage
   } else if (msg.type === 'write') {
     write(scope, msg.data!)
   } else if (msg.type === 'clear') {
+    scope.pendingReplayScrollAnchorRows = null
     scope.terminalGeneration++
     resetWriteQueue(scope)
     resumeTerminalDataReplyAuthority(scope)
