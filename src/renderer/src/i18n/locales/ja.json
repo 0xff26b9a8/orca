@@ -14276,7 +14276,25 @@
                   "forcePushBeforeReview": "強制プッシュしてから {{shortLabel}} を作成",
                   "pushBeforeReview": "プッシュしてから {{shortLabel}} を作成",
                   "titleForcePushBeforeCreatingReview": "{{reviewLabel}} を作成する前に lease 付きで強制プッシュ",
-                  "titlePushBeforeCreatingReview": "{{reviewLabel}} を作成する前にローカルのコミットをプッシュ"
+                  "titlePushBeforeCreatingReview": "{{reviewLabel}} を作成する前にローカルのコミットをプッシュ",
+                  "pushCount_one": "{{count}} 件のコミットをプッシュ",
+                  "pushCount_other": "{{count}} 件のコミットをプッシュ",
+                  "pullCount_one": "{{count}} 件のコミットをプル",
+                  "pullCount_other": "{{count}} 件のコミットをプル",
+                  "fastForwardCount_one": "{{count}} 件のコミットを fast-forward",
+                  "fastForwardCount_other": "{{count}} 件のコミットを fast-forward",
+                  "syncCounts": "{{behind}} 件をプル、{{ahead}} 件をプッシュ",
+                  "remoteBranchFallback": "リモートブランチ",
+                  "titleForcePushOlderCopiesBranch": "リモートにはローカルコミットの古いコピーしかありません。このブランチを lease 付きで強制プッシュして {{upstreamName}} を更新します。",
+                  "titleForcePushOlderCopiesCount_one": "リモートにはローカルコミットの古いコピーしかありません。{{count}} 件のブランチコミットを lease 付きで強制プッシュして {{upstreamName}} を更新します。",
+                  "titleForcePushOlderCopiesCount_other": "リモートにはローカルコミットの古いコピーしかありません。{{count}} 件のブランチコミットを lease 付きで強制プッシュして {{upstreamName}} を更新します。",
+                  "titleManualForcePush_one": "{{count}} 件のローカルコミットを lease 付きで強制プッシュして {{upstreamName}} を更新します。",
+                  "titleManualForcePush_other": "{{count}} 件のローカルコミットを lease 付きで強制プッシュして {{upstreamName}} を更新します。",
+                  "titleManualForcePushReplaceRemote_one": "{{count}} 件のローカルコミットを lease 付きで強制プッシュして {{upstreamName}} を更新し、リモートにのみあるコミットを置き換えます。",
+                  "titleManualForcePushReplaceRemote_other": "{{count}} 件のローカルコミットを lease 付きで強制プッシュして {{upstreamName}} を更新し、リモートにのみあるコミットを置き換えます。",
+                  "titleUnpublishedForcePushBranch": "このブランチを lease 付きで強制プッシュし、必要に応じてアップストリームを設定します。",
+                  "titleUnpublishedForcePushCount_one": "{{count}} 件のブランチコミットを lease 付きで強制プッシュし、必要に応じてアップストリームを設定します。",
+                  "titleUnpublishedForcePushCount_other": "{{count}} 件のブランチコミットを lease 付きで強制プッシュし、必要に応じてアップストリームを設定します。"
                 }
               },
               "primary": {

@@ -14414,7 +14414,25 @@
                   "forcePushBeforeReview": "Force Push avant {{shortLabel}}",
                   "pushBeforeReview": "Push avant {{shortLabel}}",
                   "titleForcePushBeforeCreatingReview": "Faites un force push avec lease avant de créer une {{reviewLabel}}",
-                  "titlePushBeforeCreatingReview": "Poussez les commits locaux avant de créer une {{reviewLabel}}"
+                  "titlePushBeforeCreatingReview": "Poussez les commits locaux avant de créer une {{reviewLabel}}",
+                  "pushCount_one": "Pousser {{count}} commit",
+                  "pushCount_other": "Pousser {{count}} commits",
+                  "pullCount_one": "Tirer {{count}} commit",
+                  "pullCount_other": "Tirer {{count}} commits",
+                  "fastForwardCount_one": "Faire un fast-forward de {{count}} commit",
+                  "fastForwardCount_other": "Faire un fast-forward de {{count}} commits",
+                  "syncCounts": "Tirer {{behind}}, pousser {{ahead}}",
+                  "remoteBranchFallback": "la branche distante",
+                  "titleForcePushOlderCopiesBranch": "Le remote n'a que d'anciennes copies des commits locaux. Faites un force push avec lease de cette branche pour mettre à jour {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_one": "Le remote n'a que d'anciennes copies des commits locaux. Faites un force push avec lease de {{count}} commit de la branche pour mettre à jour {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_other": "Le remote n'a que d'anciennes copies des commits locaux. Faites un force push avec lease de {{count}} commits de la branche pour mettre à jour {{upstreamName}}.",
+                  "titleManualForcePush_one": "Faites un force push avec lease de {{count}} commit local pour mettre à jour {{upstreamName}}.",
+                  "titleManualForcePush_other": "Faites un force push avec lease de {{count}} commits locaux pour mettre à jour {{upstreamName}}.",
+                  "titleManualForcePushReplaceRemote_one": "Faites un force push avec lease de {{count}} commit local pour mettre à jour {{upstreamName}} et remplacer les commits présents uniquement sur le remote.",
+                  "titleManualForcePushReplaceRemote_other": "Faites un force push avec lease de {{count}} commits locaux pour mettre à jour {{upstreamName}} et remplacer les commits présents uniquement sur le remote.",
+                  "titleUnpublishedForcePushBranch": "Faites un force push avec lease de cette branche et définissez un upstream si nécessaire.",
+                  "titleUnpublishedForcePushCount_one": "Faites un force push avec lease de {{count}} commit de la branche et définissez un upstream si nécessaire.",
+                  "titleUnpublishedForcePushCount_other": "Faites un force push avec lease de {{count}} commits de la branche et définissez un upstream si nécessaire."
                 }
               },
               "primary": {

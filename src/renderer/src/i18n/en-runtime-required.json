@@ -1085,6 +1085,24 @@
                   "6de99d162b": "entry"
                 }
               },
+              "dropdown": {
+                "items": {
+                  "fastForwardCount_one": "Fast-forward {{count}} commit",
+                  "fastForwardCount_other": "Fast-forward {{count}} commits",
+                  "pullCount_one": "Pull {{count}} commit",
+                  "pullCount_other": "Pull {{count}} commits",
+                  "pushCount_one": "Push {{count}} commit",
+                  "pushCount_other": "Push {{count}} commits",
+                  "titleForcePushOlderCopiesCount_one": "Remote only has older copies of local commits. Force push {{count}} branch commit with lease to update {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_other": "Remote only has older copies of local commits. Force push {{count}} branch commits with lease to update {{upstreamName}}.",
+                  "titleManualForcePushReplaceRemote_one": "Force push {{count}} local commit with lease to update {{upstreamName}} and replace remote-only commits.",
+                  "titleManualForcePushReplaceRemote_other": "Force push {{count}} local commits with lease to update {{upstreamName}} and replace remote-only commits.",
+                  "titleManualForcePush_one": "Force push {{count}} local commit with lease to update {{upstreamName}}.",
+                  "titleManualForcePush_other": "Force push {{count}} local commits with lease to update {{upstreamName}}.",
+                  "titleUnpublishedForcePushCount_one": "Force push {{count}} branch commit with lease and set an upstream if needed.",
+                  "titleUnpublishedForcePushCount_other": "Force push {{count}} branch commits with lease and set an upstream if needed."
+                }
+              },
               "primary": {
                 "action": {
                   "2d8f185fbc": "Stage all changes before committing partially staged files",

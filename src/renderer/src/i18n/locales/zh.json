@@ -14214,7 +14214,25 @@
                   "forcePushBeforeReview": "先强制推送再创建 {{shortLabel}}",
                   "pushBeforeReview": "先推送再创建 {{shortLabel}}",
                   "titleForcePushBeforeCreatingReview": "在创建 {{reviewLabel}} 之前使用 lease 强制推送",
-                  "titlePushBeforeCreatingReview": "在创建 {{reviewLabel}} 之前推送本地提交"
+                  "titlePushBeforeCreatingReview": "在创建 {{reviewLabel}} 之前推送本地提交",
+                  "pushCount_one": "推送 {{count}} 个提交",
+                  "pushCount_other": "推送 {{count}} 个提交",
+                  "pullCount_one": "拉取 {{count}} 个提交",
+                  "pullCount_other": "拉取 {{count}} 个提交",
+                  "fastForwardCount_one": "快进 {{count}} 个提交",
+                  "fastForwardCount_other": "快进 {{count}} 个提交",
+                  "syncCounts": "拉取 {{behind}} 个，推送 {{ahead}} 个",
+                  "remoteBranchFallback": "远程分支",
+                  "titleForcePushOlderCopiesBranch": "远程只有本地提交的旧副本。使用 lease 强制推送此分支以更新 {{upstreamName}}。",
+                  "titleForcePushOlderCopiesCount_one": "远程只有本地提交的旧副本。使用 lease 强制推送 {{count}} 个分支提交以更新 {{upstreamName}}。",
+                  "titleForcePushOlderCopiesCount_other": "远程只有本地提交的旧副本。使用 lease 强制推送 {{count}} 个分支提交以更新 {{upstreamName}}。",
+                  "titleManualForcePush_one": "使用 lease 强制推送 {{count}} 个本地提交以更新 {{upstreamName}}。",
+                  "titleManualForcePush_other": "使用 lease 强制推送 {{count}} 个本地提交以更新 {{upstreamName}}。",
+                  "titleManualForcePushReplaceRemote_one": "使用 lease 强制推送 {{count}} 个本地提交以更新 {{upstreamName}}，并替换仅存在于远程的提交。",
+                  "titleManualForcePushReplaceRemote_other": "使用 lease 强制推送 {{count}} 个本地提交以更新 {{upstreamName}}，并替换仅存在于远程的提交。",
+                  "titleUnpublishedForcePushBranch": "使用 lease 强制推送此分支，并在需要时设置上游。",
+                  "titleUnpublishedForcePushCount_one": "使用 lease 强制推送 {{count}} 个分支提交，并在需要时设置上游。",
+                  "titleUnpublishedForcePushCount_other": "使用 lease 强制推送 {{count}} 个分支提交，并在需要时设置上游。"
                 }
               },
               "primary": {

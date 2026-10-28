@@ -14786,7 +14786,25 @@
                   "forcePushBeforeReview": "Force Push before {{shortLabel}}",
                   "pushBeforeReview": "Push before {{shortLabel}}",
                   "titleForcePushBeforeCreatingReview": "Force push with lease before creating a {{reviewLabel}}",
-                  "titlePushBeforeCreatingReview": "Push local commits before creating a {{reviewLabel}}"
+                  "titlePushBeforeCreatingReview": "Push local commits before creating a {{reviewLabel}}",
+                  "pushCount_one": "Push {{count}} commit",
+                  "pushCount_other": "Push {{count}} commits",
+                  "pullCount_one": "Pull {{count}} commit",
+                  "pullCount_other": "Pull {{count}} commits",
+                  "fastForwardCount_one": "Fast-forward {{count}} commit",
+                  "fastForwardCount_other": "Fast-forward {{count}} commits",
+                  "syncCounts": "Pull {{behind}}, push {{ahead}}",
+                  "remoteBranchFallback": "the remote branch",
+                  "titleForcePushOlderCopiesBranch": "Remote only has older copies of local commits. Force push this branch with lease to update {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_one": "Remote only has older copies of local commits. Force push {{count}} branch commit with lease to update {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_other": "Remote only has older copies of local commits. Force push {{count}} branch commits with lease to update {{upstreamName}}.",
+                  "titleManualForcePushReplaceRemote_one": "Force push {{count}} local commit with lease to update {{upstreamName}} and replace remote-only commits.",
+                  "titleManualForcePushReplaceRemote_other": "Force push {{count}} local commits with lease to update {{upstreamName}} and replace remote-only commits.",
+                  "titleManualForcePush_one": "Force push {{count}} local commit with lease to update {{upstreamName}}.",
+                  "titleManualForcePush_other": "Force push {{count}} local commits with lease to update {{upstreamName}}.",
+                  "titleUnpublishedForcePushBranch": "Force push this branch with lease and set an upstream if needed.",
+                  "titleUnpublishedForcePushCount_one": "Force push {{count}} branch commit with lease and set an upstream if needed.",
+                  "titleUnpublishedForcePushCount_other": "Force push {{count}} branch commits with lease and set an upstream if needed."
                 }
               },
               "primary": {

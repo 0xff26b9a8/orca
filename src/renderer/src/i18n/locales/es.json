@@ -14247,7 +14247,25 @@
                   "forcePushBeforeReview": "Force Push antes de {{shortLabel}}",
                   "pushBeforeReview": "Push antes de {{shortLabel}}",
                   "titleForcePushBeforeCreatingReview": "Haz force push con lease antes de crear un {{reviewLabel}}",
-                  "titlePushBeforeCreatingReview": "Haz push de los commits locales antes de crear un {{reviewLabel}}"
+                  "titlePushBeforeCreatingReview": "Haz push de los commits locales antes de crear un {{reviewLabel}}",
+                  "pushCount_one": "Hacer push de {{count}} commit",
+                  "pushCount_other": "Hacer push de {{count}} commits",
+                  "pullCount_one": "Hacer pull de {{count}} commit",
+                  "pullCount_other": "Hacer pull de {{count}} commits",
+                  "fastForwardCount_one": "Hacer fast-forward de {{count}} commit",
+                  "fastForwardCount_other": "Hacer fast-forward de {{count}} commits",
+                  "syncCounts": "Pull de {{behind}}, push de {{ahead}}",
+                  "remoteBranchFallback": "la rama remota",
+                  "titleForcePushOlderCopiesBranch": "El remoto solo tiene copias antiguas de commits locales. Haz force push con lease de esta rama para actualizar {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_one": "El remoto solo tiene copias antiguas de commits locales. Haz force push con lease de {{count}} commit de la rama para actualizar {{upstreamName}}.",
+                  "titleForcePushOlderCopiesCount_other": "El remoto solo tiene copias antiguas de commits locales. Haz force push con lease de {{count}} commits de la rama para actualizar {{upstreamName}}.",
+                  "titleManualForcePush_one": "Haz force push con lease de {{count}} commit local para actualizar {{upstreamName}}.",
+                  "titleManualForcePush_other": "Haz force push con lease de {{count}} commits locales para actualizar {{upstreamName}}.",
+                  "titleManualForcePushReplaceRemote_one": "Haz force push con lease de {{count}} commit local para actualizar {{upstreamName}} y reemplazar los commits que solo están en el remoto.",
+                  "titleManualForcePushReplaceRemote_other": "Haz force push con lease de {{count}} commits locales para actualizar {{upstreamName}} y reemplazar los commits que solo están en el remoto.",
+                  "titleUnpublishedForcePushBranch": "Haz force push con lease de esta rama y configura un upstream si es necesario.",
+                  "titleUnpublishedForcePushCount_one": "Haz force push con lease de {{count}} commit de la rama y configura un upstream si es necesario.",
+                  "titleUnpublishedForcePushCount_other": "Haz force push con lease de {{count}} commits de la rama y configura un upstream si es necesario."
                 }
               },
               "primary": {

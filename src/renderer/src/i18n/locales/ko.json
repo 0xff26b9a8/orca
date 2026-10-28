@@ -14214,7 +14214,25 @@
                   "forcePushBeforeReview": "강제 푸시 후 {{shortLabel}} 만들기",
                   "pushBeforeReview": "푸시 후 {{shortLabel}} 만들기",
                   "titleForcePushBeforeCreatingReview": "{{reviewLabel}}을(를) 만들기 전에 lease로 강제 푸시",
-                  "titlePushBeforeCreatingReview": "{{reviewLabel}}을(를) 만들기 전에 로컬 commits 푸시"
+                  "titlePushBeforeCreatingReview": "{{reviewLabel}}을(를) 만들기 전에 로컬 commits 푸시",
+                  "pushCount_one": "커밋 {{count}}개 푸시",
+                  "pushCount_other": "커밋 {{count}}개 푸시",
+                  "pullCount_one": "커밋 {{count}}개 풀",
+                  "pullCount_other": "커밋 {{count}}개 풀",
+                  "fastForwardCount_one": "커밋 {{count}}개 fast-forward",
+                  "fastForwardCount_other": "커밋 {{count}}개 fast-forward",
+                  "syncCounts": "{{behind}}개 풀, {{ahead}}개 푸시",
+                  "remoteBranchFallback": "원격 브랜치",
+                  "titleForcePushOlderCopiesBranch": "원격에는 로컬 커밋의 이전 사본만 있습니다. {{upstreamName}}을(를) 업데이트하려면 이 브랜치를 lease로 강제 푸시하세요.",
+                  "titleForcePushOlderCopiesCount_one": "원격에는 로컬 커밋의 이전 사본만 있습니다. {{upstreamName}}을(를) 업데이트하려면 브랜치 커밋 {{count}}개를 lease로 강제 푸시하세요.",
+                  "titleForcePushOlderCopiesCount_other": "원격에는 로컬 커밋의 이전 사본만 있습니다. {{upstreamName}}을(를) 업데이트하려면 브랜치 커밋 {{count}}개를 lease로 강제 푸시하세요.",
+                  "titleManualForcePush_one": "로컬 커밋 {{count}}개를 lease로 강제 푸시하여 {{upstreamName}}을(를) 업데이트합니다.",
+                  "titleManualForcePush_other": "로컬 커밋 {{count}}개를 lease로 강제 푸시하여 {{upstreamName}}을(를) 업데이트합니다.",
+                  "titleManualForcePushReplaceRemote_one": "로컬 커밋 {{count}}개를 lease로 강제 푸시하여 {{upstreamName}}을(를) 업데이트하고 원격에만 있는 커밋을 대체합니다.",
+                  "titleManualForcePushReplaceRemote_other": "로컬 커밋 {{count}}개를 lease로 강제 푸시하여 {{upstreamName}}을(를) 업데이트하고 원격에만 있는 커밋을 대체합니다.",
+                  "titleUnpublishedForcePushBranch": "이 브랜치를 lease로 강제 푸시하고 필요하면 업스트림을 설정합니다.",
+                  "titleUnpublishedForcePushCount_one": "브랜치 커밋 {{count}}개를 lease로 강제 푸시하고 필요하면 업스트림을 설정합니다.",
+                  "titleUnpublishedForcePushCount_other": "브랜치 커밋 {{count}}개를 lease로 강제 푸시하고 필요하면 업스트림을 설정합니다."
                 }
               },
               "primary": {
