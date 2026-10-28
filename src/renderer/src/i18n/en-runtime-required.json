@@ -47,7 +47,6 @@
         "b0b7344684": "Request up to 15 reviewers",
         "b1157c78ff": "sheet",
         "ce8a85d209": "default",
-        "checkActionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
         "d0a05e73f5": "compact",
         "e517b4d641": "closed",
         "e9b7cb7d17": "Failed to {{value0}} PR"
@@ -129,7 +128,6 @@
         "b0e80f083d": "wants to merge into",
         "b6bda618cf": "compact",
         "c9de94b07a": "Show more lines above",
-        "checkActionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
         "d65f70786e": "closed",
         "e1f3641bfd": "from",
         "e295a78c11": "Show {{value0}} more lines above",
@@ -200,12 +198,10 @@
         "d5253b54af": "error"
       },
       "WorktreeJumpPalette": {
-        "c4afa68159": "Try a worktree, setting, action, tab title, agent prompt, URL, PR, or port.",
         "dabd819ca1": "Type to see all {{value0}} worktrees"
       },
       "activity": {
         "ActivityPrototypePage": {
-          "770d458144": "Group by",
           "a472a14700": "More options",
           "beb2c19173": "Unread"
         },
@@ -223,9 +219,7 @@
       },
       "artifacts": {
         "ArtifactsPage": {
-          "openArtifact": "Open artifact",
-          "signInCopy": "Sign in to view and manage artifacts shared through your account.",
-          "signInHeading": "Sign in to Orca"
+          "openArtifact": "Open artifact"
         },
         "artifact-publish-flow": {
           "5cb4f5ec36": "Copy link"
@@ -299,10 +293,6 @@
         "ExternalAutomationManagers": {
           "330b3c32e8": "available"
         },
-        "createDestination": {
-          "stale": "{host} changed while this form was open. Choose it again before saving.",
-          "unavailable": "That host cannot hold a new automation yet. Choose another host to create this one on."
-        },
         "externalScope": {
           "unknownManager": "This external automation is no longer listed for any host in view."
         }
@@ -364,7 +354,6 @@
         "report": {
           "CrashReportDialog": {
             "56a3dfa283": "Failed to send crash report.",
-            "835037edc9": "· Orca",
             "b175e90213": "No crash report is available.",
             "b2e36f53a1": "Failed to send crash report. Diagnostic ticket {{value0}} was uploaded but not linked."
           }
@@ -401,8 +390,6 @@
           "8c8b7f5ff5": "Show front matter"
         },
         "ReviewNotesSendMenuContent": {
-          "50f7e753ea": "Sending notes to active agent...",
-          "bb9c69a0c9": "Notes sent to active agent.",
           "e84705f223": "Active agent session",
           "f5096c6e4e": "Could not send notes to the active agent."
         },
@@ -639,8 +626,7 @@
         "project": {
           "view": {
             "surfaces": {
-              "2c4b1c2c08": "number",
-              "7616c986c6": "Open {{value0}} issues"
+              "2c4b1c2c08": "number"
             }
           }
         }
@@ -700,11 +686,7 @@
           "35bbaf5ae0": "notifications",
           "984338477a": "theme",
           "a5e5da02f7": "integrations",
-          "c47e1bd149": "agent",
-          "ff92d15436": "Orca will notify you know when agents are done or need help."
-        },
-        "ThemeStep": {
-          "ad19e5c916": "Importing…"
+          "c47e1bd149": "agent"
         },
         "mac": {
           "notification": {
@@ -781,7 +763,6 @@
           "ChecksPanel": {
             "3c3ad3a1d2": "Started the agent. No selected comments can be marked resolved on the host.",
             "7202f4a40a": "unlink PR",
-            "abf59262fb": "Review the prompt before starting an agent.",
             "e56c42122e": "destructive",
             "gitlabUnlink": "Unlink MR"
           },
@@ -859,7 +840,6 @@
             "03d238218c": "Details",
             "04832d8047": "rebase",
             "0fad573938": "Uncommitted",
-            "15b7f210d7": "Review the prompt before starting an agent.",
             "1f7119f604": "Base",
             "2830dd64a2": "deleted",
             "2f609a2e7c": "Delete all untracked",
@@ -873,7 +853,6 @@
             "77afaa8152": "All",
             "783a808870": "Close",
             "7a09d7f9d2": "base",
-            "901140f47d": "Review the prompt before starting an agent.",
             "9bb062a886": "uncommitted",
             "9febd8ab5f": "create_pr",
             "a0cc0e6b4e": "loading",
@@ -888,8 +867,7 @@
             "d62bc0c7d8": "untracked",
             "e59bca888a": "markdown",
             "f3a1b8c204": "upstream",
-            "f62ce91ade": "origin",
-            "tooManyChanges": "Too many changes detected. Only the first {{value0}} changes are shown."
+            "f62ce91ade": "origin"
           },
           "SourceControlAgentActionDialogForm": {
             "1bb611240f": "Use {basePrompt} for Orca's default prompt.",
@@ -915,7 +893,6 @@
                 "95ad090b01": "thread",
                 "9fecebb29d": "Add",
                 "a916648574": "Open details",
-                "actionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
                 "commitsBehind_one": "{{count}} commit behind",
                 "commitsBehind_other": "{{count}} commits behind",
                 "d098e5529a": "Output",
@@ -1197,9 +1174,6 @@
           "statusBarCount": "{{value0}} indicators visible.",
           "workspaceCardLayoutGuidance": "Managed from the workspace sidebar."
         },
-        "AutoRenameBranchFromWorkSetting": {
-          "ef787db0e3": "Auto-Rename Branch"
-        },
         "AutoRenameBranchPromptEditor": {
           "0691753cf2": "Unsaved changes",
           "182d419b97": "built-in branch-name prompt",
@@ -1278,10 +1252,7 @@
           "9762364929": "Uses APFS clone-copy on macOS when possible, otherwise symlinks configured folders or files into created worktrees.",
           "a05bcdaf57": "Agents View",
           "f63ea281e3": "Threaded left-sidebar feed for agent completions and blocking states.",
-          "fb82ea1d7a": "Automatically materialize configured files or folders into newly created worktrees.",
-          "newWorktreeCardStyle": {
-            "copy": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation."
-          }
+          "fb82ea1d7a": "Automatically materialize configured files or folders into newly created worktrees."
         },
         "GeneralPane": {
           "confirm_running_terminal_close": "Confirm before closing running terminals",
@@ -1293,7 +1264,6 @@
         },
         "GeneralSupportSection": {
           "1e29570462": "starring",
-          "511782265b": "Support the project with a GitHub star via the gh CLI.",
           "5c49f02662": "hidden",
           "73b327e793": "Try Again",
           "9d181300e3": "starred",
@@ -1310,7 +1280,6 @@
           "a0832ccdb1": "downloaded"
         },
         "GeneralWorkspaceSettingsSection": {
-          "externalWorktreesDescription": "Choose whether worktrees created outside Orca appear by default.",
           "hide": "Hide",
           "show": "Show"
         },
@@ -1499,7 +1468,6 @@
         },
         "RemoteServerUpdateDialog": {
           "checkAgain": "Check for Server Updates",
-          "restartWarning": "Updating restarts these servers. {{value0}} live tabs and {{value1}} terminal panes may briefly disconnect.",
           "updateOne": "Update server",
           "updating": "Updating servers…"
         },
@@ -1519,11 +1487,9 @@
         },
         "RepositoryPane": {
           "createPendingSetup": "Track setup",
-          "creatingPendingSetup": "Creating...",
           "settingUpHost": "Importing...",
           "setupExistingFolder": "Import existing folder",
           "setupExistingFolderHelp": "Make this project available on another host by linking a checkout that already exists there.",
-          "setupHost": "Import",
           "setupProjectOnHost": "Set up on another host",
           "setupProjectOnHostHelp": "Choose a host, then import an existing checkout, clone the repository there, or track a setup that will be provisioned later."
         },
@@ -1634,7 +1600,6 @@
           "6b9ca3e69b": "Open in browser",
           "849825e829": "Paste this pairing URL into another Orca client.",
           "8de0f84fff": "Generate Access Link",
-          "add-custom": "Add custom address…",
           "b91e36a986": "web",
           "de6d5cff95": "This computer (",
           "intentQuestion": "Where will this link be opened?",
@@ -1855,22 +1820,6 @@
           "openArtifactsDescription": "View and delete links shared through your account.",
           "signInRequired": "Sign in is required to upload and manage artifacts."
         },
-        "auto": {
-          "rename": {
-            "branch": {
-              "search": {
-                "427f2cd1eb": "Auto-Rename Branch"
-              }
-            }
-          }
-        },
-        "bitbucket": {
-          "credentials": {
-            "dialog": {
-              "remoteRuntime": "Bitbucket credentials saved here are stored on this local machine only. Set ORCA_BITBUCKET_* environment variables on the remote runtime instead."
-            }
-          }
-        },
         "claudeSubagentNavigation": {
           "search": {
             "mod": "mod",
@@ -1909,7 +1858,6 @@
             "fa72e71f05": "agents",
             "fe5688b761": "sidebar",
             "nativeChat": {
-              "description": "Open supported new agents in Chat UI.",
               "queue": "queue"
             }
           }
@@ -1990,13 +1938,6 @@
           },
           "title": "Orca on your SSH hosts"
         },
-        "mobile": {
-          "settings": {
-            "search": {
-              "b730ff7049": "experimental"
-            }
-          }
-        },
         "providerAccountScope": {
           "localCredentials": "Credentials and account checks for this provider are owned by this desktop client. To use a server, change Settings > Remote Orca Servers > Advanced > Default host for new projects.",
           "localMac": "Local Mac",
@@ -2024,14 +1965,7 @@
           "terminalQuickCommands": "Commands are saved on this client, then scoped globally or to a project setup so they run from the selected terminal context."
         },
         "shareSkills": {
-          "refreshLinks": "Refresh",
-          "showButton": "Show Skills button"
-        },
-        "ssh": {
-          "search": {
-            "62826efbe9": "Add a new remote SSH target.",
-            "74c6d90d78": "Manage remote SSH targets."
-          }
+          "refreshLinks": "Refresh"
         },
         "sshHostServer": {
           "automationsLeftDisabled_one": "This host’s Orca server took over {{count}} automation but couldn’t turn it back on. Turn it on in Automations.",
@@ -2130,13 +2064,10 @@
       },
       "sidebar": {
         "AddRemoteHostDialog": {
-          "pairingCode": "Pairing code",
           "pairingCommand": "orca serve --pairing-address <host>",
           "pairingHelpPrefix": "Run",
           "pairingHelpSuffix": "on the server and paste the printed pairing URL.",
-          "serverName": "Server name",
           "sshConfigPickerBulkHint": "Bulk sync stays in Settings → SSH",
-          "sshConfigPickerDescription": "Pick a host to fill the form. Nothing is saved until you click Save.",
           "sshPersistenceDefault": "Remote terminals on this host stay alive until you end them or reset the relay."
         },
         "AddRepoHostSelector": {
@@ -2235,7 +2166,6 @@
           "2d4f0eb933": "Default",
           "631b97eea9": "Host scope",
           "680043342f": "compact",
-          "bc96dbd041": "Workspace options ({{value0}})",
           "c7591b6014": "repo"
         },
         "WorkspaceKanbanSettingsMenu": {
@@ -2436,11 +2366,8 @@
           "1c9e7f420a": "Installed bundle skills",
           "2ae587d39c": "Retry incomplete coverage",
           "34c2ef9e71": "Install {{count}} skills",
-          "3677ae58e7": "Update, roll back, or safely remove versions installed by Orca.",
-          "44d118a8f7": "Manage installed skills",
           "470d8d2476": "Confirm remove",
           "561e49ccd1": "Install selected version",
-          "64c71cf7b9": "No Orca-managed skill installs were found on this machine.",
           "74b70892ea": "Local files were modified",
           "86ed219b55": "Choose a version",
           "9c04bd0120": "Installed version",
@@ -2511,7 +2438,6 @@
           "01c5a15e05": "Share {{value0}} skills"
         },
         "SkillsPage": {
-          "08a321a984": "Adjust the search or filters.",
           "0bc1379f4c": "All sources",
           "0c74e7ff34": "Installed",
           "38e0951c3a": "Agent Skills",
@@ -2539,8 +2465,6 @@
           "agentsNoneChosen": "No extra agents",
           "agentsSummary": "Also: {{value0}}",
           "bundleDestinationSummary": "{{value0}} new · {{value1}} already installed · {{value2}} need a decision",
-          "deselectAll": "Deselect optional",
-          "reviewSupportingFiles": "Includes supporting files",
           "trustNote": "Skills are instructions and code from their author. Install what you trust."
         },
         "managedInstall": {
@@ -3025,9 +2949,6 @@
           }
         }
       },
-      "claudeAgentRowView": {
-        "restartRequired": "Restart Claude in this pane to enable subagent navigation. Recent Claude versions with Orca hooks are required."
-      },
       "dropFailureReason": {
         "changed": "The file changed while it was uploading. Try again.",
         "disconnected": "The host is disconnected.",
@@ -3123,9 +3044,6 @@
     },
     "sshEgress": {
       "localChip": "This device"
-    },
-    "sshRoute": {
-      "errorDescription": "Pages in this workspace browse through its SSH host, and that connection is not available right now."
     }
   },
   "components": {
@@ -3670,9 +3588,6 @@
       "moreOptions": "{{value0}} more - keep typing to narrow",
       "noOptions": "No matching hosts or projects",
       "search": "Filter by host or project..."
-    },
-    "matchLabel": {
-      "automation": "Run"
     }
   }
 }

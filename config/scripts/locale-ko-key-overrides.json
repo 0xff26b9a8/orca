@@ -584,7 +584,7 @@
   "auto.components.WorktreeJumpPalette.worktreesHeader": {
     "ko": "워크트리"
   },
-  "auto.components.activity.ActivityPrototypePage.770d458144": {
+  "auto.components.activity.ActivityPrototypePage.groupAgentActivityBy": {
     "ko": "agent 활동 그룹화 기준"
   },
   "auto.components.activity.ActivityPrototypePage.8de7c5beaa": {
@@ -2547,7 +2547,7 @@
     "ko": "설정 추적"
   },
   "auto.components.settings.RepositoryPane.creatingPendingSetup": {
-    "ko": "만드는 중..."
+    "ko": "추가 중..."
   },
   "auto.components.settings.RepositoryPane.existingFolder": {
     "ko": "기존 폴더"
