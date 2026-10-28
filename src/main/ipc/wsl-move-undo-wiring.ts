@@ -45,6 +45,9 @@ const HostTerminalList = z.object({
   truncated: z.boolean().optional()
 })
 
+// The host's answer for a workspace selector it does not have.
+const HOST_WORKSPACE_NOT_FOUND = 'selector_not_found'
+
 // Far above any host's terminal count; a list cut off at it cannot prove what runs there.
 const HOST_TERMINAL_LIST_LIMIT = 10_000
 
@@ -111,14 +114,14 @@ export function createWslMoveUndoPorts(
           if (response === null) {
             return null
           }
-          // A workspace the host no longer lists runs nothing there.
           if (!response.ok) {
-            return 0
+            // A workspace the host no longer has runs nothing there; any other error proves nothing.
+            return response.error.code === HOST_WORKSPACE_NOT_FOUND ? 0 : null
           }
           const listed = HostTerminalList.safeParse(response.result)
           return listed.success
             ? listed.data.terminals.filter((terminal) => terminal.connected).length
-            : 0
+            : null
         },
         wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms))
       })

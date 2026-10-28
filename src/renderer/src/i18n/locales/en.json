@@ -66,7 +66,8 @@
       "useHereHostRemovalPending": "The {{distro}} host is still being removed, so Orca leaves it alone. Finish removing it in Settings, then try again.",
       "useHereHostAutomations": "Orca couldn't turn off this project's automations on the {{distro}} host, so they could run twice. Connect the host in Settings, then try again.",
       "useHereUnsavedTitle": "Save your files first",
-      "useHereUnsavedDescription": "Bringing {{name}} back reloads this window. Save or close these files first: {{files}}"
+      "useHereUnsavedDescription": "Bringing {{name}} back reloads this window. Save or close these files first: {{files}}",
+      "automationRunsOnHost": "Runs on the {{distro}} host"
     },
     "startupWorktreeRefresh": {
       "loading": "Discovering workspaces…",

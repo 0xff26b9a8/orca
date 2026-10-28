@@ -230,4 +230,50 @@ describe("undo's stop of the host's terminals", () => {
       .map(([, , , params]) => params)
     expect(slept).toEqual([{ worktree: 'id:repo-a::/home/dev/repo-a' }])
   })
+
+  describe("the host's answer for one workspace", () => {
+    const answering = (workspaceAnswer: unknown) => {
+      rpc.call.mockReset()
+      rpc.call.mockImplementation(async (...args: unknown[]) => {
+        const [, , method, params] = args
+        if (
+          method === 'terminal.list' &&
+          typeof params === 'object' &&
+          params &&
+          'worktree' in params
+        ) {
+          return workspaceAnswer
+        }
+        if (method === 'worktree.sleep') {
+          return { ok: true, result: {} }
+        }
+        return {
+          ok: true,
+          result: {
+            terminals: [{ worktreeId: 'repo-a::/home/dev/repo-a', connected: true }],
+            truncated: false
+          }
+        }
+      })
+    }
+
+    it('reads a workspace the host no longer has as running nothing', async () => {
+      host.listed = true
+      answering({ ok: false, error: { code: 'selector_not_found', message: 'gone' } })
+      expect(await createWslMoveUndoPorts(store, '/user-data').stopHostCopies(move)).toBe('stopped')
+    })
+
+    it('reads any other error, or an answer it cannot read, as the host not answering', async () => {
+      host.listed = true
+      for (const answer of [
+        { ok: false, error: { code: 'runtime_unavailable', message: 'busy' } },
+        { ok: true, result: { nothing: 'useful' } }
+      ]) {
+        answering(answer)
+        expect(await createWslMoveUndoPorts(store, '/user-data').stopHostCopies(move)).toBe(
+          'unreachable'
+        )
+      }
+    })
+  })
 })

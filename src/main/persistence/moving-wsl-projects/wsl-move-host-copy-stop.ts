@@ -19,14 +19,19 @@ export type WslMoveHostCopyPort = {
   wait: (ms: number) => Promise<void>
 }
 
-const EXIT_WAIT_MS = 20_000
+// One wall-clock budget for the whole stop, slow answers included, not a count of polls.
+const STOP_DEADLINE_MS = 30_000
+// What the terminals always get to exit after the last sleep, however long the sleeps took.
+const MIN_EXIT_WAIT_MS = 5_000
 const EXIT_POLL_MS = 500
 
 export async function stopWslMoveHostCopies(
   sessionWorkspaceIds: readonly string[],
   port: WslMoveHostCopyPort,
-  exitWaitMs = EXIT_WAIT_MS
+  deadlineMs = STOP_DEADLINE_MS,
+  now: () => number = Date.now
 ): Promise<WslMoveHostCopyStop> {
+  const deadline = now() + deadlineMs
   // The session here names only workspaces with tabs kept after the move (a moved project keeps
   // just its chats), so the host's own list adds the ones it runs that this computer never saw.
   const listed = await port.workspacesWithTerminals()
@@ -46,7 +51,9 @@ export async function stopWslMoveHostCopies(
       return 'unreachable'
     }
   }
-  for (let waited = 0; ; waited += EXIT_POLL_MS) {
+  // A slow but healthy host with many workspaces may spend the budget sleeping them.
+  const exitDeadline = Math.max(deadline, now() + MIN_EXIT_WAIT_MS)
+  for (;;) {
     let running = 0
     for (const id of hostWorkspaceIds) {
       const live = await port.liveTerminals(id)
@@ -58,7 +65,7 @@ export async function stopWslMoveHostCopies(
     if (running === 0) {
       return 'stopped'
     }
-    if (waited >= exitWaitMs) {
+    if (now() >= exitDeadline) {
       return 'still-running'
     }
     await port.wait(EXIT_POLL_MS)
