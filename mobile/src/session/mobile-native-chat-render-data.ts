@@ -12,7 +12,7 @@ import {
   isUndrawnProviderFrameMessage
 } from '../../../src/shared/native-chat/tools/native-chat-tool-fold'
 import { projectNativeChatTaskListFrames } from '../../../src/shared/native-chat/input/native-chat-task-list-frames'
-import { foldSubagentItems } from '../../../src/shared/native-chat-subagent-items'
+import { foldSubagentItems } from '../../../src/shared/native-chat/transcript/native-chat-subagent-items'
 import { prepareNativeChatMessages } from '../../../src/shared/native-chat-message-preparation'
 import {
   isImageRefBlock,
