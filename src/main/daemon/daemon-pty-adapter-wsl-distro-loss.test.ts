@@ -27,6 +27,7 @@ describe('a WSL bridge pane exit', () => {
   // The distro's boot id each read returns; never a real wsl.exe.
   let bootIds: string[]
   const readBootId = vi.fn(async () => (bootIds.length > 1 ? bootIds.shift()! : bootIds[0]!))
+  const noteMayHaveStopped = vi.fn()
 
   beforeEach(async () => {
     historyDir = mkdtempSync(join(tmpdir(), 'orca-distro-loss-history-'))
@@ -35,6 +36,7 @@ describe('a WSL bridge pane exit', () => {
     readRunning.mockClear()
     bootIds = ['boot-1']
     readBootId.mockClear()
+    noteMayHaveStopped.mockClear()
     const harness = await startDaemonAdapterHarness(
       () => {
         const subprocess = createMockSubprocess()
@@ -46,7 +48,8 @@ describe('a WSL bridge pane exit', () => {
         historyPath: historyDir,
         wslBridgeBootIdentity: new WslBridgeBootIdentity({
           isRunning: async () => true,
-          readBootId
+          readBootId,
+          noteMayHaveStopped
         })
       }
     )
@@ -95,6 +98,33 @@ describe('a WSL bridge pane exit', () => {
     expect(exits).toEqual([{ id, code: -1, incarnationId: expect.any(String), hostLost: true }])
     // Ending its history would refuse the cold restore the kept tab needs.
     expect(clear).toHaveBeenCalledWith(id, -1, expect.any(String), { closeHistory: false })
+  })
+
+  it("closes a pane's own clean exit at once, with no settle wait or running-list read", async () => {
+    // A list that never answers: classifying the exit would hang it.
+    running = () => new Promise<WslRunningDistrosRead>(() => {})
+    const exits = collectExits()
+    const id = await spawnBridgePane()
+
+    subprocesses[0]!._simulateExit(0)
+
+    await waitFor(() => exits.length > 0)
+    expect(exits).toEqual([expect.objectContaining({ id, code: 0 })])
+    expect(exits[0]).not.toHaveProperty('hostLost')
+    expect(readRunning).not.toHaveBeenCalled()
+    // Still marked: background reads must settle in case the distro did stop (poweroff, --shutdown).
+    expect(noteMayHaveStopped).toHaveBeenCalledWith('Ubuntu')
+  })
+
+  it('marks a non-zero exit as a possible stop before classifying it', async () => {
+    running = async () => ({ status: 'confirmed', distros: [] })
+    const exits = collectExits()
+    await spawnBridgePane()
+
+    subprocesses[0]!._simulateExit(1)
+
+    await waitFor(() => exits.length > 0)
+    expect(noteMayHaveStopped).toHaveBeenCalledWith('Ubuntu')
   })
 
   it('logs what the running list said, so a run can tell host loss from a raced reboot', async () => {

@@ -3,7 +3,10 @@
  * calls 'running' can still be told apart as the distro having been terminated and booted again.
  * Reads go through the background-work gate (E9): only into a distro a fresh list says is running.
  */
-import { isWslDistroRunningForBackgroundWork } from '../wsl-background-distro-gate'
+import {
+  isWslDistroRunningForBackgroundWork,
+  noteWslDistroMayHaveStopped
+} from '../wsl-background-distro-gate'
 import { onRunningWslDistrosStopped } from '../wsl-running-distro-cache'
 import { readWslDistroBootId } from '../wsl/wsl-distro-boot-id'
 
@@ -13,12 +16,15 @@ export type WslBridgeBootIdentityDeps = {
   readBootId: (distro: string) => Promise<string | null>
   /** Confirmed running lists that no longer name a distro; returns an unsubscribe. */
   onDistrosStopped?: (listener: (stopped: string[]) => void) => () => void
+  /** A bridge exit may be its distro stopping: later background reads must start after it settles. */
+  noteMayHaveStopped?: (distro: string) => void
 }
 
-const PRODUCTION_DEPS: WslBridgeBootIdentityDeps = {
+export const PRODUCTION_WSL_BRIDGE_BOOT_IDENTITY_DEPS: WslBridgeBootIdentityDeps = {
   isRunning: isWslDistroRunningForBackgroundWork,
   readBootId: readWslDistroBootId,
-  onDistrosStopped: onRunningWslDistrosStopped
+  onDistrosStopped: onRunningWslDistrosStopped,
+  noteMayHaveStopped: noteWslDistroMayHaveStopped
 }
 
 function distroKey(distro: string): string {
@@ -38,7 +44,9 @@ export class WslBridgeBootIdentity {
   // Held only while a bridge pane lives, so an idle adapter keeps no listener.
   private unsubscribeStops: (() => void) | null = null
 
-  constructor(private readonly deps: WslBridgeBootIdentityDeps = PRODUCTION_DEPS) {}
+  constructor(
+    private readonly deps: WslBridgeBootIdentityDeps = PRODUCTION_WSL_BRIDGE_BOOT_IDENTITY_DEPS
+  ) {}
 
   /** A spawn or reattach of `sessionId`; a new incarnation takes the distro's current boot id. */
   noteSpawn(sessionId: string, distro: string, incarnationId?: string): void {
@@ -53,16 +61,22 @@ export class WslBridgeBootIdentity {
     }
     // A stop seen before the exit reaches us: a pane spawned meanwhile must not take the old id.
     this.unsubscribeStops ??=
-      this.deps.onDistrosStopped?.((stopped) => stopped.forEach((name) => this.noteExit(name))) ??
+      this.deps.onDistrosStopped?.((stopped) => stopped.forEach((name) => this.dropBootId(name))) ??
       null
     this.bySession.set(sessionId, { distro: key, incarnationId, bootId: this.distroBootId(distro) })
   }
 
   /**
    * Synchronous, as the exit arrives: it may be the first of a reboot's, so a spawn during its
-   * verdict must not inherit the old boot's id.
+   * verdict must not inherit the old boot's id. It may also be the distro stopping (E9): until that
+   * settles, a stopping distro WSL still lists must not pass the gate into a boot-id exec.
    */
   noteExit(distro: string): void {
+    this.deps.noteMayHaveStopped?.(distro)
+    this.dropBootId(distro)
+  }
+
+  private dropBootId(distro: string): void {
     this.byDistro.delete(distroKey(distro))
   }
 
