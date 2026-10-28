@@ -11,6 +11,7 @@ const gate = vi.hoisted(() => ({ enabled: false }))
 vi.mock('../sidebar/use-wsl-hosts-enabled', () => ({
   useWslHostsEnabled: () => gate.enabled,
   useWslHostsAcceptNewWork: () => gate.enabled,
+  useWslHostsPaused: () => false,
   useWslHostServerFilesMissing: () => false,
   wslHostsAvailable: () => true,
   openWslHostsExperimentalSetting: vi.fn()
