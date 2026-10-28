@@ -4694,8 +4694,8 @@
               "d9a4b3e2f1c5": "이벤트",
               "recentCombinedActivity": "최근 Claude, Codex, OpenCode, Muse의 통합 토큰 활동입니다.",
               "statusScanning": "스캐닝",
-              "statusEnabled": "활성화됨",
-              "statusOff": "끄다"
+              "statusEnabled": "활성",
+              "statusOff": "비활성"
             }
           }
         },
@@ -12620,7 +12620,7 @@
           "offDescription": "흐린 텍스트와 Powerline 구분 기호를 포함해 프로그램 색상을 그대로 유지합니다.",
           "customDescription": "텍스트와 배경 사이의 대비를 얼마나 높일지 선택합니다.",
           "auto": "자동",
-          "off": "끄다",
+          "off": "끔",
           "custom": "사용자 지정",
           "targetDescription": "가능한 경우 값이 높을수록 대비가 증가합니다. 배경색은 변경되지 않습니다.",
           "subtle": "미묘한",
@@ -20419,8 +20419,8 @@
   "runtimeRpc": {
     "startupFailure": {
       "unknownCause": "추가 오류 세부정보가 없습니다.",
-      "continueButton": "Continue without CLI",
-      "title": "Orca CLI unavailable",
+      "continueButton": "CLI 없이 계속",
+      "title": "Orca CLI를 사용할 수 없습니다",
       "message": "Orca가 로컬 명령 전송 기능을 시작하지 못했습니다.",
       "detail": "Orca는 계속 작동하지만 이번 세션에서는 orca status, orca terminal 등의 명령과 오케스트레이션 기능을 사용할 수 없습니다.\n\n{{guidance}}\n\n원인: {{cause}}",
       "guidance": {
