@@ -1946,9 +1946,6 @@
   "auto.components.right.sidebar.checks.panel.content.b45db92d0e": {
     "ko": "수정"
   },
-  "auto.components.right.sidebar.checks.panel.content.b652f38caf": {
-    "ko": "실패한 체크"
-  },
   "auto.components.right.sidebar.checks.panel.content.b8c4e2a1f7": {
     "ko": "전체 로그 보기"
   },
@@ -2365,9 +2362,6 @@
   },
   "auto.components.settings.ManageSessionsSection.33c2a1e1b4": {
     "ko": "세션 {{value0}} 종료"
-  },
-  "auto.components.settings.McpConfigSection.3b224167ff": {
-    "ko": "서버"
   },
   "auto.components.settings.McpConfigSection.6bac9ddfc6": {
     "ko": "SSH repos는 원격 파일 시스템을 통해 읽힙니다. 스타터 생성은 워크스페이스 루트 구성으로 제한됩니다."

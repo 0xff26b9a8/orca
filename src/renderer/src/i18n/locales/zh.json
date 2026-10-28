@@ -5083,15 +5083,15 @@
           "fab8fce842": "文件",
           "8f9833d509": "不可变版本",
           "66270286ac": "· 您可以安全地重试。",
-          "1b6ad2ca5c": "检查过。",
-          "3fc62a61eb": "放置",
           "157de228b4": "检验技能",
           "69236de8d6": "检查…",
           "27672470d9": "打开链接不会安装任何东西。首先查看不可变版本。",
           "66cff7a804": "https://app.orca.dev/skills/share/…",
           "93eb0fe8c7": "Orca 技能链接",
           "releaseNotes": "发行说明：",
-          "targetHeader": "安装目标"
+          "targetHeader": "安装目标",
+          "placementsChecked_one": "已检查 {{count}} 个安装位置。",
+          "placementsChecked_other": "已检查 {{count}} 个安装位置。"
         },
         "SkillInstallTargetFields": {
           "8e6a972229": "这台机器上没有已知的工作区。",
@@ -7930,8 +7930,6 @@
         "McpConfigSection": {
           "4d16a0d9ac": "已检查",
           "b900cd6282": "未找到 MCP 配置。当您希望此仓库定义其自己的 MCP 服务器时，添加一个空的工作区配置。",
-          "3b224167ff": "服务器",
-          "251b96564a": "已检测·",
           "f34c152dc0": "刷新 MCP 配置",
           "6bac9ddfc6": "SSH 仓库是通过远程文件系统读取的。 Starter 创建仅限于工作区根配置。",
           "96f5609b04": "检查智能体在此仓库中工作时可以使用的 MCP 服务器定义。",
@@ -7939,7 +7937,9 @@
           "9ee215caf6": ".mcp.json",
           "1f3665e35a": "MCP 配置已创建",
           "82436439eb": "添加 MCP 配置",
-          "0a5c1ead54": "创建空配置"
+          "0a5c1ead54": "创建空配置",
+          "detectedServers_one": "已检测到 {{detected}} 个 · {{count}} 个服务器",
+          "detectedServers_other": "已检测到 {{detected}} 个 · {{count}} 个服务器"
         },
         "MobileEmulatorAgentControlRow": {
           "1861982430": "无法加载 CLI 状态。",
@@ -13440,12 +13440,14 @@
           "Search": {
             "1abfb25a66": "输入要在文件中搜索的内容",
             "d56d140747": "按 Enter 进行搜索",
-            "0b8104eaf2": "文件",
-            "4107975b3a": "在",
-            "6aeda362ed": "结果",
             "98c8435e36": "选择要搜索的工作区",
             "1ec640c9c7": "匹配",
-            "dcc294f28d": "（结果被截断）"
+            "dcc294f28d": "（结果被截断）",
+            "resultsInFiles": "{{files}}中共 {{results}}",
+            "resultCount_one": "{{count}} 个结果",
+            "resultCount_other": "{{count}} 个结果",
+            "fileCount_one": "{{count}} 个文件",
+            "fileCount_other": "{{count}} 个文件"
           },
           "SearchFilters": {
             "01e4671ccf": "例如 *.min.js、dist/**",
@@ -13475,7 +13477,6 @@
             "conflictsSection": "冲突",
             "cc05b2d088": "在文件资源管理器中打开",
             "03194cfff4": "本地会话状态源自您在此处打开的冲突。",
-            "413a3ba113": "冲突",
             "27a50fe970": "评审冲突",
             "f6cb48b6fe": "用AI解决",
             "3eeccbb221": "已解决的文件在离开实时冲突状态后会恢复正常更改。",
@@ -13702,7 +13703,9 @@
             "entryDiscardFailed": "无法丢弃“{{value0}}”",
             "entryDeleteFailed": "删除“{{value0}}”失败",
             "entryFailedInWorkspace": "{{value0}} 在 {{value1}} 中",
-            "diffCommentNotesCopyFailed": "复制笔记失败"
+            "diffCommentNotesCopyFailed": "复制笔记失败",
+            "conflictCount_one": "{{count}} 个冲突",
+            "conflictCount_other": "{{count}} 个冲突"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "无法启动选定的智能体。",
@@ -13760,7 +13763,6 @@
           "checks": {
             "panel": {
               "content": {
-                "3916814392": "落后（基础提交：",
                 "755be805f6": "暂无评论",
                 "751f7c6e5c": "显示每个来源的前 100 条评论",
                 "94557d68e2": "评论",
@@ -13807,13 +13809,10 @@
                 "c16762ac8c": "下面的检查和注释显示当前获取的上下文。",
                 "9d0e7bcefc": "没有阻塞 PR 操作",
                 "5856874b59": "当该面板保持打开状态时，Orca 将刷新检查。",
-                "5341023167": "查看",
                 "b45db92d0e": "修复",
                 "5d4ebf9391": "检查详细信息或启动 AI 修复过程。",
-                "b652f38caf": "检查失败",
                 "87cd07c69a": "该分支存在必须解决的冲突",
                 "0975eeaaef": "冲突的文件",
-                "6fa7f8723f": "提交",
                 "2b2be92919": "添加评论",
                 "7440d09d2c": "开始对话",
                 "b37ebdc51c": "无法发表评论。",
@@ -13853,7 +13852,16 @@
                 "e45324fbed": "加载检查详细信息失败。",
                 "checksUnresolvedChip": "未解决的",
                 "checksUnresolvedStripHint": "这些检查完成后没有得出通过或失败的结论。",
-                "dcb3c546fe": "重试"
+                "dcb3c546fe": "重试",
+                "commitsBehind_one": "落后 {{count}} 个提交",
+                "commitsBehind_other": "落后 {{count}} 个提交",
+                "baseCommitLabel": "基础提交：",
+                "failingChecks_one": "{{count}} 项检查失败",
+                "failingChecks_other": "{{count}} 项检查失败",
+                "pendingChecks_one": "{{count}} 项检查待处理",
+                "pendingChecks_other": "{{count}} 项检查待处理",
+                "unresolvedChecks_one": "{{count}} 项检查未解决",
+                "unresolvedChecks_other": "{{count}} 项检查未解决"
               },
               "empty": {
                 "state": {
@@ -16003,7 +16011,6 @@
           "f338288514": "正在加载冲突内容...",
           "90d576adb2": "刷新",
           "a1ce36f77d": "快照拍摄于",
-          "4be41eaafc": "未解决的冲突",
           "c8ca989aea": "显示文件树",
           "58ad5ad431": "关闭",
           "28e7db4a90": "源代码控制",
@@ -16014,7 +16021,9 @@
           "9c2901ef8a": "下一次冲突",
           "41d9af2e7a": "上一个冲突",
           "55d61a0ccd": "冲突 ·",
-          "da539359b6": "对于此冲突，没有可编辑的工作树文件。"
+          "da539359b6": "对于此冲突，没有可编辑的工作树文件。",
+          "unresolvedConflicts_one": "{{count}} 个未解决的冲突",
+          "unresolvedConflicts_other": "{{count}} 个未解决的冲突"
         },
         "ConflictReviewFileTree": {
           "3449521a8c": "此快照中没有冲突。",

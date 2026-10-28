@@ -5057,15 +5057,15 @@
           "fab8fce842": "파일",
           "8f9833d509": "불변 버전",
           "66270286ac": "· 안전하게 재시도할 수 있습니다.",
-          "1b6ad2ca5c": "확인했습니다.",
-          "3fc62a61eb": "놓기",
           "157de228b4": "스킬 점검",
           "69236de8d6": "확인 중…",
           "27672470d9": "링크를 열어도 아무것도 설치되지 않습니다. 먼저 변경할 수 없는 버전을 검토하세요.",
           "66cff7a804": "https://app.orca.dev/skills/share/…",
           "93eb0fe8c7": "Orca 스킬 링크",
           "releaseNotes": "릴리스 노트:",
-          "targetHeader": "설치 대상"
+          "targetHeader": "설치 대상",
+          "placementsChecked_one": "설치 위치 {{count}}개를 확인했습니다.",
+          "placementsChecked_other": "설치 위치 {{count}}개를 확인했습니다."
         },
         "SkillInstallTargetFields": {
           "8e6a972229": "이 머신에는 알려진 워크스페이스가 없습니다.",
@@ -7930,8 +7930,6 @@
         "McpConfigSection": {
           "4d16a0d9ac": "체크됨",
           "b900cd6282": "MCP 구성을 찾을 수 없습니다. 이 repo가 자체 MCP 서버를 정의하도록 하려면 빈 워크스페이스 구성을 추가하세요.",
-          "3b224167ff": "서버",
-          "251b96564a": "감지됨 ·",
           "f34c152dc0": "MCP 구성 새로 고침",
           "6bac9ddfc6": "SSH repos는 원격 파일 시스템을 통해 읽힙니다. 스타터 생성은 워크스페이스 루트 구성으로 제한됩니다.",
           "96f5609b04": "이 repo에서 작업하는 동안 agents가 사용할 수 있는 MCP 서버 정의를 검사하세요.",
@@ -7939,7 +7937,9 @@
           "9ee215caf6": ".mcp.json",
           "1f3665e35a": "MCP 구성이 생성되었습니다.",
           "82436439eb": "MCP 구성 추가",
-          "0a5c1ead54": "빈 구성 만들기"
+          "0a5c1ead54": "빈 구성 만들기",
+          "detectedServers_one": "{{detected}}개 감지됨 · 서버 {{count}}개",
+          "detectedServers_other": "{{detected}}개 감지됨 · 서버 {{count}}개"
         },
         "MobileEmulatorAgentControlRow": {
           "1861982430": "CLI 상태를 로드하지 못했습니다.",
@@ -13440,12 +13440,14 @@
           "Search": {
             "1abfb25a66": "파일에서 검색하려면 입력하세요.",
             "d56d140747": "검색하려면 Enter를 누르세요.",
-            "0b8104eaf2": "파일",
-            "4107975b3a": "~에",
-            "6aeda362ed": "결과",
             "98c8435e36": "검색할 워크스페이스를 선택하세요",
             "1ec640c9c7": "일치",
-            "dcc294f28d": "(결과가 잘림)"
+            "dcc294f28d": "(결과가 잘림)",
+            "resultsInFiles": "{{files}}에서 {{results}}",
+            "resultCount_one": "결과 {{count}}개",
+            "resultCount_other": "결과 {{count}}개",
+            "fileCount_one": "파일 {{count}}개",
+            "fileCount_other": "파일 {{count}}개"
           },
           "SearchFilters": {
             "01e4671ccf": "제외할 파일(예: *.min.js, dist/**)",
@@ -13475,7 +13477,6 @@
             "conflictsSection": "충돌",
             "cc05b2d088": "파일 탐색기에서 열기",
             "03194cfff4": "여기에서 연 충돌에서 파생된 로컬 세션 상태입니다.",
-            "413a3ba113": "충돌",
             "27a50fe970": "충돌 리뷰",
             "f6cb48b6fe": "AI로 해결",
             "3eeccbb221": "해결된 파일은 라이브 충돌 상태를 벗어나면 다시 일반 변경 사항으로 돌아갑니다.",
@@ -13702,7 +13703,9 @@
             "entryDiscardFailed": "'{{value0}}'을(를) 삭제하지 못했습니다.",
             "entryDeleteFailed": "'{{value0}}'을(를) 삭제하지 못했습니다.",
             "entryFailedInWorkspace": "{{value1}}의 {{value0}}",
-            "diffCommentNotesCopyFailed": "메모를 복사하지 못했습니다."
+            "diffCommentNotesCopyFailed": "메모를 복사하지 못했습니다.",
+            "conflictCount_one": "충돌 {{count}}개",
+            "conflictCount_other": "충돌 {{count}}개"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "선택한 agent를 시작할 수 없습니다.",
@@ -13760,7 +13763,6 @@
           "checks": {
             "panel": {
               "content": {
-                "3916814392": "뒤에(기본 commit:",
                 "755be805f6": "댓글 없음",
                 "751f7c6e5c": "소스당 처음 100개의 댓글 표시",
                 "94557d68e2": "댓글",
@@ -13807,13 +13809,10 @@
                 "c16762ac8c": "아래 체크와 댓글은 현재 가져온 컨텍스트를 보여줍니다.",
                 "9d0e7bcefc": "차단 PR 조치 없음",
                 "5856874b59": "Orca는 이 패널이 열려 있는 동안 검사를 새로 고칩니다.",
-                "5341023167": "확인",
                 "b45db92d0e": "수정",
                 "5d4ebf9391": "세부 정보를 검사하거나 AI 수정 패스를 시작하세요.",
-                "b652f38caf": "실패한 체크",
                 "87cd07c69a": "이 브랜치에는 해결해야 할 충돌이 있습니다.",
                 "0975eeaaef": "충돌하는 파일",
-                "6fa7f8723f": "commit",
                 "2b2be92919": "댓글 추가",
                 "7440d09d2c": "대화 시작",
                 "b37ebdc51c": "댓글을 달 수 없습니다.",
@@ -13853,7 +13852,16 @@
                 "e45324fbed": "체크 세부 정보를 불러오지 못했습니다.",
                 "checksUnresolvedChip": "해결되지 않은",
                 "checksUnresolvedStripHint": "이러한 검사는 통과 또는 실패 판정 없이 완료되었습니다.",
-                "dcb3c546fe": "다시 시도"
+                "dcb3c546fe": "다시 시도",
+                "commitsBehind_one": "커밋 {{count}}개 뒤처짐",
+                "commitsBehind_other": "커밋 {{count}}개 뒤처짐",
+                "baseCommitLabel": "기본 커밋:",
+                "failingChecks_one": "실패한 검사 {{count}}개",
+                "failingChecks_other": "실패한 검사 {{count}}개",
+                "pendingChecks_one": "대기 중인 검사 {{count}}개",
+                "pendingChecks_other": "대기 중인 검사 {{count}}개",
+                "unresolvedChecks_one": "미해결 검사 {{count}}개",
+                "unresolvedChecks_other": "미해결 검사 {{count}}개"
               },
               "empty": {
                 "state": {
@@ -16003,7 +16011,6 @@
           "f338288514": "충돌 콘텐츠 로드 중...",
           "90d576adb2": "새로고침",
           "a1ce36f77d": "스냅샷 캡처 시간:",
-          "4be41eaafc": "미해결 충돌",
           "c8ca989aea": "파일 트리 표시",
           "58ad5ad431": "닫기",
           "28e7db4a90": "소스 제어",
@@ -16014,7 +16021,9 @@
           "9c2901ef8a": "다음 충돌",
           "41d9af2e7a": "이전 충돌",
           "55d61a0ccd": "충돌 ·",
-          "da539359b6": "이 충돌에 대해 편집할 수 있는 작업 트리 파일이 없습니다."
+          "da539359b6": "이 충돌에 대해 편집할 수 있는 작업 트리 파일이 없습니다.",
+          "unresolvedConflicts_one": "미해결 충돌 {{count}}개",
+          "unresolvedConflicts_other": "미해결 충돌 {{count}}개"
         },
         "ConflictReviewFileTree": {
           "3449521a8c": "이 스냅샷에는 충돌이 없습니다.",

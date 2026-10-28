@@ -5398,15 +5398,15 @@
           "fab8fce842": "files",
           "8f9833d509": "Immutable version",
           "66270286ac": "· You can retry safely.",
-          "1b6ad2ca5c": "checked.",
-          "3fc62a61eb": "placement",
           "157de228b4": "Inspect skill",
           "69236de8d6": "Checking…",
           "27672470d9": "Opening the link does not install anything. Review the immutable version first.",
           "66cff7a804": "https://app.orca.dev/skills/share/…",
           "93eb0fe8c7": "Orca skill link",
           "releaseNotes": "Release notes:",
-          "targetHeader": "Installation Target"
+          "targetHeader": "Installation Target",
+          "placementsChecked_one": "{{count}} placement checked.",
+          "placementsChecked_other": "{{count}} placements checked."
         },
         "SkillInstallTargetFields": {
           "8e6a972229": "No workspaces are known on this machine.",
@@ -8482,8 +8482,6 @@
         "McpConfigSection": {
           "4d16a0d9ac": "Checked",
           "b900cd6282": "No MCP config found. Add an empty workspace config when you want this repo to define its own MCP servers.",
-          "3b224167ff": "server",
-          "251b96564a": "detected ·",
           "f34c152dc0": "Refresh MCP configs",
           "6bac9ddfc6": "SSH repos are read through the remote filesystem. Starter creation is limited to the workspace root config.",
           "96f5609b04": "Inspect MCP server definitions that agents can use while working in this repo.",
@@ -8491,7 +8489,9 @@
           "9ee215caf6": ".mcp.json",
           "1f3665e35a": "MCP config created",
           "82436439eb": "Add MCP config",
-          "0a5c1ead54": "Create empty config"
+          "0a5c1ead54": "Create empty config",
+          "detectedServers_one": "{{detected}} detected · {{count}} server",
+          "detectedServers_other": "{{detected}} detected · {{count}} servers"
         },
         "MobileEmulatorAgentControlRow": {
           "1861982430": "Failed to load CLI status.",
@@ -13988,12 +13988,14 @@
           "Search": {
             "1abfb25a66": "Type to search in files",
             "d56d140747": "Press Enter to search",
-            "0b8104eaf2": "file",
-            "4107975b3a": "in",
-            "6aeda362ed": "result",
             "98c8435e36": "Select a workspace to search",
             "1ec640c9c7": "match",
-            "dcc294f28d": "(results truncated)"
+            "dcc294f28d": "(results truncated)",
+            "resultsInFiles": "{{results}} in {{files}}",
+            "resultCount_one": "{{count}} result",
+            "resultCount_other": "{{count}} results",
+            "fileCount_one": "{{count}} file",
+            "fileCount_other": "{{count}} files"
           },
           "SearchFilters": {
             "01e4671ccf": "e.g. *.min.js, dist/**",
@@ -14023,7 +14025,6 @@
             "conflictsSection": "Conflicts",
             "cc05b2d088": "Open in File Explorer",
             "03194cfff4": "Local session state derived from a conflict you opened here.",
-            "413a3ba113": "conflict",
             "27a50fe970": "Review conflicts",
             "f6cb48b6fe": "Resolve with AI",
             "3eeccbb221": "Resolved files move back to normal changes after they leave the live conflict state.",
@@ -14250,7 +14251,9 @@
             "entryDiscardFailed": "Failed to discard “{{value0}}”",
             "entryDeleteFailed": "Failed to delete “{{value0}}”",
             "entryFailedInWorkspace": "{{value0}} in {{value1}}",
-            "diffCommentNotesCopyFailed": "Failed to copy notes"
+            "diffCommentNotesCopyFailed": "Failed to copy notes",
+            "conflictCount_one": "{{count}} conflict",
+            "conflictCount_other": "{{count}} conflicts"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "Could not start the selected agent.",
@@ -14309,7 +14312,6 @@
             "panel": {
               "loadFailedOnMachine": "Could not load from {{machine}}: {{detail}}",
               "content": {
-                "3916814392": "behind (base commit:",
                 "755be805f6": "No comments",
                 "751f7c6e5c": "Showing first 100 comments per source",
                 "94557d68e2": "Comments",
@@ -14359,13 +14361,10 @@
                 "c16762ac8c": "Checks and comments below show the current fetched context.",
                 "9d0e7bcefc": "No blocking PR action",
                 "5856874b59": "Orca will refresh checks while this panel stays open.",
-                "5341023167": "check",
                 "b45db92d0e": "Fix",
                 "5d4ebf9391": "Inspect details or start an AI fix pass.",
-                "b652f38caf": "failing check",
                 "87cd07c69a": "This branch has conflicts that must be resolved",
                 "0975eeaaef": "Conflicting files",
-                "6fa7f8723f": "commit",
                 "2b2be92919": "Add comment",
                 "7440d09d2c": "Start conversation",
                 "b37ebdc51c": "Commenting unavailable.",
@@ -14402,7 +14401,16 @@
                 "actionRequiredHint": "This check needs a manual action on GitHub (for example, approving the workflow run) before merging is unblocked.",
                 "b3195cba33": "Unmark author as bot",
                 "f588b46a6c": "Mark author as bot",
-                "e45324fbed": "Failed to load check details."
+                "e45324fbed": "Failed to load check details.",
+                "commitsBehind_one": "{{count}} commit behind",
+                "commitsBehind_other": "{{count}} commits behind",
+                "baseCommitLabel": "base commit:",
+                "failingChecks_one": "{{count}} failing check",
+                "failingChecks_other": "{{count}} failing checks",
+                "pendingChecks_one": "{{count}} check pending",
+                "pendingChecks_other": "{{count}} checks pending",
+                "unresolvedChecks_one": "{{count}} check unresolved",
+                "unresolvedChecks_other": "{{count}} checks unresolved"
               },
               "empty": {
                 "state": {
@@ -16575,7 +16583,6 @@
           "f338288514": "Loading conflict contents...",
           "90d576adb2": "Refresh",
           "a1ce36f77d": "Snapshot captured at",
-          "4be41eaafc": "unresolved conflict",
           "c8ca989aea": "Show file tree",
           "58ad5ad431": "Dismiss",
           "28e7db4a90": "Source Control",
@@ -16586,7 +16593,9 @@
           "9c2901ef8a": "Next conflict",
           "41d9af2e7a": "Previous conflict",
           "55d61a0ccd": "conflict ·",
-          "da539359b6": "No working-tree file is available to edit for this conflict."
+          "da539359b6": "No working-tree file is available to edit for this conflict.",
+          "unresolvedConflicts_one": "{{count}} unresolved conflict",
+          "unresolvedConflicts_other": "{{count}} unresolved conflicts"
         },
         "ConflictReviewFileTree": {
           "3449521a8c": "No conflicts in this snapshot.",
