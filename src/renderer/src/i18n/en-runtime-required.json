@@ -2888,13 +2888,6 @@
           "TerminalSshReconnectOverlay": {
             "connectButton": "Connect",
             "connectingButton": "Connecting..."
-          },
-          "terminal": {
-            "drop": {
-              "handler": {
-                "29c031b49a": "Uploading {{value0}} file{{value1}} to runtime…"
-              }
-            }
           }
         },
         "quick": {
