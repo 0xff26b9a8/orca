@@ -95,6 +95,11 @@ export function createWslHostConnector(options: {
     hasUserVisibleWork: options.hasUserVisibleWork
   })
   supervisor = liveness
+  // Liveness connects in flight, per distro; a plain connect meanwhile joins rather than re-arms.
+  const livenessConnects = new Map<
+    string,
+    { promise: Promise<WslOrcadConnection>; noBoot: boolean; intent: boolean }
+  >()
   // Read right before a no-boot reconnect spawns anything in the distro (E9).
   const requireRunning = async (distro: string): Promise<boolean> =>
     confirmsRunning(await readConfirmedRunningWslDistros(), wslDistroHolderKey(distro))
@@ -158,8 +163,32 @@ export function createWslHostConnector(options: {
   return {
     listDistros: () => listWslHostDistros(),
     readOrcadPublicKey: (distro) => readWslDistroOrcadPublicKey(transportFor(distro)),
-    connect: (distro, { noBoot, ...connectOptions } = {}) =>
-      liveness.connect(distro, noBoot ? { ...connectOptions, requireRunning } : connectOptions),
+    connect: (distro, { noBoot, ...connectOptions } = {}) => {
+      const options = noBoot ? { ...connectOptions, requireRunning } : connectOptions
+      const key = wslDistroHolderKey(distro)
+      const pending = livenessConnects.get(key)
+      // Why join: a second plain connect re-armed the liveness watch (an identity read and a watch
+      // channel) and waited for it, which held a pane's first call about 1 s after ready. Never
+      // join an Update/Force (its incumbent is on its way out) or, when booting, a no-boot one
+      // (it may refuse, and nothing would arm).
+      if (pending && !pending.intent && !options.intent && (noBoot || !pending.noBoot)) {
+        // While the bridge connect runs, `get` names the server it replaces: wait for the new one.
+        return manager.isConnecting(distro)
+          ? manager.ensure(distro, options)
+          : Promise.resolve(manager.get(distro) ?? manager.ensure(distro, options))
+      }
+      const connected = liveness.connect(distro, options).finally(() => {
+        if (livenessConnects.get(key)?.promise === connected) {
+          livenessConnects.delete(key)
+        }
+      })
+      livenessConnects.set(key, {
+        promise: connected,
+        noBoot: Boolean(noBoot),
+        intent: Boolean(options.intent)
+      })
+      return connected
+    },
     forgetPairingFailures: (environmentId) => pairingRecovery.repairs.forgetFailures(environmentId),
     get: (distro) => manager.get(distro),
     isReachable: async (distro, environmentId) =>
