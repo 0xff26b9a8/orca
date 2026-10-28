@@ -30,6 +30,7 @@ import { getRuntimeEnvironmentStatus } from './runtime-environments/runtime-envi
 import { callRuntimeEnvironment } from './runtime-environments/runtime-environment-transport-routing'
 import { isRemoteRuntimeConnectionReady } from './runtime-environments/runtime-environment-request-connections'
 import { resolveEnvironment } from '../../shared/runtime-environment-store'
+import { reconcileWslHostBridgePorts } from '../../shared/runtime-environment-wsl-host-store'
 import { getPreferredPairedRuntimeConnection } from '../../shared/runtime-environments'
 import { requestOrcadTerminalCensus } from '../ssh/orcad-terminal-census-client'
 import type { WslHostRuntimeAccess } from '../wsl/wsl-host-server-stop'
@@ -120,6 +121,14 @@ function createService(args: WslHostHandlerArgs): WslHostService | null {
   const fake = readFakeWslHostsConfig()
   if (process.platform !== 'win32' && !fake) {
     return null
+  }
+  // Before any bridge connects or the window lists servers: a crash mid-save must not hide a host.
+  try {
+    for (const environmentId of reconcileWslHostBridgePorts(args.getUserDataPath())) {
+      console.warn(`[wsl-hosts] Realigned ${environmentId}'s bridge port with its pairing.`)
+    }
+  } catch (error) {
+    console.warn('[wsl-hosts] Could not check WSL host records against their pairings:', error)
   }
   let automationWake: WslHostAutomationWake | null = null
   const created = new WslHostService({

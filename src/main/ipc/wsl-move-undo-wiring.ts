@@ -22,7 +22,8 @@ import {
   type WslMoveHostAutomationStop
 } from '../persistence/moving-wsl-projects/wsl-move-undo-host-automations'
 import { scheduleWslMoveRewriteRetry } from '../persistence/moving-wsl-projects/wsl-move-rewrite-retry'
-import { wslHostRemovalPending } from './wsl-move-host-connect'
+import { connectWslMoveHostService, wslHostRemovalPending } from './wsl-move-host-connect'
+import { getWslHostService } from '../wsl/wsl-host-service-instance'
 import {
   disableWslHostAutomations,
   readWslHostAutomationStates,
@@ -54,6 +55,21 @@ const HOST_TERMINAL_LIST_LIMIT = 10_000
 const SLEEP_TIMEOUT_MS = 60_000
 const LIST_TIMEOUT_MS = 10_000
 
+/** Undo is the user's act: after a relaunch a host with no open work connects first, as Connect would. */
+async function connectUndoHost(userDataPath: string, move: WslMoveCutover): Promise<boolean> {
+  const service = getWslHostService()
+  if (!service) {
+    return true
+  }
+  try {
+    await connectWslMoveHostService(service, userDataPath, move.manifest.source.distro, 'user')
+    return true
+  } catch (error) {
+    console.warn('[wsl-move] The host did not connect for undo:', error)
+    return false
+  }
+}
+
 export function createWslMoveUndoPorts(
   store: Pick<
     Store,
@@ -72,6 +88,9 @@ export function createWslMoveUndoPorts(
       const hostIds = [...new Set(Object.keys(local.tabsByWorktree).filter(scope.inScope))].map(
         (id) => scope.worktreeId(id)
       )
+      if (!(await connectUndoHost(userDataPath, move))) {
+        return 'unreachable'
+      }
       const call = async (method: string, params: unknown, timeoutMs: number) => {
         try {
           return await callRuntimeEnvironment(
@@ -138,6 +157,9 @@ export function createWslMoveUndoPorts(
         // E11: a Remove that could not prove the server stopped; the host is not to be touched.
         if (wslHostRemovalPending(userDataPath, move.manifest.source.distro)) {
           return { outcome: 'removal-pending' }
+        }
+        if (!(await connectUndoHost(userDataPath, move))) {
+          return { outcome: 'unreachable' }
         }
         const environmentId = move.destinationEnvironmentId
         const stop = await stopWslMoveHostAutomations(
