@@ -278,6 +278,10 @@
     "fileLoad": {
       "hostUnresolved": "The host couldn't find this file's workspace. It may have been removed, or the host may not know about it yet. Retry, or close this tab from the tab strip.",
       "remoteTooLarge": "This file is too large to open from its host."
+    },
+    "diffTooLarge": {
+      "title": "File too large to diff",
+      "detail": "One version of this file is over 10 MB, so Orca doesn’t load it for a text diff."
     }
   },
   "githubChecks": {
