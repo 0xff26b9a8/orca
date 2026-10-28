@@ -21203,11 +21203,71 @@
   },
   "projectViews": {
     "layout": {
-      "board": "Board"
+      "board": "Board",
+      "roadmap": "Feuille de route",
+      "table": "Tableau"
     },
     "unsupported": {
       "switchLayout": "Basculez vers une vue Tableau, Board ou Feuille de route pour travailler avec ce projet dans Orca.",
-      "description": "Orca affiche les vues de projet de type Tableau, Board et Feuille de route. Cette vue utilise une mise en page qu'Orca ne peut pas encore restituer."
+      "description": "Orca affiche les vues de projet de type Tableau, Board et Feuille de route. Cette vue utilise une mise en page qu'Orca ne peut pas encore restituer.",
+      "layoutNotSupported": "Orca ne prend pas encore en charge les vues de projet de type {{layout}}."
+    },
+    "authHelp": {
+      "hostSignedOut": "`gh` n'est pas connecté à {{host}}.",
+      "hostSignedOutDetail": "Les hôtes GitHub Enterprise nécessitent leur propre connexion `gh`, distincte de github.com. Exécutez la commande de connexion dans un terminal, terminez le parcours dans le navigateur sur {{host}}, puis rechargez.",
+      "ghMissing": "GitHub CLI (`gh`) n'est pas installé ou n'est pas dans le PATH.",
+      "ghMissingDetail": "Orca utilise `gh` pour communiquer avec GitHub Projects. Installez-le depuis cli.github.com, puis connectez-vous.",
+      "envTokenKeyringFallback": "Votre trousseau contient déjà une connexion `gh` qui prendra le relais une fois la variable d'environnement supprimée.",
+      "envTokenLoginAfterUnset": "Après l'avoir supprimée, exécutez `gh auth login` pour vous connecter normalement, puis réessayez.",
+      "envTokenRemoveWindows": "Trouvez où `{{varName}}` est définie (variables d'environnement système ou utilisateur, ou votre profil PowerShell), supprimez-la, puis redémarrez Orca pour qu'il prenne en compte le nouvel environnement.",
+      "envTokenRemovePosix": "Trouvez où `{{varName}}` est exportée (souvent `~/.zshrc`, `~/.zshenv`, `~/.bashrc`, `~/.profile` ou le gestionnaire de secrets de votre shell), supprimez-la, puis redémarrez Orca pour qu'il prenne en compte le nouvel environnement.",
+      "envTokenActive": "`{{varName}}` est définie dans votre environnement, donc `gh` utilise ce jeton au lieu de la connexion de votre trousseau. `gh auth refresh` ne peut pas modifier les jetons fournis par l'environnement — c'est pourquoi l'exécuter n'a rien changé.",
+      "envTokenInherited": "Orca a hérité de `{{varName}}` depuis votre shell, et `gh` utilise ce jeton. `gh auth refresh` ne s'applique pas aux jetons fournis par l'environnement.",
+      "envTokenInheritedDetailWindows": "Supprimez `{{varName}}` dans le shell qui lance Orca (ou dans vos variables d'environnement utilisateur), puis redémarrez Orca.",
+      "envTokenInheritedDetailPosix": "Supprimez `{{varName}}` dans le shell qui lance Orca (ou dans le fichier rc de votre shell), puis redémarrez Orca.",
+      "signedOut": "Vous n'êtes pas connecté à GitHub via `gh`.",
+      "missingScopes": "Il manque à votre jeton `gh` des autorisations nécessaires pour GitHub Projects : {{scopes}}.",
+      "missingScopesDetail": "Exécutez la commande d'actualisation dans un terminal. Elle ouvrira un navigateur pour autoriser les nouvelles autorisations ; revenez ensuite ici et rechargez.",
+      "accessDeniedDetail": "Votre jeton dispose des autorisations requises, mais GitHub refuse toujours l'accès. Si le projet appartient à une organisation avec SAML SSO, vous devez autoriser ce jeton pour l'organisation dans Settings → Developer settings → Personal access tokens → Configure SSO."
+    },
+    "picker": {
+      "pasteUnparseable": "URL de projet ou owner/number attendu",
+      "ownerLoadFailed": "Impossible de charger les projets de {{owner}}.",
+      "organizationsLoadFailed": "Certaines organisations n'ont pas été chargées ({{failureCount}})."
+    },
+    "error": {
+      "notFoundState": "Impossible de trouver ce projet ou cette vue.",
+      "schemaDrift": "Impossible de lire cette vue de projet.",
+      "projectOrViewNotFound": "Projet ou vue introuvable.",
+      "projectNotFound": "Projet introuvable.",
+      "viewNotFound": "Impossible de trouver la vue sélectionnée.",
+      "ownerNotFound": "Propriétaire introuvable.",
+      "itemNotFound": "Élément introuvable.",
+      "issueNotFound": "Issue introuvable.",
+      "inputRequired": "Saisie requise.",
+      "inputTooLarge": "La référence du projet est trop longue pour être résolue.",
+      "inputUnparseable": "Impossible d'analyser la saisie. URL de projet GitHub ou `owner/number` attendu.",
+      "invalidSlug": "{{field}} invalide : « {{value}} » n'est pas un identifiant GitHub valide.",
+      "invalidPositiveInteger": "{{field}} invalide : doit être un entier positif.",
+      "invalidOwnerType": "Type de propriétaire invalide.",
+      "invalidItemType": "Type d'élément invalide.",
+      "missingIds": "Identifiants manquants.",
+      "updatesRequired": "Modifications requises.",
+      "commentBodyRequired": "Le contenu du commentaire est requis.",
+      "duplicateTargetNotAllowed": "Une cible de doublon n'est valide que lors d'une fermeture comme doublon.",
+      "duplicateTargetRequired": "Le numéro de l'issue cible du doublon est requis.",
+      "requestInvalid": "Requête invalide — {{detail}}",
+      "requestFailedDetail": "La requête GitHub a échoué : {{detail}}",
+      "requestFailed": "La requête GitHub a échoué.",
+      "unexpectedRestResponse": "Réponse REST inattendue : {{detail}}",
+      "authRequired": "Connectez-vous à GitHub pour charger les tâches du projet. Exécutez `{{command}}`.",
+      "scopeMissing": "L'accès aux projets GitHub nécessite des autorisations supplémentaires. Exécutez `{{command}}`.",
+      "rateLimitNearlyExhausted": "Limite de débit GitHub presque atteinte (il reste {{remaining}}/{{limit}}). Réinitialisation dans environ {{minutes}} min.",
+      "rateLimited": "Limite de débit GitHub atteinte. Réessayez dans quelques minutes.",
+      "network": "Erreur réseau — vérifiez votre connexion.",
+      "tooLargeUnknownCount": "Cette vue contient trop d'éléments pour être affichée dans Orca. Restreignez le filtre de la vue sur GitHub.",
+      "tooLarge": "Cette vue contient {{itemCount}} éléments, trop pour être affichée dans Orca. Restreignez le filtre de la vue sur GitHub.",
+      "schemaDriftDetail": "Impossible de lire cette vue de projet : {{detail}}."
     }
   },
   "projectField": {

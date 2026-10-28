@@ -21130,11 +21130,71 @@
   },
   "projectViews": {
     "layout": {
-      "board": "Quadro"
+      "board": "Quadro",
+      "roadmap": "Roteiro",
+      "table": "Tabela"
     },
     "unsupported": {
       "switchLayout": "Mude para uma visualização de Tabela, Quadro ou Roteiro para trabalhar com este projeto no Orca.",
-      "description": "O Orca exibe visualizações de projetos em tabela, quadro e roteiro. Esta visualização usa um layout que ele ainda não pode exibir."
+      "description": "O Orca exibe visualizações de projetos em tabela, quadro e roteiro. Esta visualização usa um layout que ele ainda não pode exibir.",
+      "layoutNotSupported": "O Orca ainda não oferece suporte a visualizações de projeto do tipo {{layout}}."
+    },
+    "authHelp": {
+      "hostSignedOut": "O `gh` não está conectado a {{host}}.",
+      "hostSignedOutDetail": "Hosts do GitHub Enterprise precisam de um login próprio no `gh`, separado do github.com. Execute o comando de login em um terminal, conclua o fluxo no navegador em {{host}} e depois recarregue.",
+      "ghMissing": "O GitHub CLI (`gh`) não está instalado ou não está no PATH.",
+      "ghMissingDetail": "O Orca usa o `gh` para se comunicar com o GitHub Projects. Instale-o em cli.github.com e depois faça login.",
+      "envTokenKeyringFallback": "Seu chaveiro já tem um login do `gh` que passará a ser usado assim que a variável de ambiente for removida.",
+      "envTokenLoginAfterUnset": "Depois de removê-la, execute `gh auth login` para fazer login normalmente e tente novamente.",
+      "envTokenRemoveWindows": "Encontre onde `{{varName}}` está definida (variáveis de ambiente do sistema ou do usuário, ou seu perfil do PowerShell), remova-a e reinicie o Orca para que o novo ambiente seja carregado.",
+      "envTokenRemovePosix": "Encontre onde `{{varName}}` é exportada (geralmente `~/.zshrc`, `~/.zshenv`, `~/.bashrc`, `~/.profile` ou o gerenciador de segredos do seu shell), remova-a e reinicie o Orca para que o novo ambiente seja carregado.",
+      "envTokenActive": "`{{varName}}` está definida no seu ambiente, então o `gh` está usando esse token em vez do login do seu chaveiro. O `gh auth refresh` não consegue alterar tokens fornecidos pelo ambiente — por isso executá-lo não ajudou.",
+      "envTokenInherited": "O Orca herdou `{{varName}}` do seu shell, e o `gh` está usando esse token. O `gh auth refresh` não se aplica a tokens fornecidos pelo ambiente.",
+      "envTokenInheritedDetailWindows": "Remova `{{varName}}` no shell que inicia o Orca (ou nas suas variáveis de ambiente de usuário) e depois reinicie o Orca.",
+      "envTokenInheritedDetailPosix": "Remova `{{varName}}` no shell que inicia o Orca (ou no arquivo rc do seu shell) e depois reinicie o Orca.",
+      "signedOut": "Você não está conectado ao GitHub pelo `gh`.",
+      "missingScopes": "Seu token do `gh` não tem escopos necessários para o GitHub Projects: {{scopes}}.",
+      "missingScopesDetail": "Execute o comando de atualização em um terminal. Ele abrirá um navegador para autorizar os novos escopos; depois volte aqui e recarregue.",
+      "accessDeniedDetail": "Seu token tem os escopos necessários, mas o GitHub ainda negou o acesso. Se o projeto estiver em uma organização com SAML SSO, você precisa autorizar este token para a organização em Settings → Developer settings → Personal access tokens → Configure SSO."
+    },
+    "picker": {
+      "pasteUnparseable": "Esperava-se uma URL de projeto ou owner/number",
+      "ownerLoadFailed": "Não foi possível carregar os projetos de {{owner}}.",
+      "organizationsLoadFailed": "Algumas organizações não foram carregadas ({{failureCount}})."
+    },
+    "error": {
+      "notFoundState": "Não foi possível encontrar este projeto ou visualização.",
+      "schemaDrift": "Não foi possível ler esta visualização do projeto.",
+      "projectOrViewNotFound": "Projeto ou visualização não encontrado.",
+      "projectNotFound": "Projeto não encontrado.",
+      "viewNotFound": "Não foi possível encontrar a visualização selecionada.",
+      "ownerNotFound": "Proprietário não encontrado.",
+      "itemNotFound": "Item não encontrado.",
+      "issueNotFound": "Issue não encontrada.",
+      "inputRequired": "Entrada obrigatória.",
+      "inputTooLarge": "A referência do projeto é longa demais para ser resolvida.",
+      "inputUnparseable": "Não foi possível interpretar a entrada. Esperava-se uma URL de projeto do GitHub ou `owner/number`.",
+      "invalidSlug": "{{field}} inválido: \"{{value}}\" não é um identificador válido do GitHub.",
+      "invalidPositiveInteger": "{{field}} inválido: deve ser um inteiro positivo.",
+      "invalidOwnerType": "Tipo de proprietário inválido.",
+      "invalidItemType": "Tipo de item inválido.",
+      "missingIds": "IDs ausentes.",
+      "updatesRequired": "Alterações obrigatórias.",
+      "commentBodyRequired": "O conteúdo do comentário é obrigatório.",
+      "duplicateTargetNotAllowed": "O destino duplicado só é válido ao fechar como duplicada.",
+      "duplicateTargetRequired": "O número da issue de destino duplicada é obrigatório.",
+      "requestInvalid": "Solicitação inválida — {{detail}}",
+      "requestFailedDetail": "A solicitação ao GitHub falhou: {{detail}}",
+      "requestFailed": "A solicitação ao GitHub falhou.",
+      "unexpectedRestResponse": "Resposta REST inesperada: {{detail}}",
+      "authRequired": "Faça login no GitHub para carregar as tarefas do projeto. Execute `{{command}}`.",
+      "scopeMissing": "O acesso a projetos do GitHub precisa de escopos adicionais. Execute `{{command}}`.",
+      "rateLimitNearlyExhausted": "O limite de taxa do GitHub está quase esgotado (restam {{remaining}}/{{limit}}). Será redefinido em cerca de {{minutes}} min.",
+      "rateLimited": "Limite de taxa do GitHub atingido. Tente novamente em alguns minutos.",
+      "network": "Erro de rede — verifique sua conexão.",
+      "tooLargeUnknownCount": "Esta visualização tem itens demais para ser exibida no Orca. Restrinja o filtro da visualização no GitHub.",
+      "tooLarge": "Esta visualização tem {{itemCount}} itens, demais para ser exibida no Orca. Restrinja o filtro da visualização no GitHub.",
+      "schemaDriftDetail": "Não foi possível ler esta visualização do projeto: {{detail}}."
     }
   },
   "projectField": {
