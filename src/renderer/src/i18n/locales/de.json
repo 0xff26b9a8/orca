@@ -17766,6 +17766,7 @@
         "agentCommandNotRunnable": "Der Befehl für {{agent}} unter Einstellungen → Agenten muss ein Programmpfad oder -name sein, den Orca finden kann, ohne Argumente oder Variablen. Den Befehl ändern oder zurücksetzen.",
         "runtimeNotInstalled": "{{agent}} ist auf dem Computer, auf dem dieser Chat läuft, nicht installiert. Die Installation über den Chat in einer aktuellen Orca-Version durchführen.",
         "fullAccessAsRoot": "{{agent}} verwendet keinen Vollzugriff, solange die Ausführung als root erfolgt. Unter Einstellungen → Agenten für den Computer, auf dem dieser Chat läuft, eine andere Berechtigung für {{agent}} auswählen und anschließend einen neuen Chat starten.",
+        "launchPreparationFailed": "Orca konnte den Start von {{agent}} auf dem Computer, auf dem dieser Chat läuft, nicht vorbereiten.",
         "conversationOpenElsewhere": "Codex hält diese Unterhaltung noch offen. In einem Moment erneut versuchen oder andere Codex-Terminals schließen.",
         "conversationOpenInTerminal": "{{agent}} führt diese Unterhaltung bereits in einem anderen Terminal aus. Dort {{agent}} beenden oder das Terminal schließen, um hier fortzufahren.",
         "chooseClaudeAccount": "In den Einstellungen unter Claude-Konten ein Konto auswählen oder hinzufügen.",
