@@ -10418,7 +10418,6 @@
       "src/renderer/src/lib/agent-hibernation-visibility.test.ts": 1419,
       "src/renderer/src/lib/agent-idle-edge.test.ts": 39,
       "src/renderer/src/lib/agent-launch-caller-permissions.test.ts": 1162,
-      "src/renderer/src/lib/agent-launch-caller-placement.test.ts": 876,
       "src/renderer/src/lib/agent-launch-caller-prompt-transport.test.ts": 948,
       "src/renderer/src/lib/agent-launch-caller-routing.test.ts": 1233,
       "src/renderer/src/lib/agent-launch-pane-start.test.ts": 46,
