@@ -12502,7 +12502,7 @@
       "src/shared/native-chat/transcript/native-chat-text-reveal.test.ts": 27,
       "src/shared/native-chat-transcript-contracts.test.ts": 591,
       "src/shared/native-chat-transcript-projection.test.ts": 134,
-      "src/shared/native-chat-transcript-retention.test.ts": 55,
+      "src/shared/native-chat/transcript/native-chat-transcript-retention.test.ts": 55,
       "src/shared/native-chat/transcript/native-chat-turn-activity.test.ts": 137,
       "src/shared/native-chat/transcript/native-chat-turn-fold.test.ts": 120,
       "src/shared/native-chat-turn-membership.test.ts": 174,
