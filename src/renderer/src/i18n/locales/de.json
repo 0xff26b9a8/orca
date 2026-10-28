@@ -60,6 +60,7 @@
       "useHereRefusedOk": "OK",
       "useHereSupersededBy": "{{names}} wurden nach diesem Projekt auf den {{distro}}-Host verschoben. Zuerst diese Projekte wieder auf diesem Computer verwenden, dann dieses Projekt.",
       "useHereMoveRunning": "Ein Verschiebevorgang auf den {{distro}}-Host läuft noch. Nach dessen Abschluss erneut versuchen.",
+      "useHereHostKeptForPeers": "{{project}} wurde auf den Host {{distro}} verschoben, der für ein anderes Orca weiterläuft. Füge den Host erneut hinzu, um es hier wieder zu verwenden.",
       "useHereHostUnreachable": "Der {{distro}}-Host antwortet nicht, daher kann Orca die dortige Kopie dieses Projekts nicht stoppen, und die zugehörigen Agenten laufen dort möglicherweise noch. Den Host in den Einstellungen verbinden oder entfernen und dann erneut versuchen.",
       "useHereHostStillRunning": "In der Kopie dieses Projekts auf dem {{distro}}-Host laufen noch Terminals, sodass die zugehörigen Agenten doppelt ausgeführt werden könnten. Einen Moment warten und dann erneut versuchen.",
       "useHereFailed": "Dieses Projekt konnte nicht auf diesen Computer zurückgeholt werden.",
