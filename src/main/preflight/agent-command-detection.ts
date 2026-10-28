@@ -5,7 +5,7 @@ import {
   getPreflightWslTarget,
   type PreflightRuntimeContext
 } from '../ipc/preflight-runtime-target'
-import { isCommandOnPath } from '../ipc/preflight-command-exec'
+import { findCommandsOnLocalPath } from '../ipc/command-path-resolver'
 import { buildLocalPreflightEnv } from '../ipc/preflight-local-env'
 import { readGuestWindowsDriveMounts } from '../ipc/wsl-guest-windows-drive-path'
 
@@ -21,13 +21,11 @@ export async function detectAgentCommandsOnHost(
   if (wslTarget) {
     return detectWslCommandsOnPath(wslTarget, commands)
   }
-  const pathChecks = await Promise.all(
-    commands.map(async (cmd) => ({
-      cmd,
-      installedOnPath: await isCommandOnPath(cmd)
-    }))
-  )
-  const missedCommands = pathChecks.filter((check) => !check.installedOnPath).map(({ cmd }) => cmd)
+  // One directory read per PATH entry replaces a stat per command-extension candidate (#34636).
+  const onPathCommands = await findCommandsOnLocalPath(commands, {
+    env: buildLocalPreflightEnv()
+  })
+  const missedCommands = commands.filter((cmd) => !onPathCommands.has(cmd))
   // Resolve cold-GUI install dirs once; use the same WSL-filtered PATH while retaining process PATH elsewhere.
   const guestMounts = readGuestWindowsDriveMounts()
   const installDirCommands = detectCommandsInInstallDirs(
@@ -35,9 +33,7 @@ export async function detectAgentCommandsOnHost(
     guestMounts.length > 0 ? buildLocalPreflightEnv(guestMounts)?.PATH : undefined
   )
   const foundCommands = new Set(
-    pathChecks
-      .filter(({ cmd, installedOnPath }) => installedOnPath || installDirCommands.has(cmd))
-      .map(({ cmd }) => cmd)
+    commands.filter((cmd) => onPathCommands.has(cmd) || installDirCommands.has(cmd))
   )
   return foundCommands
 }

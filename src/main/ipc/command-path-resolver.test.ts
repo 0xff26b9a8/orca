@@ -2,7 +2,11 @@ import { access, chmod, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/p
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { isCommandOnLocalPath, listLocalCommandPaths } from './command-path-resolver'
+import {
+  findCommandsOnLocalPath,
+  isCommandOnLocalPath,
+  listLocalCommandPaths
+} from './command-path-resolver'
 
 describe('isCommandOnLocalPath', () => {
   it('returns false for an empty command', async () => {
@@ -221,6 +225,90 @@ describe('isCommandOnLocalPath', () => {
       } finally {
         await rm(dir, { recursive: true, force: true })
       }
+    })
+  })
+})
+
+describe('findCommandsOnLocalPath', () => {
+  // POSIX semantics must match the per-candidate lookup.
+  describe.skipIf(process.platform === 'win32')('posix', () => {
+    let dir = ''
+    beforeAll(async () => {
+      dir = await mkdtemp(path.join(tmpdir(), 'cmd-batch-posix-'))
+      await writeFile(path.join(dir, 'runme'), '#!/bin/sh\n')
+      await chmod(path.join(dir, 'runme'), 0o755)
+      await writeFile(path.join(dir, 'plain'), 'not executable\n')
+      await chmod(path.join(dir, 'plain'), 0o644)
+      await mkdir(path.join(dir, 'adir'))
+      await symlink(path.join(dir, 'runme'), path.join(dir, 'linkme'))
+    })
+    afterAll(async () => {
+      await rm(dir, { recursive: true, force: true })
+    })
+
+    it('returns only executable commands, with the same verdict as isCommandOnLocalPath', async () => {
+      const commands = ['runme', 'plain', 'adir', 'linkme', 'missing']
+      const options = { platform: 'linux' as const, env: { PATH: dir } }
+      const batch = await findCommandsOnLocalPath(commands, options)
+      for (const command of commands) {
+        expect(batch.has(command)).toBe(await isCommandOnLocalPath(command, options))
+      }
+      expect([...batch].sort()).toEqual(['linkme', 'runme'])
+    })
+
+    it('skips relative PATH entries like the absolute-only gate', async () => {
+      await expect(
+        findCommandsOnLocalPath(['runme'], { platform: 'linux', env: { PATH: '.' }, cwd: dir })
+      ).resolves.toEqual(new Set())
+    })
+
+    it('skips a missing PATH directory without failing the batch', async () => {
+      const missing = path.join(dir, 'does-not-exist')
+      await expect(
+        findCommandsOnLocalPath(['runme'], {
+          platform: 'linux',
+          env: { PATH: `${missing}:${dir}` }
+        })
+      ).resolves.toEqual(new Set(['runme']))
+    })
+  })
+
+  describe('win32', () => {
+    let dir = ''
+    beforeAll(async () => {
+      dir = await mkdtemp(path.join(tmpdir(), 'cmd-batch-win32-'))
+      await writeFile(path.join(dir, 'tool.CMD'), '@echo off\n')
+      await writeFile(path.join(dir, 'MiXeD.CmD'), '@echo off\n')
+    })
+    afterAll(async () => {
+      await rm(dir, { recursive: true, force: true })
+    })
+
+    it('resolves bare commands via PATHEXT with the case-insensitive Path key', async () => {
+      await expect(
+        findCommandsOnLocalPath(['tool', 'other'], {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.COM;.EXE;.CMD;.BAT' }
+        })
+      ).resolves.toEqual(new Set(['tool']))
+    })
+
+    it('honors PATHEXT exclusions per command', async () => {
+      await expect(
+        findCommandsOnLocalPath(['tool'], {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.EXE;.COM' }
+        })
+      ).resolves.toEqual(new Set())
+    })
+
+    it('matches Windows filenames case-insensitively', async () => {
+      await expect(
+        findCommandsOnLocalPath(['mixed'], {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.CMD' }
+        })
+      ).resolves.toEqual(new Set(['mixed']))
     })
   })
 })

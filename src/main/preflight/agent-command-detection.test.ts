@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as DrivePath from '../ipc/wsl-guest-windows-drive-path'
+import type * as CommandPathResolver from '../ipc/command-path-resolver'
 
 const { detectInstallDirs, guestMounts } = vi.hoisted(() => {
   const value: readonly string[] = []
@@ -16,6 +17,11 @@ vi.mock('../../shared/local-agent-install-dir-detection', () => ({
 }))
 vi.mock('../ipc/preflight-command-exec', () => ({
   isCommandOnPath: vi.fn(async () => false)
+}))
+vi.mock('../ipc/command-path-resolver', async (importOriginal) => ({
+  ...(await importOriginal<typeof CommandPathResolver>()),
+  // PATH contents must not decide which commands reach the install-dir fallback.
+  findCommandsOnLocalPath: vi.fn(async (_commands: readonly string[]) => new Set<string>())
 }))
 vi.mock('../ipc/wsl-guest-windows-drive-path', async (importOriginal) => ({
   ...(await importOriginal<typeof DrivePath>()),
