@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import { registerHooks, syncBuiltinESMExports } from 'node:module'
 import path from 'node:path'
-import { workerData } from 'node:worker_threads'
+import { Worker, workerData } from 'node:worker_threads'
 
 // Run unbuilt production TS in Node workers, including extensionless source imports.
 registerHooks({
@@ -22,7 +22,7 @@ registerHooks({
   }
 })
 
-if (workerData.blockedDirectory) {
+if (workerData?.blockedDirectory) {
   const originalOpen = fsp.opendir
   fsp.opendir = (directory, options) =>
     directory === workerData.blockedDirectory
@@ -31,7 +31,7 @@ if (workerData.blockedDirectory) {
   syncBuiltinESMExports()
 }
 
-if (workerData.unknownDirectory) {
+if (workerData?.unknownDirectory) {
   const { dir, names, counters: buffer, holdMetadata } = workerData.unknownDirectory
   const counters = new Int32Array(buffer)
   const originalOpen = fsp.opendir
@@ -77,4 +77,37 @@ if (workerData.unknownDirectory) {
   syncBuiltinESMExports()
 }
 
-await import(workerData.entry)
+if (workerData) {
+  await import(workerData.entry)
+} else {
+  const { transformSync } = await import('esbuild')
+  registerHooks({
+    load(url, context, nextLoad) {
+      if (url.endsWith('.ts')) {
+        return {
+          format: 'module',
+          source: transformSync(fs.readFileSync(new URL(url), 'utf8'), {
+            loader: 'ts',
+            format: 'esm',
+            target: 'esnext'
+          }).code,
+          shortCircuit: true
+        }
+      }
+      return nextLoad(url, context)
+    }
+  })
+  const { DetectionDirectoryWorkerClient } =
+    await import('./command-path-directory-worker-client.ts')
+  const client = new DetectionDirectoryWorkerClient(
+    () =>
+      new Worker(new URL(import.meta.url), {
+        workerData: {
+          entry: new URL('./command-path-directory-worker-entry.ts', import.meta.url).href
+        }
+      })
+  )
+  void client.read(process.argv[2]).then((names) => {
+    console.log(JSON.stringify(names === null ? null : [...names]))
+  })
+}

@@ -1,7 +1,16 @@
 import { access, chmod, mkdir, mkdtemp, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+
+// Exercise Windows filename folding through source listings on case-sensitive hosts.
+vi.mock('./command-path-directory-worker-client', async () => ({
+  readDetectionDirectoryViaWorker: vi.fn(
+    (await import('./command-path-directory')).readDetectionDirectory
+  )
+}))
+
+import { readDetectionDirectoryViaWorker } from './command-path-directory-worker-client'
 import {
   findCommandsOnLocalPath,
   isCommandOnLocalPath,
@@ -311,6 +320,17 @@ describe('findCommandsOnLocalPath', () => {
           env: { Path: dir, PATHEXT: '.CMD' }
         })
       ).resolves.toEqual(new Set(['mixed']))
+    })
+
+    it('probes exact host filenames when the directory worker is unavailable', async () => {
+      vi.mocked(readDetectionDirectoryViaWorker).mockResolvedValueOnce(null)
+      await expect(
+        findCommandsOnLocalPath(['tool', 'missing'], {
+          platform: 'win32',
+          env: { Path: dir, PATHEXT: '.CMD' },
+          cwd: dir
+        })
+      ).resolves.toEqual(new Set(['tool']))
     })
 
     it('matches extensionless executable names checked by the agent fallback', async () => {

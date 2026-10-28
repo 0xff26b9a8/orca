@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { Worker } from 'node:worker_threads'
+import { runProcess } from '@orca/process-host'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as DirectoryWorkerClient from './command-path-directory-worker-client'
 import { DetectionDirectoryWorkerClient } from './command-path-directory-worker-client'
@@ -42,6 +43,18 @@ afterEach(async () => {
 })
 
 describe('detection directory worker boundary', () => {
+  it('keeps a plain Node CLI alive for pending listings and lets it exit while idle', async () => {
+    await writeFile(path.join(dir, 'found'), '')
+    const result = await runProcess({
+      program: process.execPath,
+      args: [fixture, dir],
+      env: { ...process.env, ORCA_BACKGROUND_LAUNCH: '1' },
+      timeoutMs: 5_000
+    })
+    expect(result.code, result.stderr).toBe(0)
+    expect(result.stdout.trim()).toBe(JSON.stringify([['found', 'found']]))
+  })
+
   it('keeps real unknown-Dirent metadata off the caller and closes the bounded listing before candidate fallback', async () => {
     const names = Array.from({ length: 129 }, (_, index) => `unrelated-${index}`)
     await Promise.all(names.map((name) => writeFile(path.join(dir, name), '')))
@@ -83,6 +96,31 @@ describe('detection directory worker boundary', () => {
     ).resolves.toEqual(new Set())
     expect(factory).toHaveBeenCalledTimes(1)
     await expect(value.read(path.join(dir, 'missing'))).resolves.toEqual(new Map())
+  })
+
+  it('still finds a stable executable when an unknown Dirent disappears during iteration', async () => {
+    await writeFile(path.join(dir, 'found'), '')
+    await chmod(path.join(dir, 'found'), 0o755)
+    const counters = new Int32Array(new SharedArrayBuffer(5 * Int32Array.BYTES_PER_ELEMENT))
+    client(
+      () =>
+        new Worker(fixture, {
+          workerData: {
+            entry,
+            unknownDirectory: {
+              dir,
+              names: ['deleted-neighbor', 'found'],
+              counters: counters.buffer
+            }
+          }
+        })
+    )
+    await expect(
+      findCommandsOnLocalPath(['found', 'b', 'c', 'd', 'e'], { env: { PATH: dir }, cwd: dir })
+    ).resolves.toEqual(new Set(['found']))
+    expect(Atomics.load(counters, 0)).toBe(1)
+    expect(Atomics.load(counters, 1)).toBe(1)
+    expect(Atomics.load(counters, 2)).toBe(1)
   })
 
   it('uses async executable probes when the worker cannot start', async () => {

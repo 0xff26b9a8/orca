@@ -66,8 +66,8 @@ export class DetectionDirectoryWorkerClient {
     this.host.clearIdleTimer()
     const id = this.nextId++
     return new Promise((resolve) => {
+      // Keep plain-Node CLI invocations alive until their listings settle.
       const timer = setTimeout(() => this.dispose(), REQUEST_TIMEOUT_MS)
-      timer.unref?.()
       this.pending.set(id, { resolve, timer })
       const request: DetectionDirectoryRequest = { id, dir }
       try {
