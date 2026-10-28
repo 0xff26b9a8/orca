@@ -18,7 +18,11 @@ const host = vi.hoisted(() => ({
   listed: true,
   unreadable: false,
   removalPending: false,
-  connect: vi.fn(async (..._args: unknown[]): Promise<boolean> => true)
+  connect: vi.fn(async (..._args: unknown[]): Promise<boolean> => true),
+  keptForPeers: false
+}))
+vi.mock('../wsl/wsl-host-kept-for-peers', () => ({
+  wasWslHostKeptForPeers: () => host.keptForPeers
 }))
 vi.mock('../../shared/runtime-environment-store', () => ({
   listEnvironments: () => {
@@ -148,6 +152,22 @@ describe("undo's host automation port", () => {
       (await createWslMoveUndoPorts(store, '/user-data').stopHostAutomations?.(move))?.outcome
     ).toBe('stopped')
     expect(host.disabled).toEqual([])
+  })
+
+  // R39: another Orca on this computer kept the removed host's server, so the move's copies may run.
+  it('refuses a removed host whose server was kept for another Orca', async () => {
+    host.disabled = []
+    host.listed = false
+    host.keptForPeers = true
+    try {
+      const { store } = storeWith()
+      const ports = createWslMoveUndoPorts(store, '/user-data')
+      expect((await ports.stopHostAutomations?.(move))?.outcome).toBe('unreachable')
+      expect(await ports.stopHostCopies(move)).toBe('unreachable')
+      expect(host.disabled).toEqual([])
+    } finally {
+      host.keptForPeers = false
+    }
   })
 })
 

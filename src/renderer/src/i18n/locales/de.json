@@ -6217,7 +6217,7 @@
           "advanced": "Erweitert",
           "alsoDeleteRemoteHint": "Löscht die entfernten Git-Worktrees und ihre Branches dauerhaft. Kann nicht rückgängig gemacht werden.",
           "alsoForgetLocalHint": "Entfernt sie nur aus Orca. Entfernte Dateien, Worktrees und Branches bleiben unberührt.",
-          "wslHostEndsTerminals": "Entfernt {{value0}} aus Orca, beendet die zugehörigen offenen Terminals und stoppt den Orca-Server in dieser Distribution. Dateien in der Distribution bleiben unberührt."
+          "wslHostEndsTerminalsUnlessShared": "Entfernt {{value0}} aus Orca. Sofern kein anderes auf diesem Computer geöffnetes Orca es verwendet, werden außerdem die offenen Terminals beendet und der Orca-Server in dieser Distribution gestoppt. Dateien in der Distribution bleiben unverändert."
         },
         "HostRenameDialog": {
           "1a2b3c4d5e": "Host umbenennen",
@@ -6574,6 +6574,7 @@
           "removalPending": "Entfernen nicht abgeschlossen"
         },
         "wslHostRemoval": {
+          "keptForOthers": "Aus diesem Orca entfernt. Der Host läuft für {{value0}} weiter.",
           "partial": "Der Host wurde entfernt, aber in der Distribution läuft noch etwas: {{value0}}",
           "pending": "Orca hat den Host noch nicht entfernt: {{value0}} Zum Wiederholen erneut entfernen oder zum Beibehalten verbinden."
         },
