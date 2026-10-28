@@ -10,7 +10,7 @@ vi.mock('../wsl/wsl-guest-pane-processes', async (importOriginal) => ({
   readWslGuestPaneProcesses: readRows
 }))
 
-const { readDaemonWslSleepCwd } = await import('./daemon-wsl-sleep-cwd')
+const { readDaemonWslQuitCwds, readDaemonWslSleepCwd } = await import('./daemon-wsl-sleep-cwd')
 
 const pane = { paneKey: 'tab-1:leaf-1', wslDistro: 'Ubuntu', live: true }
 const shell: WslGuestProcessRow = {
@@ -56,6 +56,19 @@ describe('readDaemonWslSleepCwd', () => {
     const read = readDaemonWslSleepCwd(pane)
     await vi.advanceTimersByTimeAsync(3_000)
     expect(await read).toBeNull()
+  })
+
+  it("answers quit's panes within its own budget, leaving out panes it cannot read", async () => {
+    readRows.mockResolvedValue([shell])
+    const cwds = await readDaemonWslQuitCwds(
+      [
+        { sessionId: 's1', paneKey: pane.paneKey, wslDistro: 'Ubuntu' },
+        { sessionId: 's2', paneKey: 'tab-2:leaf-2', wslDistro: 'Ubuntu' }
+      ],
+      1_000
+    )
+    expect(cwds).toEqual(new Map([['s1', '\\\\wsl.localhost\\Ubuntu\\home\\a\\deep']]))
+    expect(readRows).toHaveBeenCalledWith('Ubuntu', 1_000, { running: true })
   })
 
   it('reads nothing off Windows', async () => {

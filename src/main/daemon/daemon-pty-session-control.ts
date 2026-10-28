@@ -157,12 +157,12 @@ export abstract class DaemonPtySessionControl extends DaemonPtySessionInput {
         async () => {
           // Set inside: a caller past its deadline leaves this checkpoint running without it.
           if (sleepCwd) {
-            this.sleepShellCwds.set(id, sleepCwd)
+            this.probedShellCwds.set(id, sleepCwd)
           }
           try {
             await this.checkpointSessions([id], { final: true, teardown: true })
           } finally {
-            this.sleepShellCwds.delete(id)
+            this.probedShellCwds.delete(id)
           }
         },
         { callerDeadlineMs: opts.deadlineMs }
