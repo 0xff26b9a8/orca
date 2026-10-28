@@ -1,3 +1,5 @@
+import { WslOrcadBridgeActivity } from './wsl-orcad-bridge-activity'
+import { listenWslOrcadStdioBridge } from './wsl-orcad-stdio-bridge'
 import { createWslOrcadPairingRecovery } from './wsl-orcad-pairing-repair'
 import { readConfirmedRunningWslDistros } from '../wsl-background-distro-gate'
 import { parsePairingCode } from '../../shared/pairing'
@@ -64,8 +66,15 @@ export function createWslHostConnector(options: {
         : Promise.reject(refuseUnknown(distro))
   }
   const pairingRecovery = createWslOrcadPairingRecovery(options.userDataPath)
+  // The desktop's own bridged sockets double as the liveness watch; no bridge is held for it.
+  const bridgeActivity = new WslOrcadBridgeActivity()
   const manager = new WslOrcadConnectionManager({
     holder,
+    listen: (transport, listenOptions) =>
+      listenWslOrcadStdioBridge(transport, {
+        ...listenOptions,
+        events: bridgeActivity.events(listenOptions.environmentId)
+      }),
     pairingRecovery,
     getPairingOffer: (environmentId) =>
       findWslHostDeployment(options.userDataPath, environmentId)
@@ -81,6 +90,7 @@ export function createWslHostConnector(options: {
   })
   const liveness = createWslOrcadLivenessSupervisor({
     manager,
+    bridgeActivity,
     holder,
     hasUserVisibleWork: options.hasUserVisibleWork
   })
