@@ -225,6 +225,7 @@ export function useMobileNativeChatController(args: {
     showNativeChat,
     showNativeChatRef,
     nativeChatAgent: activeChatResolution?.agent ?? null,
+    nativeChatSessionLive: activeChatResolution?.sessionLive === true,
     chatDraftKey,
     setChatComposerText,
     getChatComposerEditGeneration,
