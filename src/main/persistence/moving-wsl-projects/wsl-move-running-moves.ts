@@ -31,6 +31,11 @@ export function isWslMoveRunning(distro: string): boolean {
   return runningMoves.has(wslMoveJournalKey(distro))
 }
 
+/** True while this process runs a move of any distro. */
+export function isAnyWslMoveRunning(): boolean {
+  return runningMoves.size > 0
+}
+
 /** Cancels a run that has not asked the host to commit yet; true when one was running. */
 export function cancelWslMove(distro: string): boolean {
   const running = runningMoves.get(wslMoveJournalKey(distro))
