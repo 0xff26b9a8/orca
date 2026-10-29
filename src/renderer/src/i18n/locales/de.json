@@ -21106,7 +21106,9 @@
       "errors": {
         "noName": "Der Agent zur Chat-Benennung hat keinen Namen zurückgegeben.",
         "agentNotRun": "Orca konnte den Agenten zur Chat-Benennung nicht ausführen.",
-        "noAgentAvailable": "In diesem Arbeitsbereich kann kein Agent zur Chat-Benennung ausgeführt werden."
+        "noAgentAvailable": "In diesem Arbeitsbereich kann kein Agent zur Chat-Benennung ausgeführt werden.",
+        "grokFailed": "Grok konnte diesen Chat nicht benennen. Versuche erneut, den Namen zu generieren.",
+        "antigravityFailed": "Antigravity konnte diesen Chat nicht benennen. Versuche erneut, den Namen zu generieren."
       }
     }
   },

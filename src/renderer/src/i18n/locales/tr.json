@@ -21089,7 +21089,9 @@
       "errors": {
         "noName": "Sohbeti adlandıran ajan bir ad döndürmedi.",
         "agentNotRun": "Sohbeti adlandıran ajan Orca tarafından çalıştırılamadı.",
-        "noAgentAvailable": "Bu çalışma alanında sohbeti adlandıran hiçbir ajan çalıştırılamaz."
+        "noAgentAvailable": "Bu çalışma alanında sohbeti adlandıran hiçbir ajan çalıştırılamaz.",
+        "grokFailed": "Grok bu sohbete ad veremedi. Adı yeniden oluşturmayı deneyin.",
+        "antigravityFailed": "Antigravity bu sohbete ad veremedi. Adı yeniden oluşturmayı deneyin."
       }
     }
   },
