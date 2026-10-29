@@ -9020,8 +9020,6 @@
           }
         },
         "InstalledPluginCarousel": {
-          "title": "Instalados · {{value0}}",
-          "seeAll": "Ver todos",
           "previous": "Plugins instalados anteriores",
           "next": "Próximos plugins instalados"
         },
