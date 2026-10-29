@@ -19730,7 +19730,12 @@
       },
       "agentMessage": {
         "messageFrom": "Message from",
-        "unnamedSender": "an agent"
+        "unnamedSender": "an agent",
+        "goToAgent": "Go to agent",
+        "messageFromCoordinator": "Message from your coordinator",
+        "showMore": "Show more",
+        "taskFromCoordinator": "Task from your coordinator",
+        "updateFromWorker": "Update from your worker"
       },
       "goal": {
         "placeholder": "Describe your goal, define measurable outcomes for best results",
