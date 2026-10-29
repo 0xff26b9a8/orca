@@ -324,8 +324,10 @@ export default function MonacoEditor({
         point={gutterMenuPoint}
         line={gutterMenuLine}
         selection={gutterMenuSelection}
+        fileId={fileId}
         filePath={filePath}
         relativePath={relativePath}
+        worktreeId={worktreeId}
       />
     </div>
   )
