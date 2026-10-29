@@ -3,6 +3,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { RpcClient } from '../../../transport/rpc-client'
 import { useMobileNativeChatFileSearch } from './use-mobile-native-chat-file-search'
+import * as ranking from '../../../../../src/shared/quick-open-path-search'
 
 type SearchState = ReturnType<typeof useMobileNativeChatFileSearch>
 
@@ -44,6 +45,7 @@ describe('useMobileNativeChatFileSearch', () => {
   afterEach(() => {
     act(() => renderer?.unmount())
     renderer = null
+    vi.restoreAllMocks()
     vi.useRealTimers()
   })
 
@@ -259,16 +261,15 @@ describe('useMobileNativeChatFileSearch', () => {
       }
       return listResponse
     })
+    const rank = vi.spyOn(ranking, 'rankQuickOpenFiles')
     await mount(fakeClient({ sendRequest }))
 
-    act(() => state?.loadNativeChatFiles('apple'))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(120)
-    })
-    act(() => state?.loadNativeChatFiles('readme'))
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(120)
-    })
+    for (const query of ['apple', 'app', 'docs', 'readme']) {
+      act(() => state?.loadNativeChatFiles(query))
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(120)
+      })
+    }
     expect(sendRequest.mock.calls.filter(([method]) => method === 'files.list')).toHaveLength(1)
 
     await act(async () => {
@@ -277,5 +278,6 @@ describe('useMobileNativeChatFileSearch', () => {
       await Promise.resolve()
     })
     expect(state?.nativeChatFilePaths).toEqual(['docs/readme.md'])
+    expect(rank).toHaveBeenCalledTimes(1)
   })
 })

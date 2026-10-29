@@ -134,7 +134,11 @@ export function useMobileNativeChatFileSearch(args: {
             const accepted = nativeChatFileInventoryRead.interpret(response)
             return accepted.accepted ? accepted.value : null
           })
-          if (!loaded || inventory.commit(loaded.lease, loaded.value) !== 'committed') {
+          if (
+            !loaded ||
+            inventory.commit(loaded.lease, loaded.value) !== 'committed' ||
+            !isCurrentRequest()
+          ) {
             return
           }
           applyPaths(rankInventory(loaded.value, normalizedQuery))
