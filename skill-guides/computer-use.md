@@ -87,6 +87,7 @@ printf '%s' "$TEXT" | ORCA computer set-value --app <app> --element-index <index
 - An action's verification is separate from whether its provider call succeeded:
   - `verified` means the changed value was read back.
   - `unverified (accessibility action unasserted)` means the accessibility call succeeded but no post-state assertion was made.
+  - `unverified (suspected noop)` means the accessibility call succeeded but the window's tree and the app's windows were unchanged about a second later. Web and Electron controls often ignore it. Do not repeat the same element click; if the effect you expect would show in the window, retry once with `click --x --y` at the control from a fresh screenshot. If the effect lives elsewhere (clipboard, another app), check there first.
   - `unverified (synthetic input)` means input was fired into the void and is unverifiable.
   - Missing verification metadata is unverified, including responses from older runtimes.
   - Never report an unverified action as success. If it could have sent, submitted, bought, or deleted something, say the effect is unproven.
@@ -164,6 +165,7 @@ Slack: the accessibility tree may be shallow while the screenshot contains usefu
 - `element_not_clickable`: the element has no actionable frame; use a parent/child element with a frame or choose window-local coordinates from the latest screenshot.
 - `invalid_argument`: fix the command flags; do not retry the same command unchanged.
 - `action_timeout`: inspect current state before retrying, then use a simpler semantic action or `--no-screenshot` if observation is slow.
+- `verification_failed`: the write was read back and the element holds a different value, so the action failed. Run `get-app-state` to see which field changed. For editable text, click the intended field and confirm focus, select all (`cmd+a` on macOS, `ctrl+a` on Windows/Linux), then use `type-text` and inspect the resulting value instead of repeating `set-value`.
 - `screenshot_failed`: use `--no-screenshot` if tree state is enough; if the message names Screen Recording or screenshots permission, run `ORCA computer permissions --id screenshots --json`.
 - `accessibility_error`: run `ORCA computer capabilities --json`; if the message names Accessibility permission, run `ORCA computer permissions --id accessibility --json`.
 - Empty tree or no screenshot: app may have no visible window, be minimized, or need permissions.

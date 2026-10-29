@@ -14,6 +14,7 @@ export const COMPUTER_ERROR_CODES = {
   value_not_settable: 'value_not_settable',
   invalid_argument: 'invalid_argument',
   action_timeout: 'action_timeout',
+  verification_failed: 'verification_failed',
   screenshot_failed: 'screenshot_failed',
   accessibility_error: 'accessibility_error'
 } as const
@@ -112,6 +113,8 @@ export type ComputerActionVerification =
         | 'readback_unsupported'
         | 'window_changed'
         | 'value_mismatch'
+        // The accessibility call succeeded but the window and the app's windows looked the same about a second later.
+        | 'suspected_noop'
       expected?: string | null
       actualPreview?: string | null
     }
