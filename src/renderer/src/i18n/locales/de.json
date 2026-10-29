@@ -14665,7 +14665,6 @@
       },
       "mobile": {
         "MobileHero": {
-          "downloadApp": "App herunterladen",
           "a8fb43cf1c": "Fortfahren",
           "3f90dbd274": "Abschließen",
           "b622eba64d": "Zurück",
@@ -14698,11 +14697,6 @@
           "e59a252eca": "Code erneut generieren",
           "d0b52871ce": "Die Smartphones sind gekoppelt.",
           "051978a785": "Das Smartphone ist gekoppelt.",
-          "channel": {
-            "group": "Veröffentlichungskanal",
-            "preview": "Vorschau",
-            "stable": "Stabil"
-          },
           "pairingQrError": "Dieser Kopplungscode konnte nicht als QR-Code dargestellt werden. Stattdessen in Orca Mobile kopieren.",
           "noRelayCode": "Kein Kopplungscode verfügbar",
           "noPairingCode": "Kein Kopplungscode verfügbar",
@@ -14749,12 +14743,8 @@
         "mobile": {
           "platform": {
             "copy": {
-              "preview": {
-                "tagline": "Neueste Funktionen, täglich aktualisiert."
-              },
-              "stable": {
-                "tagline": "Die öffentliche Version, wöchentlich aktualisiert."
-              }
+              "downloadApk": "APK herunterladen",
+              "openAppStore": "App Store öffnen"
             }
           }
         },
