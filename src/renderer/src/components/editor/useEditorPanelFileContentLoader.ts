@@ -113,6 +113,9 @@ export function useEditorPanelFileContentLoader({
           if (!migration.ok) {
             throw new Error(restoredOwnerMigrationErrorMessage(migration.reason))
           }
+          if (fileReadGenerationRef.current[id] !== generation) {
+            return
+          }
           fileReadGenerationRef.current[id] = ++fileReadGenerationCounterRef.current
           setFileContents((prev) => {
             const next = { ...prev }
