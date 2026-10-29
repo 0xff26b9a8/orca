@@ -11,11 +11,13 @@ import {
 import { translate } from '@/i18n/i18n'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { useAppStore } from '@/store'
-import type {
-  BrowserAnnotationIntent,
-  BrowserGrabPayload
+import {
+  isBrowserAnnotationPageFull,
+  type BrowserAnnotationIntent,
+  type BrowserGrabPayload
 } from '../../../../../shared/browser-grab-types'
 import { formatGrabPayloadAsText } from './GrabConfirmationSheet'
+import { browserAnnotationLimitMessage } from './browser-annotation-limit-message'
 import {
   createBrowserAnnotationId,
   createBrowserAnnotationPayload,
@@ -85,14 +87,16 @@ export function useBrowserPageGrabAnnotations({
   const [grabToast, setGrabToast] = useState<BrowserPageGrabToastState | null>(null)
   const grabRef = useRef(grab)
   const grabPayloadRef = useRef(grab.payload)
+  const browserAnnotationsLengthRef = useRef(browserAnnotationsLength)
 
   useLayoutEffect(() => {
+    browserAnnotationsLengthRef.current = browserAnnotationsLength
     toolTargetIdRef.current = toolTargetId
     grabIntentRef.current = grabIntent
     pendingAnnotationPayloadRef.current = pendingAnnotationPayload
     grabRef.current = grab
     grabPayloadRef.current = grab.payload
-  }, [grab, grabIntent, pendingAnnotationPayload, toolTargetId])
+  }, [browserAnnotationsLength, grab, grabIntent, pendingAnnotationPayload, toolTargetId])
   // Why: Radix fires onOpenChange(false) before onSelect, so this flag lets onOpenChange skip the rearm that would clear the payload first.
   const grabMenuActionTakenRef = useRef(false)
   const recordFeatureInteraction = useAppStore((s) => s.recordFeatureInteraction)
@@ -150,6 +154,14 @@ export function useBrowserPageGrabAnnotations({
       return
     }
     if (grabIntent === 'annotate') {
+      // The store refuses notes past the cap, so say so before the user writes one.
+      if (
+        grabPayloadRef.current === grab.payload &&
+        isBrowserAnnotationPageFull(browserAnnotationsLengthRef.current)
+      ) {
+        showGrabToast(browserAnnotationLimitMessage(), 'error', grab.payload)
+        return
+      }
       // Loading may cancel the selection before React accepts this pending snapshot.
       setPendingAnnotationPayload(() =>
         grabPayloadRef.current === grab.payload ? grab.payload : null
