@@ -21,6 +21,7 @@ import {
 import type { PRComment } from '../../../../../shared/github/comment-types'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
+import { isReviewThreadResolutionInFlight } from '@/store/github/review-thread-resolution-in-flight'
 import { worktreeLaunchWorkspace } from '@/lib/agent-launch-route-input'
 
 type ChecksPanelCommentResolutionInput = Pick<
@@ -105,6 +106,10 @@ export function useChecksPanelCommentResolution(model: ChecksPanelCommentResolut
       }
       if (!repo || !prNumber) {
         return false
+      }
+      // Why: skip the local optimistic flip too; the store no-ops overlapping requests.
+      if (isReviewThreadResolutionInFlight(useAppStore.getState(), threadId)) {
+        return true
       }
       const requestKey = checksPanelAsyncResultKey(
         prCacheKey,
