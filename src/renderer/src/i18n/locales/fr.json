@@ -2133,8 +2133,7 @@
         "estimateValue": "Estimation {{estimate}}"
       },
       "NewWorkspaceComposerCard": {
-        "reuseExistingBranch": "Réutiliser la branche",
-        "reuseExistingBranchHint": "Faites un checkout de la branche existante au lieu d'en créer une nouvelle à partir de celle-ci.",
+        "openExistingWorkspace": "Ouvrir l’espace de travail existant",
         "createMultiple": "Créer plus",
         "cbb47ee0dc": "Disponible uniquement pour les projets Git locaux.",
         "d861de981b": "Sparse checkout",
@@ -21165,6 +21164,15 @@
     "moreBranchActions": "Plus d'options de suppression de branche"
   },
   "workspace": {
+    "branchChoice": {
+      "title": "Branche pour cet arbre de travail",
+      "existing": "Branche existante",
+      "existingHint": "Les nouveaux commits sont ajoutés à cette branche.",
+      "new": "Nouvelle branche",
+      "newHint": "Créer une nouvelle branche locale",
+      "newName": "Nom de la nouvelle branche",
+      "automaticName": "Nom automatique"
+    },
     "links": {
       "foreignReview": "Cette revue appartient à un autre dépôt. Ajoutez des revues du dépôt de cet espace de travail.",
       "repositoryLoading": "L'identité du dépôt est encore en cours de chargement. Réessayez dès qu'elle est disponible.",

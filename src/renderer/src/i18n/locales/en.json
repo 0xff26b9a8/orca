@@ -2281,8 +2281,7 @@
         "estimateValue": "Estimate {{estimate}}"
       },
       "NewWorkspaceComposerCard": {
-        "reuseExistingBranch": "Reuse branch",
-        "reuseExistingBranchHint": "Check out the existing branch instead of creating a new one from it.",
+        "openExistingWorkspace": "Open existing workspace",
         "createMultiple": "Create more",
         "cbb47ee0dc": "Only available for local Git projects.",
         "d861de981b": "Sparse checkout",
@@ -20831,6 +20830,15 @@
     "openDefault": "Open in Default App"
   },
   "workspace": {
+    "branchChoice": {
+      "title": "Branch for this worktree",
+      "existing": "Existing branch",
+      "existingHint": "New commits go on this branch.",
+      "new": "New branch",
+      "newHint": "Create a new local branch",
+      "newName": "New branch name",
+      "automaticName": "Automatic name"
+    },
     "links": {
       "foreignReview": "This review belongs to another repository. Add reviews from this workspace’s repository.",
       "repositoryLoading": "Repository identity is still loading. Try again once it is available.",

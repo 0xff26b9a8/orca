@@ -1917,6 +1917,7 @@
         "estimateValue": "見積もり {{estimate}}"
       },
       "NewWorkspaceComposerCard": {
+        "openExistingWorkspace": "既存のワークスペースを開く",
         "cbb47ee0dc": "ローカル Git プロジェクトでのみ使用できます。",
         "d861de981b": "まばらなチェックアウト",
         "090cfedeb4": "メモを書く",
@@ -1950,8 +1951,6 @@
         "notConnected": "未接続",
         "runOn": "実行先",
         "notePasteTooLarge": "メモ欄への貼り付け内容が大きすぎます。",
-        "reuseExistingBranch": "ブランチを再利用",
-        "reuseExistingBranchHint": "既存のブランチから新規ブランチを作成せず、そのブランチをチェックアウトします。",
         "createMultiple": "さらに作成",
         "waitForSetupBeforeAgent": "セットアップが完了するまで待ってから Agent を開始してください",
         "destroyDisabled": "破壊は無効です",
@@ -20515,6 +20514,15 @@
     "alwaysForceDeleteBranchesTooltip": "将来のワークスペースの削除後に保持されるブランチに適用されます。"
   },
   "workspace": {
+    "branchChoice": {
+      "title": "このワークツリーのブランチ",
+      "existing": "既存のブランチ",
+      "existingHint": "新しいコミットはこのブランチに追加されます。",
+      "new": "新しいブランチ",
+      "newHint": "新しいローカルブランチを作成",
+      "newName": "新しいブランチ名",
+      "automaticName": "自動で命名"
+    },
     "links": {
       "foreignReview": "このレビューは別のリポジトリに属しています。このワークスペースのリポジトリのレビューを追加してください。",
       "repositoryLoading": "リポジトリの識別情報をまだ読み込んでいます。利用可能になってから再試行してください。",

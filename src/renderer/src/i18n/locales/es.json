@@ -1947,6 +1947,7 @@
         "estimateValue": "Estimación {{estimate}}"
       },
       "NewWorkspaceComposerCard": {
+        "openExistingWorkspace": "Abrir espacio de trabajo existente",
         "cbb47ee0dc": "Solo disponible para proyectos Git locales.",
         "d861de981b": "Sparse checkout",
         "090cfedeb4": "Escribe una nota",
@@ -1980,8 +1981,6 @@
         "notConnected": "No conectado",
         "runOn": "Ejecutar en",
         "notePasteTooLarge": "El contenido pegado es demasiado grande para el campo de nota.",
-        "reuseExistingBranch": "Reutilizar rama",
-        "reuseExistingBranchHint": "Haz checkout de la rama existente en lugar de crear una nueva a partir de ella.",
         "createMultiple": "Crear más",
         "waitForSetupBeforeAgent": "Esperar a que termine el setup antes de iniciar el agente",
         "destroyDisabled": "destroy deshabilitado",
@@ -21165,6 +21164,15 @@
     "alwaysForceDeleteBranches": "Eliminar siempre las ramas conservadas"
   },
   "workspace": {
+    "branchChoice": {
+      "title": "Rama para este árbol de trabajo",
+      "existing": "Rama existente",
+      "existingHint": "Los nuevos commits se añaden a esta rama.",
+      "new": "Nueva rama",
+      "newHint": "Crear una nueva rama local",
+      "newName": "Nombre de la nueva rama",
+      "automaticName": "Nombre automático"
+    },
     "links": {
       "foreignReview": "Esta revisión pertenece a otro repositorio. Agrega revisiones del repositorio de este espacio de trabajo.",
       "repositoryLoading": "La identidad del repositorio aún se está cargando. Vuelve a intentarlo cuando esté disponible.",
