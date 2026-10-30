@@ -30,6 +30,7 @@ export function mockBrowserManager(
       return null
     },
     getWorktreeIdForTab: (tabId: string) => worktrees.get(tabId),
+    getPopupPages: () => [],
     getGuestWebContentsId: vi.fn(() => null),
     getSessionProfileIdForTab: vi.fn(() => null),
     getBrowserPageLoadError: vi.fn(() => null),
@@ -44,6 +45,7 @@ export function mockBrowserManager(
     }),
     showAgentPointer: async () => {},
     isAgentUsingPage: () => false,
+    handOverAgentActivity: () => {},
     ...overrides
   } as unknown as BrowserManager
 }
