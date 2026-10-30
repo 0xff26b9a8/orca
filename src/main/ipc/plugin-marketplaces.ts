@@ -29,11 +29,7 @@ export type PluginMarketplaceHandlerServices = {
 }
 
 /** The consent write path (applyPluginConsent), bound to the store by the caller. */
-export type PluginApproveConsent = (
-  pluginKey: string,
-  reviewedFingerprint: string,
-  originWebContentsId: number
-) => Promise<void>
+export type PluginApproveConsent = (pluginKey: string, reviewedFingerprint: string) => Promise<void>
 
 const sourceIdSchema = z.string().regex(PLUGIN_MARKETPLACE_SOURCE_ID_PATTERN)
 const removeMarketplaceSchema = z.strictObject({ sourceId: sourceIdSchema })
@@ -113,7 +109,7 @@ export function registerPluginMarketplaceHandlers(
     const parsed = marketplacePluginSchema.parse(args)
     return services.installer.preview(parsed.marketplaceSourceId, parsed.pluginKey)
   })
-  ipcMain.handle('plugins:installMarketplacePlugin', async (event, args: unknown) => {
+  ipcMain.handle('plugins:installMarketplacePlugin', async (_event, args: unknown) => {
     const { enableIfData, expectedFingerprint, fromInstallLink, ...identity } =
       installMarketplacePluginSchema.parse(args)
     return installCatalogReleaseWithApproval({
@@ -123,8 +119,7 @@ export function registerPluginMarketplaceHandlers(
         services.installer.install(identity, {
           trigger: fromInstallLink ? 'deep_link' : 'catalog'
         }),
-      approve: (pluginKey, reviewedFingerprint) =>
-        approveConsent(pluginKey, reviewedFingerprint, event.sender.id),
+      approve: approveConsent,
       ...(enableIfData ? { enableIfData: { expectedFingerprint } } : {})
     })
   })
