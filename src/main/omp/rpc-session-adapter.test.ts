@@ -2,6 +2,11 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
 import { FakeConnection } from '../pi/rpc-session-adapter.test-fixture'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
+import { projectStructuredItemsToNativeChat } from '../../shared/structured-agent-session-projection'
+import {
+  nativeChatNoticeBlock,
+  nativeChatNoticeLook
+} from '../../shared/native-chat/native-chat-notice'
 import {
   closeProviderTimelineRigs,
   openProviderTimelineRig
@@ -305,9 +310,39 @@ it.each(['attempt', 'registration'] as const)(
   }
 )
 
+it.each([
+  ['info', 'notice'],
+  ['warning', 'warning'],
+  ['error', 'error']
+] as const)('renders OMP %s notifications using existing Chat notices', async (level, tone) => {
+  const h = await setup()
+  const message = 'xd://: mounted mcp__orca_component_fixtures_list_fixtures'
+  h.connection.receive({ type: 'notice', level, message, source: 'xdev' })
+  h.connection.receive({
+    type: 'extension_ui_request',
+    id: 'extension-notice',
+    method: 'notify',
+    message: 'Extension ready',
+    notifyType: level
+  })
+  const messages = projectStructuredItemsToNativeChat(await h.rig.rows())
+  expect(messages).toHaveLength(2)
+  for (const [index, text] of [message, 'Extension ready'].entries()) {
+    const row = messages[index]!
+    expect(row.role).toBe('system')
+    const block = nativeChatNoticeBlock(row.blocks)
+    expect(block?.text).toBe(text)
+    expect(block && nativeChatNoticeLook(block)).toEqual({ kind: 'line', tone })
+  }
+})
+
 it('shows native command results and extension failures and rejects external session changes', async () => {
   const h = await setup()
   h.connection.receive({ type: 'command_output', text: 'Current model: model-1' })
+  const commandOutputs = ['MCP servers:\n  fixtures: connected', 'Tools:\n  read\n  write']
+  for (const text of commandOutputs) {
+    h.connection.receive({ type: 'command_output', text })
+  }
   h.connection.receive({
     type: 'extension_error',
     extensionPath: '/project/check.ts',
@@ -318,6 +353,15 @@ it('shows native command results and extension failures and rejects external ses
   expect(
     rows.some((row) => row.body.kind === 'status' && row.body.text === 'Current model: model-1')
   ).toBe(true)
+  const messages = projectStructuredItemsToNativeChat(rows)
+  for (const text of commandOutputs) {
+    const message = messages.find((row) =>
+      row.blocks.some((block) => block.type === 'text' && block.text === text)
+    )
+    expect(message?.role).toBe('system')
+    const block = message && nativeChatNoticeBlock(message.blocks)
+    expect(block && nativeChatNoticeLook(block)).toEqual({ kind: 'line', tone: 'notice' })
+  }
   expect(
     rows.some(
       (row) =>

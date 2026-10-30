@@ -3,6 +3,7 @@ import { PiRpcDialogCallbacks } from '../pi/rpc-dialog-callbacks'
 import { piRpcDialogPresentation, type PiRpcDialogPresentation } from '../pi/rpc-extension-dialogs'
 import type { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
+import { ompRpcNoticeTone } from './rpc-notifications'
 
 const askSchema = z.object({
   id: z.string(),
@@ -155,7 +156,7 @@ export function createOmpRpcDialogs(
               body: {
                 kind: 'status',
                 text,
-                tone: frame.notifyType === 'error' ? 'error' : 'info'
+                tone: ompRpcNoticeTone(frame.notifyType)
               }
             }
           ])

@@ -2,6 +2,10 @@ import { randomUUID } from 'node:crypto'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { PiRpcSession } from '../pi/rpc-session'
 
+export function ompRpcNoticeTone(level: unknown): 'notice' | 'warning' | 'error' {
+  return level === 'error' || level === 'warning' ? level : 'notice'
+}
+
 export function receiveOmpNotification(frame: JsonlRpcRecord, session: PiRpcSession): boolean {
   if (frame.type === 'config_update') {
     void session.refreshOptions().catch(() => {
@@ -42,7 +46,7 @@ export function receiveOmpNotification(frame: JsonlRpcRecord, session: PiRpcSess
       body: {
         kind: 'status',
         text,
-        tone: frame.type === 'extension_error' || frame.level === 'error' ? 'error' : 'info'
+        tone: ompRpcNoticeTone(frame.type === 'extension_error' ? 'error' : frame.level)
       }
     }
   ])
