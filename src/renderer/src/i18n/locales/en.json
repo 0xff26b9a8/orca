@@ -22779,6 +22779,22 @@
       "unmarkFile": "Unmark {{path}} as viewed"
     }
   },
+  "agentPicker": {
+    "search": "Search agents and setups…",
+    "configure": "Configure {{agent}}",
+    "arguments": "Arguments",
+    "argumentsHint": "Applies only to CLI launches.",
+    "launchChat": "Launch chat",
+    "launchTerminal": "Launch terminal",
+    "setByArguments": "Set by your Arguments",
+    "searchModels": "Search models",
+    "noModels": "No models match your search.",
+    "legacyModels": "Legacy models",
+    "toggleArguments": "Toggle Arguments",
+    "argumentsTerminalHint": "Only applies to terminal (CLI) launches",
+    "searchAgentModels": "Search {{agent}} models…",
+    "legacyModelCount": "{{total}} models"
+  },
   "automations": {
     "runFailures": {
       "noDispatchHost": "No Orca window was available to launch the automation.",
