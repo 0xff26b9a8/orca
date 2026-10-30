@@ -1,13 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { execFileMock, webContentsFromIdMock, existsSyncMock, readFileSyncMock, stdinWrites } =
-  vi.hoisted(() => ({
-    execFileMock: vi.fn(),
-    webContentsFromIdMock: vi.fn(),
-    existsSyncMock: vi.fn(() => false),
-    readFileSyncMock: vi.fn(() => Buffer.from('')),
-    stdinWrites: [] as string[]
-  }))
+const {
+  execFileMock,
+  webContentsFromIdMock,
+  existsSyncMock,
+  readFileSyncMock,
+  readFileMock,
+  rmMock,
+  createFromBufferMock,
+  stdinWrites
+} = vi.hoisted(() => ({
+  execFileMock: vi.fn(),
+  webContentsFromIdMock: vi.fn(),
+  existsSyncMock: vi.fn(() => false),
+  readFileSyncMock: vi.fn(() => Buffer.from('')),
+  readFileMock: vi.fn(),
+  rmMock: vi.fn(async () => {}),
+  createFromBufferMock: vi.fn(),
+  stdinWrites: [] as string[]
+}))
 
 vi.mock('child_process', () => ({ execFile: execFileMock }))
 vi.mock('fs', () => ({
@@ -17,11 +28,13 @@ vi.mock('fs', () => ({
   chmodSync: vi.fn(),
   constants: { X_OK: 1 }
 }))
+vi.mock('fs/promises', () => ({ readFile: readFileMock, rm: rmMock }))
 vi.mock('os', () => ({ platform: () => 'darwin', arch: () => 'arm64' }))
 vi.mock('electron', () => {
   return {
     app: { getPath: vi.fn(() => '/app'), getAppPath: vi.fn(() => '/project'), isPackaged: false },
-    webContents: { fromId: webContentsFromIdMock }
+    webContents: { fromId: webContentsFromIdMock },
+    nativeImage: { createFromBuffer: createFromBufferMock }
   }
 })
 const { CdpWsProxyMock } = vi.hoisted(() => {
@@ -61,6 +74,7 @@ import {
   mockWebContents,
   overrideBridgeWebContentsLookup,
   resetAgentBrowserBridgeMocks,
+  succeedRecordingAgentBrowserSpawns,
   type ExecFileCallback
 } from './agent-browser-bridge-test-harness'
 
@@ -74,6 +88,16 @@ function failWith(error: string): void {
       cb(null, JSON.stringify({ success: false, error }), '')
     }
   )
+}
+
+function pngHeader(width: number, height: number): Buffer {
+  const header = Buffer.alloc(24)
+  Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(header)
+  header.writeUInt32BE(13, 8)
+  header.write('IHDR', 12, 'ascii')
+  header.writeUInt32BE(width, 16)
+  header.writeUInt32BE(height, 20)
+  return header
 }
 
 const CDP_DISCOVERY_FAILURE =
@@ -136,6 +160,65 @@ describe('AgentBrowserBridge', () => {
       code: 'browser_tab_not_found',
       message: 'Browser page tab-1 is no longer available'
     })
+  })
+
+  it('passes typed snapshot options to agent-browser as its flags', async () => {
+    const spawns = succeedRecordingAgentBrowserSpawns(execFileMock, stdinWrites, {
+      snapshot: 'tree'
+    })
+
+    await bridge.snapshot(undefined, undefined, {
+      interactive: true,
+      compact: true,
+      depth: 2,
+      selector: '#main form',
+      urls: true,
+      delta: true
+    })
+
+    expect(spawns.find(({ command }) => command[0] === 'snapshot')?.command).toEqual([
+      'snapshot',
+      '-i',
+      '-c',
+      '-d',
+      '2',
+      '-s',
+      '#main form',
+      '-u',
+      '--delta'
+    ])
+  })
+
+  it('returns screenshots in CSS pixels and deletes the file agent-browser wrote', async () => {
+    const wc = mockWebContents(100)
+    // A 15px classic scrollbar narrows the CSS width; the height still gives the true 2x ratio.
+    wc.debugger.sendCommand.mockResolvedValue({
+      cssVisualViewport: { clientWidth: 785, clientHeight: 600 }
+    })
+    webContentsFromIdMock.mockReturnValue(wc)
+    const resized = { toPNG: () => Buffer.from('css-png') }
+    const resize = vi.fn(() => resized)
+    createFromBufferMock.mockReturnValue({ resize })
+    readFileMock.mockResolvedValue(pngHeader(1600, 1200))
+    const spawns = succeedRecordingAgentBrowserSpawns(execFileMock, stdinWrites, {
+      path: '/ab-tmp/shot.png',
+      changed: true
+    })
+
+    await expect(bridge.screenshot({ ifChanged: true })).resolves.toEqual({
+      data: Buffer.from('css-png').toString('base64'),
+      format: 'png',
+      changed: true
+    })
+    expect(spawns.find(({ command }) => command[0] === 'screenshot')?.command).toEqual([
+      'screenshot',
+      expect.stringMatching(/^\/app\/orca-screenshot-[\w-]+\.png$/),
+      '--if-changed',
+      '--screenshot-format',
+      'png'
+    ])
+    expect(resize).toHaveBeenCalledWith({ width: 800, quality: 'best' })
+    expect(rmMock).toHaveBeenCalledWith('/ab-tmp/shot.png', { force: true })
   })
 
   it('strips --cdp and --session from exec commands', async () => {

@@ -61,6 +61,7 @@ export type {
   BrowserScreencastErrorResult,
   BrowserScreencastReadyResult,
   BrowserScreencastResult,
+  BrowserScreenshotAnnotation,
   BrowserScreenshotResult,
   BrowserScrollResult,
   BrowserSelectAllResult,

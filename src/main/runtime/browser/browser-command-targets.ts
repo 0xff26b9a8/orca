@@ -1,3 +1,4 @@
+import type { BrowserSnapshotOptions } from '../../../shared/rpc-contract/browser-observation-params'
 import type { AgentBrowserBridge } from '../../browser/agent-browser-bridge'
 import { BrowserError } from '../../browser/browser-error'
 import { webContents } from 'electron'
@@ -203,8 +204,14 @@ export class RuntimeBrowserCommandTargets {
     } catch {}
   }
 
-  async browserSnapshot(params: BrowserCommandTargetParams): Promise<BrowserSnapshotResult> {
+  async browserSnapshot(
+    params: BrowserSnapshotOptions & BrowserCommandTargetParams
+  ): Promise<BrowserSnapshotResult> {
     const target = await this.resolveBrowserCommandTarget(params)
-    return this.requireAgentBrowserBridge().snapshot(target.worktreeId, target.browserPageId)
+    return this.requireAgentBrowserBridge().snapshot(
+      target.worktreeId,
+      target.browserPageId,
+      params
+    )
   }
 }
