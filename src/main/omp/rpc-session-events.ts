@@ -16,7 +16,10 @@ export const goalSchema = z.object({
   updatedAt: z.number()
 })
 
-const reportedGoals = new WeakMap<PiRpcSession, string>()
+const reportedGoals = new WeakMap<
+  PiRpcSession,
+  { snapshot: string; signature: string; item: string; occurrence: number }
+>()
 const subagents = new WeakMap<PiRpcSession, OmpRpcSubagents>()
 const fileMentionSchema = z.looseObject({
   role: z.literal('fileMention'),
@@ -32,17 +35,23 @@ export function reportGoal(session: PiRpcSession, value: unknown): void {
   const goal = parsed.data
   const snapshot = JSON.stringify(goal)
   const previous = reportedGoals.get(session)
-  if (previous === snapshot) {
+  if (previous?.snapshot === snapshot) {
     return
   }
-  reportedGoals.set(session, snapshot)
+  const signature = JSON.stringify([goal?.id, goal?.createdAt, goal?.objective, goal?.status])
+  const accounting = previous?.signature === signature
+  const occurrence = accounting ? previous.occurrence : (previous?.occurrence ?? 0) + 1
+  const item = accounting
+    ? previous.item
+    : `omp-goal:${goal?.id ?? 'cleared'}:${goal?.updatedAt ?? Date.now()}:${occurrence}`
+  reportedGoals.set(session, { snapshot, signature, item, occurrence })
   if (previous === undefined && goal === null) {
     return
   }
   session.lane.apply([
     {
-      type: 'item.close',
-      item: `omp-goal:${goal?.id ?? 'cleared'}:${goal?.updatedAt ?? Date.now()}`,
+      type: accounting ? 'item.update' : 'item.close',
+      item,
       body: {
         kind: 'status',
         text: goal ? `Goal: ${goal.objective} (${goal.status})` : 'Goal cleared',
