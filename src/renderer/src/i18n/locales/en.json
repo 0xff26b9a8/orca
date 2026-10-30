@@ -20495,6 +20495,10 @@
       "caution": "Caution"
     },
     "automations": {
+      "openIn": "Open in",
+      "chat": "Chat",
+      "terminal": "Terminal",
+      "runChatUnavailable": "Run chat is unavailable. Showing its workspace; any saved output remains in Run Details.",
       "runTerminalUnavailable": "Run terminal is unavailable."
     },
     "agentCombobox": {
