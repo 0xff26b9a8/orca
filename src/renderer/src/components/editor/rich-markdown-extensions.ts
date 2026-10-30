@@ -11,7 +11,7 @@ import { RichMarkdownLink } from './rich-markdown-link-mark'
 import { Code } from '@tiptap/extension-code'
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
-import { TaskItem } from '@tiptap/extension-list'
+import { RichMarkdownTaskItem } from './rich-markdown-task-item'
 import { RichMarkdownTable } from './rich-markdown-table'
 import { TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
 import { BlockMath, InlineMath } from '@tiptap/extension-mathematics'
@@ -247,7 +247,7 @@ export function createRichMarkdownExtensions({
     }),
     RichMarkdownOrderedList,
     RichMarkdownTaskList,
-    TaskItem.configure({
+    RichMarkdownTaskItem.configure({
       nested: true
     }),
     ...createOrcaDetailsExtensions(),
