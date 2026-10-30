@@ -1,156 +1,16 @@
-import { OmpRpcSubagents } from './rpc-subagents'
 import { z } from 'zod'
 import { PiRpcSessionAdapter, type PiRpcSessionAdapterDeps } from '../pi/rpc-session-adapter'
 import type { PiRpcSession } from '../pi/rpc-session'
 import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
 import { applyPiRpcSessionOption } from '../pi/rpc-options'
-import { JsonlRpcResponseError, type JsonlRpcRecord } from '../jsonl-rpc/peer'
+import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { createOmpRpcDialogs } from './rpc-dialogs'
 import { buildOmpRpcLaunch, ompRpcProviderLink } from './rpc-launch'
 import { openOmpRpcConnection } from './rpc-connection'
-import { receiveOmpNotification } from './rpc-notifications'
+import { goalSchema, reportGoal, receiveOmpFrame } from './rpc-session-events'
 import { OmpRpcFastOptions } from './rpc-options'
 import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
-
-const goalSchema = z.object({
-  id: z.string(),
-  objective: z.string(),
-  status: z.enum(['active', 'paused', 'budget-limited', 'complete', 'dropped']),
-  tokenBudget: z.number().optional(),
-  tokensUsed: z.number(),
-  timeUsedSeconds: z.number(),
-  createdAt: z.number(),
-  updatedAt: z.number()
-})
-
-const reportedGoals = new WeakMap<PiRpcSession, string>()
-const subagents = new WeakMap<PiRpcSession, OmpRpcSubagents>()
-const fileMentionSchema = z.looseObject({
-  role: z.literal('fileMention'),
-  files: z.array(z.looseObject({ path: z.string(), content: z.string() })),
-  timestamp: z.number()
-})
-
-function reportGoal(session: PiRpcSession, value: unknown): void {
-  const parsed = goalSchema.nullable().safeParse(value)
-  if (!parsed.success) {
-    return
-  }
-  const goal = parsed.data
-  const snapshot = JSON.stringify(goal)
-  const previous = reportedGoals.get(session)
-  if (previous === snapshot) {
-    return
-  }
-  reportedGoals.set(session, snapshot)
-  if (previous === undefined && goal === null) {
-    return
-  }
-  session.lane.apply([
-    {
-      type: 'item.close',
-      item: `omp-goal:${goal?.id ?? 'cleared'}:${goal?.updatedAt ?? Date.now()}`,
-      body: {
-        kind: 'status',
-        text: goal ? `Goal: ${goal.objective} (${goal.status})` : 'Goal cleared',
-        threadGoal:
-          goal && goal.status !== 'dropped'
-            ? {
-                state: 'set',
-                goal: {
-                  ...goal,
-                  status: goal.status === 'budget-limited' ? 'budgetLimited' : goal.status,
-                  tokenBudget: goal.tokenBudget ?? null
-                }
-              }
-            : { state: 'cleared' }
-      }
-    }
-  ])
-}
-
-function receiveOmpFrame(
-  frame: JsonlRpcRecord,
-  session: PiRpcSession,
-  logger: PiRpcSessionAdapterDeps['logger']
-): boolean {
-  if (receiveOmpNotification(frame, session)) {
-    return true
-  }
-  if (frame.type === 'message_start' || frame.type === 'message_end') {
-    const mention = fileMentionSchema.safeParse(frame.message)
-    if (mention.success) {
-      session.turns.receive({ ...frame, message: { ...mention.data, content: [] } })
-      return true
-    }
-  }
-  let children = subagents.get(session)
-  if (!children) {
-    children = new OmpRpcSubagents((message) =>
-      logger.warn(message, {
-        scope: 'omp-rpc-subagents',
-        sessionId: session.input.identity.sessionId
-      })
-    )
-    subagents.set(session, children)
-  }
-  const evidence = children.receive(frame)
-  if (evidence) {
-    session.lane.childWork(evidence)
-    return true
-  }
-  if (frame.type === 'goal_updated') {
-    reportGoal(session, frame.goal)
-    return true
-  }
-  if (frame.type === 'omp_state') {
-    if (
-      session.openedLink &&
-      z.object({ sessionFile: z.string() }).parse(frame.state).sessionFile !== session.sessionFile
-    ) {
-      session.fail(
-        new Error(
-          'OMP changed its session file outside Orca. Reopen the target conversation explicitly.'
-        )
-      )
-      return true
-    }
-    const state = z
-      .object({ goal: z.object({ goal: goalSchema }).nullable() })
-      .safeParse(frame.state)
-    if (state.success) {
-      reportGoal(session, state.data.goal?.goal ?? null)
-    }
-    return true
-  }
-  if (frame.type === 'prompt_result') {
-    const result = z
-      .object({
-        status: z.enum(['completed', 'aborted', 'error']),
-        error: z.object({ message: z.string() }).optional(),
-        sessionSettled: z.boolean()
-      })
-      .parse(frame)
-    session.turns.reportPromptOutcome(
-      result.status === 'error'
-        ? 'failure'
-        : result.status === 'aborted'
-          ? 'cancellation'
-          : 'success',
-      result.error?.message
-    )
-    if (result.sessionSettled) {
-      session.turns.commandCompleted()
-    }
-    return true
-  }
-  if (frame.type === 'available_commands_update') {
-    void session.startup.readCommands()
-    return true
-  }
-
-  return false
-}
+import { OmpRpcRewind, rewindOmpSession, supportsOmpRewind } from './rpc-rewind'
 
 export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
   readonly atRestCommands: StructuredAgentSessionAdapter['atRestCommands']
@@ -159,6 +19,8 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
     deps: PiRpcSessionAdapterDeps & Pick<StructuredAgentSessionAdapter, 'atRestCommands'>
   ) {
     const fastOptions = new WeakMap<PiRpcSession['connection'], OmpRpcFastOptions>()
+    const rewindConnections = new WeakSet<PiRpcSession['connection']>()
+    const rewinds = new WeakMap<PiRpcSession, OmpRpcRewind>()
     super({
       ...deps,
       buildLaunch: buildOmpRpcLaunch,
@@ -176,6 +38,9 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         idleAbort: true,
         prepare: async (connection) => {
           await connection.request('set_subagent_subscription', { level: 'progress' })
+          if (await supportsOmpRewind(connection)) {
+            rewindConnections.add(connection)
+          }
         },
         dispatchOptions: {
           keys: ['model', 'effort', 'fastMode'],
@@ -192,16 +57,47 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         },
         providerLink: ompRpcProviderLink,
         dialogs: createOmpRpcDialogs,
-        receive: (frame, session) => receiveOmpFrame(frame, session, deps.logger)
+        receive: (frame, session) => {
+          let rewind = rewinds.get(session)
+          if (!rewind) {
+            rewind = new OmpRpcRewind((error) =>
+              deps.logger.warn('OMP rewind marker failed', {
+                scope: 'omp-rpc-rewind',
+                sessionId: session.input.identity.sessionId,
+                error
+              })
+            )
+            rewinds.set(session, rewind)
+          }
+          rewind.receive(frame, session)
+          return receiveOmpFrame(frame, session, deps.logger)
+        }
       }
     })
     this.atRestCommands = deps.atRestCommands
+    this.rewindSupport = (sessionId) => {
+      const session = this.sessions.get(sessionId)
+      return !session || rewindConnections.has(session.connection)
+        ? { supported: true }
+        : { supported: false, reason: 'unsupported' }
+    }
     this.readOptions = async (input) => {
       const session = this.session(input.sessionId, input.fence)
       const options = await session.readOptions()
       return fastOptions.get(session.connection)?.read(options) ?? options
     }
   }
+
+  rewindSupport: NonNullable<StructuredAgentSessionAdapter['rewindSupport']>
+
+  rewind: NonNullable<StructuredAgentSessionAdapter['rewind']> = (input) =>
+    rewindOmpSession(this.session(input.sessionId, input.fence), input.beforeTurnId)
+
+  recoverRewind: NonNullable<StructuredAgentSessionAdapter['recoverRewind']> = (input) =>
+    rewindOmpSession(this.session(input.sessionId, input.fence), input.beforeTurnId, {
+      recover: true,
+      signal: input.signal
+    })
 
   setOption: StructuredAgentSessionAdapter['setOption'] = async (input) => {
     const session = this.session(input.sessionId, input.fence)

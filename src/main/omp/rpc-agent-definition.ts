@@ -6,7 +6,7 @@ export const OMP_RPC_AGENT: DirectoryAccountAgentDefinition = {
   legacyHandleTransports: ['acp'],
   accountHomeVariable: 'PI_CODING_AGENT_DIR',
   capabilities: {
-    rewind: false,
+    rewind: true,
     compact: true,
     threadGoal: true,
     contextUsage: true,

@@ -25,7 +25,7 @@ import { supportsSupervisedProviderChildLocation } from '../provider-process/sup
 export type { PiRpcSessionAdapterDeps } from './rpc-session-contract'
 
 export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
-  private readonly sessions = new Map<string, PiRpcSession>()
+  protected readonly sessions = new Map<string, PiRpcSession>()
   private readonly acquiring = new Set<string>()
   private readonly starts = new ProviderAcquisitionStarts<PiRpcConnection>()
   private readonly retiring = new Set<Promise<void>>()
