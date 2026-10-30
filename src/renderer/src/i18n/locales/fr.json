@@ -11891,9 +11891,7 @@
           "installing": "Installation…",
           "reviewLabel": "Vérifier et installer {{value0}}",
           "review": "Vérifier et installer",
-          "retry": "Réessayer",
-          "disable": "Désactiver",
-          "enable": "Activer"
+          "retry": "Réessayer"
         },
         "PluginSettingsRow": {
           "loadingLogs": "Chargement des logs…",
@@ -13007,15 +13005,13 @@
           "offTitle": "Les plugins sont désactivés"
         },
         "PluginFilterPopover": {
-          "label": "Filtrer les plugins",
           "kind": "Catégorie",
           "catalog": "Catalogue",
           "clear": "Effacer les filtres",
           "themes": "Thèmes",
           "languages": "Langages",
           "icons": "Icônes",
-          "commands": "Commandes et panneaux",
-          "machines": "Machines et recettes"
+          "commands": "Commandes et panneaux"
         },
         "PluginUpdateAllDialog": {
           "previewError": "Impossible de lire cette mise à jour",
@@ -13070,10 +13066,6 @@
         },
         "PluginSettingsMenu": {
           "autoUpdateHint": "Ne redemande que pour un nouvel accès"
-        },
-        "InstalledPluginCarousel": {
-          "previous": "Plugins installés précédents",
-          "next": "Plugins installés suivants"
         },
         "PluginInUseAction": {
           "inUseDark": "Utilisé · Sombre",
