@@ -8,6 +8,7 @@ import type { ProviderProcessLaunch } from '../provider-process/provider-process
 import type { PiRpcConnection } from '../pi/rpc-session'
 import { OmpRpcFrameDecoder, encodeOmpRpcFrame } from './rpc-frame-decoder'
 import { OmpRpcCommandPolicy } from './rpc-command-policy'
+import { jsonlRpcRequestTimeout } from '../jsonl-rpc/peer-limits'
 
 const stateSchema = z.looseObject({
   isSettled: z.boolean(),
@@ -97,11 +98,32 @@ export function openOmpRpcConnection(
       }
     })())
   const request: PiRpcConnection['request'] = async (command, params = {}, options = {}) => {
-    await initialize()
+    const timeoutMs =
+      options.timeoutMs === null ? null : jsonlRpcRequestTimeout(options.timeoutMs ?? 30_000)
+    const deadline = timeoutMs === null ? null : performance.now() + timeoutMs
+    const timeoutError = () => new Error(`Agent did not answer ${command} in time`)
+    let timer: ReturnType<typeof setTimeout> | undefined
+    try {
+      await (timeoutMs === null
+        ? initialize()
+        : Promise.race([
+            initialize(),
+            new Promise<never>((_, reject) => {
+              timer = setTimeout(() => reject(timeoutError()), timeoutMs)
+              timer.unref()
+            })
+          ]))
+    } finally {
+      clearTimeout(timer)
+    }
+    const remaining = deadline === null ? null : Math.ceil(deadline - performance.now())
+    if (remaining !== null && remaining <= 0) {
+      throw timeoutError()
+    }
     const answer = await raw.request(
       command === 'get_commands' ? 'get_available_commands' : command,
       params,
-      options
+      { ...options, timeoutMs: remaining }
     )
     if (command === 'get_state') {
       const state = stateSchema.parse(answer)

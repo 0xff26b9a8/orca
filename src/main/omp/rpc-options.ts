@@ -45,7 +45,11 @@ export async function readOmpFastOptions(
   rpc: PiRpcRequester,
   options: AgentSessionOptionsResult
 ): Promise<AgentSessionOptionsResult> {
-  const state = stateSchema.parse(await rpc.request('get_state'))
+  const parsed = stateSchema.safeParse(await rpc.request('get_state'))
+  if (!parsed.success) {
+    return options
+  }
+  const state = parsed.data
   if (!state.model || state.fastModeEnabled === undefined || state.fastModeActive === undefined) {
     return options
   }

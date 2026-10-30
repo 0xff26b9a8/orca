@@ -27,6 +27,7 @@ async function setup(childReporting: 'attempt' | 'registration' = 'attempt') {
   let connection: FakeConnection | undefined
   const childWork = vi.fn()
   const settled = vi.fn()
+  const logger = { warn: vi.fn(), error: vi.fn() }
   const adapter = new OmpRpcSessionAdapter({
     resolveLaunch: async () => ({
       command: 'omp',
@@ -42,7 +43,7 @@ async function setup(childReporting: 'attempt' | 'registration' = 'attempt') {
     onLifecycle: vi.fn(),
     onSettled: settled,
     onChildWorkEvidence: (_sessionId, evidence) => childWork(evidence),
-    logger: { warn: vi.fn(), error: vi.fn() }
+    logger
   })
   adapters.push(adapter)
   const acquired = await adapter.acquire({
@@ -67,7 +68,7 @@ async function setup(childReporting: 'attempt' | 'registration' = 'attempt') {
   if (!connection) {
     throw new Error('No child')
   }
-  return { adapter, rig, connection, opened, childWork, settled }
+  return { adapter, rig, connection, opened, childWork, settled, logger }
 }
 
 it('rejects Goal on older OMP without closing the chat or simulating a goal', async () => {
@@ -446,4 +447,42 @@ it('sets native Fast mode and reports its actual preference and effective state'
     fastMode: true,
     fastModeState: 'on'
   })
+})
+
+it.each([
+  ['model', 'openai/another-model'],
+  ['effort', 'low']
+])('keeps a successful %s write when the following catalog refresh fails', async (key, value) => {
+  const h = await setup()
+  const failure = new Error('Temporary catalog failure')
+  h.connection.requestOverride = (command) =>
+    command === 'get_available_models'
+      ? Promise.reject(failure)
+      : command === 'set_thinking_level'
+        ? Promise.resolve({})
+        : undefined
+  await expect(
+    h.adapter.setOption({ sessionId: 'omp-test', fence: 1, key, value })
+  ).resolves.toMatchObject({ [key]: value })
+  expect((await h.adapter.readOptions({ sessionId: 'omp-test', fence: 1 })).current).toMatchObject({
+    [key]: value
+  })
+  expect(h.connection.closed).toBe(false)
+  expect(h.logger.warn).toHaveBeenCalledWith(
+    'OMP options could not be refreshed after a write',
+    expect.objectContaining({ sessionId: 'omp-test', error: failure })
+  )
+})
+
+it('still rejects a failed option write without starting a follow-up refresh', async () => {
+  const h = await setup()
+  const failure = new Error('Model unavailable')
+  h.connection.requestOverride = (command) =>
+    command === 'set_model' ? Promise.reject(failure) : undefined
+  const before = h.connection.requests.length
+  await expect(
+    h.adapter.setOption({ sessionId: 'omp-test', fence: 1, key: 'model', value: 'openai/missing' })
+  ).rejects.toBe(failure)
+  expect(h.connection.requests.slice(before)).toContain('set_model')
+  expect(h.connection.requests.slice(before)).not.toContain('get_available_models')
 })

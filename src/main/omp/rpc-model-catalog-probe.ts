@@ -73,7 +73,12 @@ export function createOmpRpcModelCatalogProbe(
         { label: 'OMP RPC model discovery', signal: options.signal }
       )
     } finally {
-      await rm(scratch, { recursive: true, force: true })
+      await rm(scratch, { recursive: true, force: true, maxRetries: 3 }).catch((error: unknown) =>
+        context.deps.logger.warn('OMP model catalog scratch cleanup failed', {
+          scope: 'omp-rpc-model-catalog',
+          error
+        })
+      )
     }
   }
   probe.sessionless = true

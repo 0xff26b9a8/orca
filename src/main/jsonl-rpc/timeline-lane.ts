@@ -116,6 +116,7 @@ export class JsonlRpcTimelineLane {
       const result = this.deps.sink.tryAppendTransition({
         steps: [],
         lifecycle: this.finalizing,
+        ...(this.finalizing ? { finalTail: true } : {}),
         publish: false,
         onPublished: () => this.deps.onChildWorkEvidence?.(event.evidence)
       })

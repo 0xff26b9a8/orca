@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest'
+import type { AgentSessionOptionsResult } from '../../shared/agent-session-wire'
 import { readOmpFastOptions } from './rpc-options'
 
 it.each([
@@ -31,3 +32,29 @@ it.each([
     })
   }
 )
+
+it.each([
+  { model: { id: 'test' } },
+  { model: { provider: 'openai', id: 'test', serviceTiers: [1] } },
+  { fastModeEnabled: 'true' }
+])('keeps the base options when optional Fast metadata is malformed: %j', async (state) => {
+  const options: AgentSessionOptionsResult = {
+    models: [{ id: 'openai/test', label: 'Test', isDefault: false, efforts: [] }],
+    current: { model: 'openai/test', effort: 'high' }
+  }
+  await expect(readOmpFastOptions({ request: async () => state }, options)).resolves.toBe(options)
+})
+
+it('still reports a failed transport while reading Fast metadata', async () => {
+  const failure = new Error('RPC disconnected')
+  await expect(
+    readOmpFastOptions(
+      {
+        request: async () => {
+          throw failure
+        }
+      },
+      { models: [], current: {} }
+    )
+  ).rejects.toBe(failure)
+})

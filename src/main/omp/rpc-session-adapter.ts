@@ -64,13 +64,22 @@ function reportGoal(session: PiRpcSession, value: unknown): void {
   ])
 }
 
-function receiveOmpFrame(frame: JsonlRpcRecord, session: PiRpcSession): boolean {
+function receiveOmpFrame(
+  frame: JsonlRpcRecord,
+  session: PiRpcSession,
+  logger: PiRpcSessionAdapterDeps['logger']
+): boolean {
   if (receiveOmpNotification(frame, session)) {
     return true
   }
   let children = subagents.get(session)
   if (!children) {
-    children = new OmpRpcSubagents()
+    children = new OmpRpcSubagents((message) =>
+      logger.warn(message, {
+        scope: 'omp-rpc-subagents',
+        sessionId: session.input.identity.sessionId
+      })
+    )
     subagents.set(session, children)
   }
   const evidence = children.receive(frame)
@@ -146,7 +155,7 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         },
         providerLink: ompRpcProviderLink,
         dialogs: createOmpRpcDialogs,
-        receive: receiveOmpFrame
+        receive: (frame, session) => receiveOmpFrame(frame, session, deps.logger)
       }
     })
   }
@@ -173,7 +182,13 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
       { signal: input.signal },
       session.optionProof
     )
-    await session.refreshOptions()
+    await session.refreshOptions().catch((error: unknown) =>
+      this.deps.logger.warn('OMP options could not be refreshed after a write', {
+        scope: 'omp-rpc',
+        sessionId: input.sessionId,
+        error
+      })
+    )
     return result
   }
 

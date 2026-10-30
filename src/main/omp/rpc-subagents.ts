@@ -16,25 +16,33 @@ const childSchema = z.object({
   currentToolArgs: z.string().optional()
 })
 
+const progressSchema = z
+  .object({ payload: z.looseObject({ progress: z.record(z.string(), z.unknown()) }) })
+  .transform(({ payload }): unknown => ({ ...payload, ...payload.progress }))
+  .pipe(childSchema)
+const lifecycleSchema = z.object({ payload: childSchema }).transform(({ payload }) => payload)
+
 export class OmpRpcSubagents {
   private readonly children = new Map<string, z.infer<typeof childSchema>>()
   private readonly completed = new Set<string>()
+
+  constructor(private readonly onDiagnostic: (message: string) => void) {}
 
   receive(frame: JsonlRpcRecord): AgentChildWorkEvidence[] | null {
     if (frame.type !== 'subagent_lifecycle' && frame.type !== 'subagent_progress') {
       return null
     }
-    const envelope = z
-      .object({ payload: z.looseObject({ progress: z.unknown().optional() }) })
-      .parse(frame)
-    const incoming = childSchema.parse(
-      frame.type === 'subagent_progress'
-        ? {
-            ...envelope.payload,
-            ...z.record(z.string(), z.unknown()).parse(envelope.payload.progress)
-          }
-        : envelope.payload
-    )
+    const parsed = (
+      frame.type === 'subagent_progress' ? progressSchema : lifecycleSchema
+    ).safeParse(frame)
+    if (!parsed.success) {
+      if (frame.type === 'subagent_progress') {
+        this.onDiagnostic('OMP ignored invalid subagent progress data')
+        return []
+      }
+      throw new Error('OMP sent invalid subagent lifecycle data', { cause: parsed.error })
+    }
+    const incoming = parsed.data
     const previous = this.children.get(incoming.id)
     const ended = (status: string) => ['completed', 'failed', 'aborted'].includes(status)
     const restart = incoming.status === 'started' && this.completed.has(incoming.id)

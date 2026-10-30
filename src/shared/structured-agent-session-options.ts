@@ -184,7 +184,10 @@ export function applyStructuredAgentSessionOptions(
 ): StructuredAgentSessionOptionState {
   const { current } = result
   const installed = usesInstalledAgentModelCatalog(state.record.agent, launch.coherentCatalog)
-  const awaitingModels = result.models.length === 0 && current.confirmed === undefined
+  const awaitingModels =
+    result.models.length === 0 &&
+    current.confirmed === undefined &&
+    (!current.model || state.record.agent === 'omp')
   // Catalog defaults supply picker context without claiming the chat chose them.
   replaceStructuredAgentSessionAnsweredValues(
     state.record,
