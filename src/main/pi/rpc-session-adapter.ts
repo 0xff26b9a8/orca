@@ -133,7 +133,8 @@ export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
       session,
       input,
       this.deps.logger,
-      () => this.sessions.get(input.sessionId) === session
+      () => this.sessions.get(input.sessionId) === session,
+      this.deps.dialect?.dispatchOptions
     )
   }
 

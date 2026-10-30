@@ -177,6 +177,19 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         prepare: async (connection) => {
           await connection.request('set_subagent_subscription', { level: 'progress' })
         },
+        dispatchOptions: {
+          keys: ['model', 'effort', 'fastMode'],
+          // Native commands can change Fast between messages without a config_update event.
+          alwaysWrite: ['fastMode'],
+          write: (session, key, value, signal) =>
+            this.setOption({
+              sessionId: session.input.identity.sessionId,
+              fence: session.input.fence,
+              key,
+              value,
+              signal
+            })
+        },
         providerLink: ompRpcProviderLink,
         dialogs: createOmpRpcDialogs,
         receive: (frame, session) => receiveOmpFrame(frame, session, deps.logger)
@@ -197,12 +210,25 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         throw new Error('OMP Fast mode requires a boolean')
       }
       input.signal?.throwIfAborted()
-      await waitForPromiseWithSignal(
-        session.connection.request('set_fast_mode', { enabled: input.value === 'true' }),
-        input.signal
-      )
-      session.selected.set('fastMode', input.value)
-      return Object.fromEntries(session.selected)
+      const token = { pending: true }
+      session.optionProof.writes.set('fastMode', token)
+      session.optionProof.current.delete('fastMode')
+      try {
+        await waitForPromiseWithSignal(
+          session.connection.request('set_fast_mode', { enabled: input.value === 'true' }),
+          input.signal
+        )
+        if (session.optionProof.writes.get('fastMode') !== token) {
+          throw new Error('OMP Fast option write was superseded')
+        }
+        session.selected.set('fastMode', input.value)
+        session.optionProof.current.set('fastMode', input.value)
+        return Object.fromEntries(session.selected)
+      } finally {
+        if (session.optionProof.writes.get('fastMode') === token) {
+          session.optionProof.writes.set('fastMode', { pending: false })
+        }
+      }
     }
     const result = await applyPiRpcSessionOption(
       session.connection,
@@ -212,14 +238,21 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
       { signal: input.signal },
       session.optionProof
     )
+    await this.refreshOptionsAfterWrite(session)
+    return result
+  }
+
+  private async refreshOptionsAfterWrite(session: PiRpcSession): Promise<void> {
+    if (session.connection.closed) {
+      return
+    }
     await session.refreshOptions().catch((error: unknown) =>
       this.deps.logger.warn('OMP options could not be refreshed after a write', {
         scope: 'omp-rpc',
-        sessionId: input.sessionId,
+        sessionId: session.input.identity.sessionId,
         error
       })
     )
-    return result
   }
 
   changeThreadGoal: NonNullable<StructuredAgentSessionAdapter['changeThreadGoal']> = async (
@@ -237,26 +270,24 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
           rejected: 'OMP RPC cannot replace an existing Goal. Clear it before creating another.'
         }
       }
-      for (const key of ['model', 'effort'] as const) {
+      for (const key of ['model', 'effort', 'fastMode'] as const) {
         const value = input.executionOptions?.[key]
         if (value !== undefined) {
-          await applyPiRpcSessionOption(
-            session.connection,
-            session.selected,
+          await this.setOption({
+            sessionId: input.sessionId,
+            fence: input.fence,
             key,
             value,
-            { signal: input.signal },
-            session.optionProof
-          )
+            signal: input.signal
+          })
         }
       }
-      const change = input.change
       const params =
-        change.kind === 'set'
-          ? { op: 'create', objective: change.objective }
-          : change.kind === 'clear'
+        input.change.kind === 'set'
+          ? { op: 'create', objective: input.change.objective }
+          : input.change.kind === 'clear'
             ? { op: 'drop' }
-            : { op: change.status === 'active' ? 'resume' : 'pause' }
+            : { op: input.change.status === 'active' ? 'resume' : 'pause' }
       input.signal?.throwIfAborted()
       const answer = z
         .object({ goal: goalSchema.nullable() })

@@ -18,6 +18,7 @@ import type { StructuredAgentSessionLogger } from '../native-chat/agent-session-
 import type { ProviderProcessLaunch } from '../provider-process/provider-process-launch'
 import type { AgentChildWorkEvidence } from '../../shared/agent-status-child-work-evidence'
 import type { StructuredAgentSessionChildWorkProducer } from '../native-chat/agent-session-wire/structured-agent-session-subagent-rows'
+import type { AgentSessionExecutionOptions } from '../../shared/agent-session-execution-options'
 
 export type PiRpcConnection = Pick<
   JsonlRpcAgentConnection,
@@ -46,6 +47,16 @@ export type PiRpcSessionDeps = PiHistoryCaptureDeps & {
     idleAbort?: boolean
     providerLink: typeof piRpcProviderLink
     prepare?: (connection: PiRpcConnection) => Promise<void>
+    dispatchOptions?: {
+      keys: readonly (keyof AgentSessionExecutionOptions)[]
+      alwaysWrite?: readonly (keyof AgentSessionExecutionOptions)[]
+      write: (
+        session: PiRpcSession,
+        key: keyof AgentSessionExecutionOptions,
+        value: string,
+        signal?: AbortSignal
+      ) => Promise<unknown>
+    }
     dialogs?: (
       lane: JsonlRpcTimelineLane,
       send: (frame: JsonlRpcRecord) => Promise<void>,

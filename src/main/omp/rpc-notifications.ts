@@ -8,6 +8,10 @@ export function ompRpcNoticeTone(level: unknown): 'notice' | 'warning' | 'error'
 
 export function receiveOmpNotification(frame: JsonlRpcRecord, session: PiRpcSession): boolean {
   if (frame.type === 'config_update') {
+    for (const key of ['model', 'effort', 'fastMode']) {
+      session.optionProof.current.delete(key)
+      session.optionProof.writes.set(key, { pending: false })
+    }
     void session.refreshOptions().catch(() => {
       receiveOmpNotification(
         {

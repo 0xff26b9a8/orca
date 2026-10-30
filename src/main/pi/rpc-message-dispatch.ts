@@ -31,7 +31,8 @@ export async function dispatchPiRpcMessage(
   session: PiRpcSession,
   input: DispatchInput,
   logger: PiRpcSessionDeps['logger'],
-  isCurrent: () => boolean
+  isCurrent: () => boolean,
+  optionWriter?: NonNullable<PiRpcSessionDeps['dialect']>['dispatchOptions']
 ): Promise<AgentSessionDispatchOutcome> {
   let prompt
   try {
@@ -61,20 +62,25 @@ export async function dispatchPiRpcMessage(
     input.signal?.throwIfAborted()
     return submitPiRpcPrompt(session, input, prompt)
   }
-  for (const key of ['model', 'effort'] as const) {
+  for (const key of optionWriter?.keys ?? ['model', 'effort']) {
     const value = input.executionOptions[key]
-    if (value === undefined || session.optionProof.current.get(key) === value) {
+    if (
+      value === undefined ||
+      (!optionWriter?.alwaysWrite?.includes(key) && session.optionProof.current.get(key) === value)
+    ) {
       continue
     }
     try {
-      await applyPiRpcSessionOption(
-        session.connection,
-        session.selected,
-        key,
-        value,
-        { signal: input.signal },
-        session.optionProof
-      )
+      await (optionWriter
+        ? optionWriter.write(session, key, value, input.signal)
+        : applyPiRpcSessionOption(
+            session.connection,
+            session.selected,
+            key,
+            value,
+            { signal: input.signal },
+            session.optionProof
+          ))
     } catch (error) {
       input.signal?.throwIfAborted()
       if (session.connection.closed) {
