@@ -25,7 +25,8 @@ describe('Pi RPC session options', () => {
             reasoning: true,
             thinkingLevelMap: { off: null, low: 'low', medium: 'medium', high: 'high' }
           },
-          { provider: 'other', id: 'gpt-6.1-sol', name: 'Other Sol', reasoning: false }
+          { provider: 'other', id: 'gpt-6.1-sol', name: 'GPT-6.1 Sol', reasoning: false },
+          { provider: 'other', id: 'gpt-6.1-sol-alt', name: 'GPT-6.1 Sol', reasoning: false }
         ]
       },
       get_state: {
@@ -46,9 +47,17 @@ describe('Pi RPC session options', () => {
       effort: 'medium',
       confirmed: ['model', 'effort']
     })
-    expect(result.models.map((model) => [model.id, model.isDefault])).toEqual([
-      ['openai-codex/gpt-6.1-sol', false],
-      ['other/gpt-6.1-sol', false]
+    expect(
+      result.models.map(({ id, label, description, isDefault }) => [
+        id,
+        label,
+        description,
+        isDefault
+      ])
+    ).toEqual([
+      ['openai-codex/gpt-6.1-sol', 'GPT-6.1 Sol', 'openai-codex/gpt-6.1-sol', false],
+      ['other/gpt-6.1-sol', 'GPT-6.1 Sol', 'other/gpt-6.1-sol', false],
+      ['other/gpt-6.1-sol-alt', 'GPT-6.1 Sol', 'other/gpt-6.1-sol-alt', false]
     ])
     expect(result.models[0]?.efforts.map((effort) => effort.value)).toEqual([
       'minimal',

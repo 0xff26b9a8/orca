@@ -58,6 +58,7 @@ export async function readPiRpcModelOptions(
   const models = modelsSchema.parse(await rpc.request('get_available_models')).models
   return models.map((model) => {
     const id = piModelOptionId(model.provider, model.id)
+    const label = model.name || id
     const efforts =
       model.reasoning !== true
         ? []
@@ -69,7 +70,8 @@ export async function readPiRpcModelOptions(
           }).map((level) => ({ value: level, label: level }))
     return {
       id,
-      label: model.name || id,
+      label,
+      ...(label !== id ? { description: id } : {}),
       isDefault: false,
       efforts
     }
