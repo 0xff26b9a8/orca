@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
-import { FakeConnection } from '../pi/rpc-session-adapter.test-fixture'
+import { FakeConnection, state } from '../pi/rpc-session-adapter.test-fixture'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { projectStructuredItemsToNativeChat } from '../../shared/structured-agent-session-projection'
 import {
@@ -721,29 +721,64 @@ it('keeps an active chat when optional model discovery fails after a config chan
   expect(h.connection.closed).toBe(false)
 })
 
+it('reads held options without contacting OMP when state requests would fail', async () => {
+  const h = await setup()
+  await vi.waitFor(() => expect(h.adapter.readCommands('omp-test')).toBeDefined())
+  h.connection.requestOverride = (command) =>
+    command === 'get_state' ? Promise.reject(new Error('State unavailable')) : undefined
+  const request = vi.spyOn(h.connection, 'request')
+  await expect(h.adapter.readOptions({ sessionId: 'omp-test', fence: 1 })).resolves.toMatchObject({
+    current: { model: 'anthropic/model-1' }
+  })
+  expect(request).not.toHaveBeenCalled()
+  expect(h.connection.closed).toBe(false)
+})
+
 it('sets native Fast mode and reports its actual preference and effective state', async () => {
   const h = await setup()
+  await vi.waitFor(() => expect(h.adapter.readCommands('omp-test')).toBeDefined())
   let enabled = false
   h.connection.requestOverride = (command) =>
     command === 'get_state'
       ? Promise.resolve({
+          ...state,
           sessionFile: h.opened.link?.handle.nativeId,
           model: { provider: 'anthropic', id: 'model-1', api: 'anthropic-messages' },
           fastModeEnabled: enabled,
           fastModeActive: enabled
         })
-      : undefined
+      : command === 'set_fast_mode'
+        ? Promise.resolve({ enabled: true, active: false })
+        : undefined
+  h.connection.receive({ type: 'config_update' })
+  await vi.waitFor(async () =>
+    expect(
+      (await h.adapter.readOptions({ sessionId: 'omp-test', fence: 1 })).fastModeSupport
+    ).toEqual({ supported: true })
+  )
   const request = vi.spyOn(h.connection, 'request')
   const before = await h.adapter.readOptions({ sessionId: 'omp-test', fence: 1 })
   expect(before.fastModeSupport).toEqual({ supported: true })
   expect(before.current.fastMode).toBe(false)
+  expect(request).not.toHaveBeenCalled()
   await h.adapter.setOption({ sessionId: 'omp-test', fence: 1, key: 'fastMode', value: 'true' })
   expect(request).toHaveBeenCalledWith('set_fast_mode', { enabled: true })
-  enabled = true
   expect((await h.adapter.readOptions({ sessionId: 'omp-test', fence: 1 })).current).toMatchObject({
     fastMode: true,
-    fastModeState: 'on'
+    fastModeState: 'off'
   })
+  expect(request.mock.calls.map(([command]) => command)).toEqual(['set_fast_mode'])
+  enabled = true
+  h.connection.receive({ type: 'config_update' })
+  await vi.waitFor(() => expect(request).toHaveBeenCalledWith('get_state'))
+  await vi.waitFor(async () =>
+    expect(
+      (await h.adapter.readOptions({ sessionId: 'omp-test', fence: 1 })).current
+    ).toMatchObject({
+      fastMode: true,
+      fastModeState: 'on'
+    })
+  )
 })
 
 it.each([

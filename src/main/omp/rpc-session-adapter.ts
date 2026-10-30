@@ -9,7 +9,7 @@ import { createOmpRpcDialogs } from './rpc-dialogs'
 import { buildOmpRpcLaunch, ompRpcProviderLink } from './rpc-launch'
 import { openOmpRpcConnection } from './rpc-connection'
 import { receiveOmpNotification } from './rpc-notifications'
-import { readOmpFastOptions } from './rpc-options'
+import { OmpRpcFastOptions } from './rpc-options'
 import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
 
 const goalSchema = z.object({
@@ -158,10 +158,18 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
   constructor(
     deps: PiRpcSessionAdapterDeps & Pick<StructuredAgentSessionAdapter, 'atRestCommands'>
   ) {
+    const fastOptions = new WeakMap<PiRpcSession['connection'], OmpRpcFastOptions>()
     super({
       ...deps,
       buildLaunch: buildOmpRpcLaunch,
-      openConnection: deps.openConnection ?? openOmpRpcConnection,
+      openConnection: (launch, handlers) => {
+        const connection = (deps.openConnection ?? openOmpRpcConnection)(launch, handlers)
+        const observed = new OmpRpcFastOptions()
+        const rpc = { request: connection.request.bind(connection) }
+        connection.request = (...args) => observed.request(rpc, ...args)
+        fastOptions.set(connection, observed)
+        return connection
+      },
       dialect: {
         agent: 'omp',
         correlatedPrompts: true,
@@ -175,6 +183,11 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
       }
     })
     this.atRestCommands = deps.atRestCommands
+    this.readOptions = async (input) => {
+      const session = this.session(input.sessionId, input.fence)
+      const options = await session.readOptions()
+      return fastOptions.get(session.connection)?.read(options) ?? options
+    }
   }
 
   setOption: StructuredAgentSessionAdapter['setOption'] = async (input) => {
@@ -207,11 +220,6 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
       })
     )
     return result
-  }
-
-  readOptions: NonNullable<StructuredAgentSessionAdapter['readOptions']> = async (input) => {
-    const session = this.session(input.sessionId, input.fence)
-    return readOmpFastOptions(session.connection, await session.readOptions())
   }
 
   changeThreadGoal: NonNullable<StructuredAgentSessionAdapter['changeThreadGoal']> = async (
