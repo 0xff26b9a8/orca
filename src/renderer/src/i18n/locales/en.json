@@ -19759,10 +19759,10 @@
         "messageFrom": "Message from",
         "unnamedSender": "an agent",
         "goToAgent": "Go to agent",
-        "messageFromCoordinator": "Message from your coordinator",
+        "messageFromCoordinator": "Message from coordinator",
         "showMore": "Show more",
-        "taskFromCoordinator": "Task from your coordinator",
-        "updateFromWorker": "Update from your worker"
+        "taskFromCoordinator": "Task from coordinator",
+        "updateFromWorker": "Update from worker"
       },
       "goal": {
         "placeholder": "Describe your goal, define measurable outcomes for best results",
