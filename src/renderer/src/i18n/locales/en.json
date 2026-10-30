@@ -13866,7 +13866,10 @@
             "clearNotesFromWorkspace_one": "Clear {{count}} note from this workspace?",
             "clearNotesFromWorkspace_other": "Clear {{count}} notes from this workspace?",
             "clearNotesFromFile_one": "Clear {{count}} note from {{path}}?",
-            "clearNotesFromFile_other": "Clear {{count}} notes from {{path}}?"
+            "clearNotesFromFile_other": "Clear {{count}} notes from {{path}}?",
+            "markResolved": "Mark as resolved",
+            "keepFile": "Keep file",
+            "keepDeletion": "Keep deletion"
           },
           "SourceControlAgentActionDialog": {
             "8e856842d1": "Could not start the selected agent.",
@@ -14448,7 +14451,8 @@
                     "edc2d82a2b": "Merge in progress",
                     "5c3707aa44": "Rebase in progress",
                     "ffe53a1da6": "Cherry-pick in progress",
-                    "35eb76d323": "Operation in progress"
+                    "35eb76d323": "Operation in progress",
+                    "completeMerge": "Complete merge"
                   }
                 }
               },
@@ -14477,7 +14481,8 @@
                   "e7876a2bde": "Stage at least one file to generate a message.",
                   "0904be2505": "Clear the message to regenerate.",
                   "1ea9ba37aa": "Pick an agent in Settings -> Git -> Source Control AI."
-                }
+                },
+                "completeMergeFailed": "Complete merge failed"
               }
             }
           },
@@ -18957,6 +18962,9 @@
       "forgeCredentialTarget": {
         "unknownHost": "The machine that owns this repository is not known yet. Reconnect it and try again.",
         "thisComputer": "this computer"
+      },
+      "runtimeGitSyncClient": {
+        "completeMergeNeedsNewerHost": "Completing a merge needs a newer Orca on this host. Update Orca on that host."
       }
     },
     "ssh": {
