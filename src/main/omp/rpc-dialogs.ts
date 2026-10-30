@@ -4,6 +4,7 @@ import { piRpcDialogPresentation, type PiRpcDialogPresentation } from '../pi/rpc
 import type { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import { ompRpcNoticeTone } from './rpc-notifications'
+import { OmpRpcAskGroups } from './rpc-ask-groups'
 
 const askSchema = z.object({
   id: z.string(),
@@ -112,13 +113,17 @@ export function createOmpRpcDialogs(
   lane: JsonlRpcTimelineLane,
   send: (frame: JsonlRpcRecord) => Promise<void>,
   fail: (error: Error) => void
-): PiRpcDialogCallbacks {
+): Pick<PiRpcDialogCallbacks, 'receive' | 'respond' | 'cancelAll'> {
   let notice = 0
-  return new PiRpcDialogCallbacks(lane, send, fail, {
+  const groups = new OmpRpcAskGroups(ompRpcDialogPresentation, send)
+  const callbacks = new PiRpcDialogCallbacks(lane, groups.reply, fail, {
     present: ompRpcDialogPresentation,
     receive: (frame, callbacks) => {
       if (frame.method === 'cancel' && typeof frame.targetId === 'string') {
-        callbacks.withdraw(frame.targetId)
+        groups.withdraw(frame.targetId, callbacks)
+        return true
+      }
+      if (groups.receive(frame, callbacks)) {
         return true
       }
       const decoration = [
@@ -182,4 +187,23 @@ export function createOmpRpcDialogs(
       return false
     }
   })
+  return {
+    receive: (frame) => callbacks.receive(frame),
+    respond: async (...args) => {
+      await callbacks.respond(...args)
+      if (args[3] === false) {
+        groups.forgetRow(args[0], (item, id) => lane.isRequestRow(item, id))
+      }
+      try {
+        groups.advance(callbacks)
+      } catch (error) {
+        fail(error instanceof Error ? error : new Error(String(error)))
+        throw error
+      }
+    },
+    cancelAll: () => {
+      callbacks.cancelAll()
+      groups.clear()
+    }
+  }
 }

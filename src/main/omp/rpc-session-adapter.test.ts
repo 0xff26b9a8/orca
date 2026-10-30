@@ -279,6 +279,303 @@ it('waits for OMP settlement and preserves failed prompt outcomes', async () => 
   ).toBe(true)
 })
 
+it('keeps commands and attachment prompts usable after a quota failure', async () => {
+  const h = await setup()
+  h.connection.requestOverride = (command) =>
+    command === 'get_commands'
+      ? Promise.resolve({
+          commands: [
+            { name: 'skill:review', source: 'skill' },
+            { name: 'mcp', source: 'builtin' }
+          ]
+        })
+      : undefined
+  h.connection.receive({ type: 'available_commands_update' })
+  await vi.waitFor(() =>
+    expect(h.adapter.readCommands('omp-test')).toEqual([
+      { name: 'skill:review', kind: 'skill' },
+      { name: 'mcp', kind: 'command' }
+    ])
+  )
+  const commands = h.adapter.readCommands('omp-test')
+  for (const id of ['quota', 'attachment', 'follow-up']) {
+    await h.adapter.dispatch({
+      sessionId: 'omp-test',
+      fence: 1,
+      clientMessageId: id,
+      body: { kind: 'message', role: 'user', blocks: [{ type: 'text', text: id }] }
+    })
+    h.connection.receive({ type: 'agent_start' })
+    if (id === 'attachment') {
+      const message = {
+        role: 'fileMention',
+        files: [{ path: 'invoice.xls', content: '(skipped auto-read: binary file)' }],
+        timestamp: 1
+      }
+      h.connection.receive({ type: 'message_start', message })
+      h.connection.receive({ type: 'message_end', message })
+    }
+    h.connection.receive({
+      type: 'message_end',
+      message: {
+        role: 'assistant',
+        content: id === 'quota' ? [] : [{ type: 'text', text: `${id} received` }],
+        stopReason: id === 'quota' ? 'error' : 'stop',
+        ...(id === 'quota' ? { errorMessage: '403 insufficient_user_quota' } : {})
+      }
+    })
+    h.connection.receive({
+      type: 'response',
+      command: 'prompt',
+      promptId: `orca-prompt:${id}`,
+      success: true
+    })
+    h.connection.receive({
+      type: 'prompt_result',
+      id: `orca-prompt:${id}`,
+      status: id === 'quota' ? 'error' : 'completed',
+      sessionSettled: true
+    })
+    await vi.waitFor(async () =>
+      expect(
+        (await h.rig.rows()).filter(
+          (row) => row.body.kind === 'turn' && row.body.state === 'completed'
+        )
+      ).toHaveLength(id === 'quota' ? 1 : id === 'attachment' ? 2 : 3)
+    )
+    expect(h.adapter.readCommands('omp-test')).toEqual(commands)
+  }
+  expect(h.connection.closed).toBe(false)
+  expect(h.logger.error).not.toHaveBeenCalled()
+  expect(JSON.stringify(await h.rig.rows())).toContain('follow-up received')
+})
+
+it.each([5, 9])(
+  'collects every answer to a %s-question Ask through bounded cards',
+  async (count) => {
+    const h = await setup()
+    h.connection.receive({
+      type: 'extension_ui_request',
+      id: 'large-ask',
+      method: 'ask',
+      questions: Array.from({ length: count }, (_, i) => ({
+        id: `q${i}`,
+        question: `Question ${i}`,
+        options: [{ label: `Choice ${i}` }]
+      }))
+    })
+    const answered = new Set<string>()
+    while (answered.size < Math.ceil(count / 4)) {
+      const row = (await h.rig.rows()).find(
+        (row) => row.body.kind === 'question' && !answered.has(row.itemId)
+      )
+      if (!row || row.body.kind !== 'question' || !row.body.questions) {
+        throw new Error('Missing Ask page')
+      }
+      expect(row.body.questions.length).toBeLessThanOrEqual(4)
+      expect(h.connection.sent.filter((frame) => frame.type === 'extension_ui_response')).toEqual(
+        []
+      )
+      await h.adapter.answerPrompt({
+        sessionId: 'omp-test',
+        fence: 1,
+        kind: 'question',
+        itemId: row.itemId,
+        commit: async () => {},
+        response: {
+          kind: 'answers',
+          answers: row.body.questions.map((question) => ({
+            questionId: question.id,
+            optionIds: ['option-0']
+          }))
+        }
+      })
+      answered.add(row.itemId)
+    }
+    expect(h.connection.sent.filter((frame) => frame.type === 'extension_ui_response')).toEqual([
+      {
+        type: 'extension_ui_response',
+        id: 'large-ask',
+        answers: Array.from({ length: count }, (_, i) => ({
+          id: `q${i}`,
+          selectedOptions: [`Choice ${i}`]
+        }))
+      }
+    ])
+  }
+)
+
+it('cancels a grouped Ask from its second card without sending partial answers', async () => {
+  const h = await setup()
+  h.connection.receive({
+    type: 'extension_ui_request',
+    id: 'cancel-group',
+    method: 'ask',
+    questions: Array.from({ length: 5 }, (_, i) => ({
+      id: `q${i}`,
+      question: `Question ${i}`,
+      options: [{ label: 'Yes' }]
+    }))
+  })
+  const first = (await h.rig.rows()).find((row) => row.body.kind === 'question')
+  if (!first || first.body.kind !== 'question' || !first.body.questions) {
+    throw new Error('Missing first card')
+  }
+  await h.adapter.answerPrompt({
+    sessionId: 'omp-test',
+    fence: 1,
+    kind: 'question',
+    itemId: first.itemId,
+    commit: async () => {},
+    response: {
+      kind: 'answers',
+      answers: first.body.questions.map((question) => ({
+        questionId: question.id,
+        optionIds: ['option-0']
+      }))
+    }
+  })
+  const second = (await h.rig.rows()).find(
+    (row) => row.body.kind === 'question' && row.itemId !== first.itemId
+  )
+  if (!second) {
+    throw new Error('Missing second card')
+  }
+  await h.adapter.dismissPrompt({
+    sessionId: 'omp-test',
+    fence: 1,
+    itemId: second.itemId,
+    commit: async () => {},
+    answer: true
+  })
+  expect(h.connection.sent.filter((frame) => frame.type === 'extension_ui_response')).toEqual([
+    { type: 'extension_ui_response', id: 'cancel-group', cancelled: true }
+  ])
+})
+
+it('keeps grouped answers retryable across rejected commits and failed final delivery', async () => {
+  const h = await setup()
+  h.connection.receive({
+    type: 'extension_ui_request',
+    id: 'retry-group',
+    method: 'ask',
+    questions: Array.from({ length: 5 }, (_, i) => ({
+      id: `q${i}`,
+      question: `Question ${i}`,
+      options: [{ label: 'Yes' }]
+    }))
+  })
+  const first = (await h.rig.rows()).find((row) => row.body.kind === 'question')
+  if (!first || first.body.kind !== 'question' || !first.body.questions) {
+    throw new Error('Missing first card')
+  }
+  const firstAnswer = {
+    sessionId: 'omp-test',
+    fence: 1,
+    kind: 'question' as const,
+    itemId: first.itemId,
+    commit: async () => {},
+    response: {
+      kind: 'answers' as const,
+      answers: first.body.questions.map((question) => ({
+        questionId: question.id,
+        optionIds: ['option-0']
+      }))
+    }
+  }
+  await expect(
+    h.adapter.answerPrompt({
+      ...firstAnswer,
+      commit: async () => {
+        throw new Error('Commit failed')
+      }
+    })
+  ).rejects.toThrow('Commit failed')
+  expect((await h.rig.rows()).filter((row) => row.body.kind === 'question')).toHaveLength(1)
+  expect(h.connection.sent).toEqual([])
+  await h.adapter.answerPrompt(firstAnswer)
+  const second = (await h.rig.rows()).find(
+    (row) => row.body.kind === 'question' && row.itemId !== first.itemId
+  )
+  if (!second) {
+    throw new Error('Missing second card')
+  }
+  const finalAnswer = {
+    ...firstAnswer,
+    itemId: second.itemId,
+    response: {
+      kind: 'answers' as const,
+      answers: [{ questionId: 'q4', optionIds: ['option-0'] }]
+    }
+  }
+  vi.spyOn(h.connection, 'send').mockRejectedValueOnce(new Error('Write failed'))
+  await expect(h.adapter.answerPrompt(finalAnswer)).rejects.toThrow('Write failed')
+  await h.adapter.answerPrompt(finalAnswer)
+  expect(h.connection.sent).toEqual([
+    {
+      type: 'extension_ui_response',
+      id: 'retry-group',
+      answers: Array.from({ length: 5 }, (_, i) => ({ id: `q${i}`, selectedOptions: ['Yes'] }))
+    }
+  ])
+  expect(h.connection.closed).toBe(false)
+})
+
+it.each(['native', 'host'] as const)(
+  'withdraws the active grouped card on %s cancellation and releases its native identity',
+  async (source) => {
+    const h = await setup()
+    const request = {
+      type: 'extension_ui_request',
+      id: 'withdraw-group',
+      method: 'ask',
+      questions: Array.from({ length: 5 }, (_, i) => ({
+        id: `q${i}`,
+        question: `Question ${i}`,
+        options: [{ label: 'Yes' }]
+      }))
+    }
+    h.connection.receive(request)
+    const row = (await h.rig.rows()).find((row) => row.body.kind === 'question')
+    if (!row) {
+      throw new Error('Missing card')
+    }
+    if (source === 'native') {
+      h.connection.receive({
+        type: 'extension_ui_request',
+        id: 'cancel-notice',
+        method: 'cancel',
+        targetId: request.id
+      })
+    } else {
+      await h.adapter.dismissPrompt({
+        sessionId: 'omp-test',
+        fence: 1,
+        itemId: row.itemId,
+        commit: async () => {},
+        answer: false
+      })
+    }
+    await expect(
+      h.adapter.answerPrompt({
+        sessionId: 'omp-test',
+        fence: 1,
+        kind: 'question',
+        itemId: row.itemId,
+        commit: async () => {},
+        response: { kind: 'answers', answers: [] }
+      })
+    ).rejects.toThrow()
+    expect(h.connection.sent).toEqual([])
+    h.connection.receive(request)
+    expect((await h.rig.rows()).filter((row) => row.body.kind === 'question')).toHaveLength(2)
+    await h.adapter.closeAll()
+    expect(h.connection.sent).toEqual([
+      { type: 'extension_ui_response', id: request.id, cancelled: true }
+    ])
+  }
+)
+
 it.each(['attempt', 'registration'] as const)(
   'reports native subagents through %s reporting without orchestration workers',
   async (reporting) => {

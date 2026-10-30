@@ -10,11 +10,13 @@ import { reviseAgentSessionProviderResumePoint } from '../runtime/agent-session/
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { ompRpcLaunchPart } from './rpc-launch'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
+import { createOmpRpcAtRestCommands } from './rpc-at-rest-commands'
 
 export function createOmpRpcAdapter(
   context: StructuredAgentAdapterContext
 ): StructuredAgentRuntimeAdapter {
   return new OmpRpcSessionAdapter({
+    atRestCommands: createOmpRpcAtRestCommands(context),
     resolveLaunch: composeStructuredLaunch(
       OMP_RPC_AGENT,
       structuredAgentLaunchSources(context),

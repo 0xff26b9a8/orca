@@ -25,6 +25,11 @@ const goalSchema = z.object({
 
 const reportedGoals = new WeakMap<PiRpcSession, string>()
 const subagents = new WeakMap<PiRpcSession, OmpRpcSubagents>()
+const fileMentionSchema = z.looseObject({
+  role: z.literal('fileMention'),
+  files: z.array(z.looseObject({ path: z.string(), content: z.string() })),
+  timestamp: z.number()
+})
 
 function reportGoal(session: PiRpcSession, value: unknown): void {
   const parsed = goalSchema.nullable().safeParse(value)
@@ -71,6 +76,13 @@ function receiveOmpFrame(
 ): boolean {
   if (receiveOmpNotification(frame, session)) {
     return true
+  }
+  if (frame.type === 'message_start' || frame.type === 'message_end') {
+    const mention = fileMentionSchema.safeParse(frame.message)
+    if (mention.success) {
+      session.turns.receive({ ...frame, message: { ...mention.data, content: [] } })
+      return true
+    }
   }
   let children = subagents.get(session)
   if (!children) {
@@ -141,7 +153,11 @@ function receiveOmpFrame(
 }
 
 export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
-  constructor(deps: PiRpcSessionAdapterDeps) {
+  readonly atRestCommands: StructuredAgentSessionAdapter['atRestCommands']
+
+  constructor(
+    deps: PiRpcSessionAdapterDeps & Pick<StructuredAgentSessionAdapter, 'atRestCommands'>
+  ) {
     super({
       ...deps,
       buildLaunch: buildOmpRpcLaunch,
@@ -158,6 +174,7 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         receive: (frame, session) => receiveOmpFrame(frame, session, deps.logger)
       }
     })
+    this.atRestCommands = deps.atRestCommands
   }
 
   setOption: StructuredAgentSessionAdapter['setOption'] = async (input) => {
