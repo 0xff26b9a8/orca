@@ -1,4 +1,3 @@
-import { agentSessionFailureWords } from '../../shared/agent-session-failure-words'
 import type {
   AgentSessionDispatchOutcome,
   StructuredAgentSessionCommandRun
@@ -9,12 +8,13 @@ import type { JsonlRpcRequestOptions } from '../jsonl-rpc/peer-oversized-record'
 import type { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import { PiRpcContextUsage } from './rpc-context-usage'
 import { PiRpcMessages, piRpcSkippedEventNotice } from './rpc-messages'
-import { PiRpcPromptDelivery, piRpcFailureFact } from './rpc-prompt-delivery'
+import { PiRpcPromptDelivery, piRpcFailureStatus } from './rpc-prompt-delivery'
 import { PiRpcIdleCheck } from './rpc-idle-check'
 import { piRpcRetryActivity } from './rpc-retry-activity'
 import { type PiRpcState, piRpcMessageSchema, piRpcSkippedEvent } from './rpc-protocol'
 
 export type PiRpcTurnDeps = {
+  correlatedPrompts?: boolean
   lane: JsonlRpcTimelineLane
   generation: string
   send: (frame: JsonlRpcRecord) => Promise<void>
@@ -62,6 +62,7 @@ export class PiRpcTurns {
       failed: deps.failed
     })
     this.delivery = new PiRpcPromptDelivery({
+      correlated: deps.correlatedPrompts,
       send: (frame) =>
         deps.send({ ...frame, streamingBehavior: this.working ? 'steer' : 'followUp' }),
       settled: deps.settled,
@@ -215,6 +216,15 @@ export class PiRpcTurns {
     }
   }
 
+  reportPromptOutcome(outcome: 'success' | 'failure' | 'cancellation', detail?: string): void {
+    if (!this.ended) {
+      this.stopped ||= outcome === 'cancellation'
+      if (outcome === 'failure') {
+        this.failure = detail ?? 'Agent prompt failed'
+      }
+    }
+  }
+
   stop(): void {
     this.stopped = true
   }
@@ -280,16 +290,7 @@ export class PiRpcTurns {
         : 'success'
     const events: ProviderTimelineEvent[] = []
     if (outcome === 'failure' && this.failure) {
-      const fact = piRpcFailureFact(this.failure)
-      events.push({
-        type: 'item.close',
-        item: `error:${this.active}`,
-        body: {
-          kind: 'status',
-          tone: 'error',
-          ...agentSessionFailureWords(fact, { agentName: 'Pi', surface: 'row' })
-        }
-      })
+      events.push(piRpcFailureStatus(this.active, this.failure))
     }
     events.push({
       type: 'turn.end',

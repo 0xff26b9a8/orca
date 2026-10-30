@@ -5,61 +5,35 @@ import {
 } from '../../shared/agent-session-failure'
 import type {
   StructuredAgentSessionAcquireInput,
-  StructuredAgentSessionLifecycleEvent,
   AgentSessionDispatchOutcome
 } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
-import type { StructuredAgentSessionLogger } from '../native-chat/agent-session-wire/structured-agent-session-logger'
 import { providerTimelineSink } from '../native-chat/agent-session-timeline/provider-timeline-plan'
 import { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
-import {
-  JsonlRpcAgentConnection,
-  type JsonlRpcAgentConnectionOptions
-} from '../jsonl-rpc/agent-connection'
+import { JsonlRpcAgentConnection } from '../jsonl-rpc/agent-connection'
 import type { ProviderProcessLaunch } from '../provider-process/provider-process-launch'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { PiRpcTurns } from './rpc-turns'
 import { PiRpcDialogCallbacks } from './rpc-dialog-callbacks'
-import { PiRpcOptionObservations, type PiRpcOptionWrite } from './rpc-options'
+import {
+  PiRpcOptionObservations,
+  readPiRpcSessionOptions,
+  type PiRpcOptionWrite
+} from './rpc-options'
+import type { AgentSessionOptionsResult } from '../../shared/agent-session-wire'
 import type { PiRpcResolvedLaunch } from './rpc-launch-resolution'
 import type { StructuredAgentSessionProviderOpenResult } from '../native-chat/agent-session-wire/structured-agent-session-provider-open-contract'
 import type { AgentSessionProviderHandleLink } from '../../shared/agent-session-provider-handle'
 import { PiRpcSessionStartup } from './rpc-session-startup'
-import { PiHistoryCapture, type PiHistoryCaptureDeps } from './rpc-history-capture'
+import { PiHistoryCapture } from './rpc-history-capture'
 
-export type PiRpcConnection = Pick<
-  JsonlRpcAgentConnection,
-  | 'request'
-  | 'send'
-  | 'close'
-  | 'pauseReading'
-  | 'resumeReading'
-  | 'pid'
-  | 'closed'
-  | 'rootVerdict'
-  | 'processless'
-  | 'lastCloseResult'
-  | 'onExit'
->
-export type PiRpcSessionDeps = PiHistoryCaptureDeps & {
-  openConnection?: (
-    launch: ProviderProcessLaunch,
-    handlers: JsonlRpcAgentConnectionOptions
-  ) => PiRpcConnection
-  onLifecycle: (event: StructuredAgentSessionLifecycleEvent) => void
-  onSettled: (input: {
-    sessionId: string
-    clientMessageId: string
-    fence: number
-    outcome: AgentSessionDispatchOutcome
-  }) => void
-  logger: StructuredAgentSessionLogger
-}
+export type { PiRpcConnection, PiRpcSessionDeps } from './rpc-session-contract'
+import type { PiRpcConnection, PiRpcSessionDeps } from './rpc-session-contract'
 
 export class PiRpcSession {
   readonly connection: PiRpcConnection
   readonly lane: JsonlRpcTimelineLane
   readonly turns: PiRpcTurns
-  readonly dialogs: PiRpcDialogCallbacks
+  readonly dialogs: Pick<PiRpcDialogCallbacks, 'receive' | 'respond' | 'cancelAll'>
   readonly selected = new Map<string, string>()
   /** Hold sends from handover through settlement. */
   readonly heldSends = new Set<string>()
@@ -96,12 +70,16 @@ export class PiRpcSession {
     this.lane = new JsonlRpcTimelineLane({
       sink,
       sessionId: input.identity.sessionId,
-      agent: 'pi',
+      agent: deps.dialect?.agent ?? 'pi',
       generation,
       namespace: input.identity.sessionId,
       pauseReading: () => this.connection?.pauseReading(),
       resumeReading: () => this.connection?.resumeReading(),
       onFailed: (reason) => this.fail(new Error(reason)),
+      onChildWorkEvidence:
+        input.childWork ??
+        ((evidence) =>
+          deps.onChildWorkEvidence?.(input.identity.sessionId, evidence, input.events)),
       onInputAccepted: (clientMessageId) =>
         this.settle(clientMessageId, {
           state: 'accepted',
@@ -109,6 +87,7 @@ export class PiRpcSession {
         })
     })
     this.turns = new PiRpcTurns({
+      correlatedPrompts: deps.dialect?.correlatedPrompts,
       lane: this.lane,
       generation,
       send: (frame) => this.connection.send(frame),
@@ -128,7 +107,7 @@ export class PiRpcSession {
           error
         })
     })
-    this.dialogs = new PiRpcDialogCallbacks(
+    this.dialogs = (deps.dialect?.dialogs ?? ((...args) => new PiRpcDialogCallbacks(...args)))(
       this.lane,
       (frame) => this.connection.send(frame),
       (error) => this.fail(error)
@@ -136,10 +115,14 @@ export class PiRpcSession {
     this.connection = (
       deps.openConnection ?? ((spec, handlers) => new JsonlRpcAgentConnection(spec, handlers))
     )(launch, {
-      onRecord: (frame) =>
-        frame.type === 'extension_ui_request'
+      onRecord: (frame) => {
+        if (deps.dialect?.receive?.(frame, this)) {
+          return
+        }
+        return frame.type === 'extension_ui_request'
           ? this.dialogs.receive(frame)
-          : this.turns.receive(frame),
+          : this.turns.receive(frame)
+      },
       onOversizedEvent: (type, prefix) => this.turns.skipped(type, prefix),
       onClose: (error) => this.fail(error),
       onDiagnostic: (message) =>
@@ -183,6 +166,10 @@ export class PiRpcSession {
     }
   }
 
+  get sessionFile(): string | undefined {
+    return this.resolvedLaunch.sessionFile ?? this.openedLink?.handle.nativeId
+  }
+
   async open(signal: AbortSignal): Promise<StructuredAgentSessionProviderOpenResult> {
     const result = await this.startup.run(this.resolvedLaunch, signal)
     this.openedLink = result.link ?? null
@@ -191,8 +178,16 @@ export class PiRpcSession {
     return result
   }
 
+  async refreshOptions(): Promise<void> {
+    const observe = this.optionObservations.prepare()
+    const options = await readPiRpcSessionOptions(this.connection)
+    if (observe(options)) {
+      this.startup.reportOptions(this.generation, options.current, { models: options.models })
+    }
+  }
+
   /** A read projects this child's held observations and successful controls. */
-  async readOptions() {
+  async readOptions(): Promise<AgentSessionOptionsResult> {
     return this.optionObservations.read()
   }
 

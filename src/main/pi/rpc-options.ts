@@ -9,6 +9,7 @@ import type {
 import { piRpcModelSchema, piRpcStateSchema } from './rpc-protocol'
 
 export type PiRpcRequester = {
+  thinkingLevels?: () => Promise<string[]>
   request(
     command: string,
     params?: Record<string, unknown>,
@@ -82,9 +83,18 @@ export async function readPiRpcSessionOptions(
   const listed = await readPiRpcModelOptions(rpc)
   beforeStateRead?.()
   const state = stateSchema.parse(await rpc.request('get_state'))
+  const levels = rpc.thinkingLevels ? await rpc.thinkingLevels() : undefined
+  const current = piRpcStateOptions(state)
   return {
-    models: listed,
-    current: piRpcStateOptions(state)
+    models:
+      levels === undefined
+        ? listed
+        : listed.map((model) => ({
+            ...model,
+            efforts:
+              model.id === current.model ? levels.map((value) => ({ value, label: value })) : []
+          })),
+    current
   }
 }
 
