@@ -30,6 +30,7 @@ export type PiRpcConnection = Pick<
   | 'closed'
   | 'rootVerdict'
   | 'processless'
+  | 'spawnAbsence'
   | 'lastCloseResult'
   | 'onExit'
 > & { thinkingLevels?: () => Promise<string[]> }

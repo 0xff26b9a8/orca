@@ -129,6 +129,9 @@ export function openOmpRpcConnection(
     get processless() {
       return raw.processless
     },
+    get spawnAbsence() {
+      return raw.spawnAbsence
+    },
     get lastCloseResult() {
       return raw.lastCloseResult
     },

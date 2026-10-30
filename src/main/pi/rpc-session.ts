@@ -1,8 +1,3 @@
-import {
-  agentSessionFailureFact,
-  providerDiagnostic,
-  providerDiagnosticOf
-} from '../../shared/agent-session-failure'
 import type {
   StructuredAgentSessionAcquireInput,
   AgentSessionDispatchOutcome
@@ -11,7 +6,7 @@ import { providerTimelineSink } from '../native-chat/agent-session-timeline/prov
 import { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import { JsonlRpcAgentConnection } from '../jsonl-rpc/agent-connection'
 import type { ProviderProcessLaunch } from '../provider-process/provider-process-launch'
-import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
+import { piExitFailure } from './rpc-exit-classification'
 import { PiRpcTurns } from './rpc-turns'
 import { PiRpcDialogCallbacks } from './rpc-dialog-callbacks'
 import {
@@ -288,14 +283,7 @@ export class PiRpcSession {
       observedAt,
       cause: this.requestedClose ? 'requested-close' : 'unexpected-exit',
       reason: cause.message,
-      failure: agentSessionFailureFact('providerExited', {
-        detail:
-          providerDiagnosticOf(cause) ??
-          providerDiagnosticOf(error) ??
-          (cause instanceof JsonlRpcResponseError
-            ? providerDiagnostic(cause.message, 'person')
-            : undefined)
-      })
+      failure: piExitFailure(error, cause)
     })
   }
 
