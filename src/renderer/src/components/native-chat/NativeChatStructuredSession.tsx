@@ -34,7 +34,6 @@ import { useNativeChatImageRuntimeContext } from './native-chat-image-runtime-co
 import { useStructuredNativeChatPaneCommands } from './use-structured-native-chat-pane-commands'
 import type { NativeChatStructuredViewProps } from './native-chat-view-types'
 import { NativeChatStructuredSessionStatus } from './NativeChatStructuredSessionStatus'
-import { useNativeChatLaunchDraftSignal } from './use-native-chat-launch-draft-adoption'
 import { useNativeChatInterruptedContinuation } from './NativeChatInterruptedContinue'
 import { NativeChatOrcaStopContext } from './native-chat-orca-stop-context'
 import { structuredSessionNotices } from './native-chat-structured-session-notices'
@@ -99,13 +98,6 @@ export function NativeChatStructuredSession(
   })
   useRecheckNativeChatFileLinksWhenTurnEnds(controller.isWorking)
   const stopControls = nativeChatStructuredStopControls(controller, hostExecution.stopping)
-  const launchDraftSignal = useNativeChatLaunchDraftSignal({
-    terminalTabId: props.tabId,
-    agent: props.agent,
-    messages: controller.messages,
-    // Pre-read idle/loading states cannot establish a launch draft baseline from an empty transcript.
-    transcriptLoading: controller.status === 'idle' || controller.status === 'loading'
-  })
   const { composerError, reportComposerError } = useNativeChatComposerError(
     controller.commandRefusalCauses
   )
@@ -399,7 +391,6 @@ export function NativeChatStructuredSession(
               unavailableHint={install.unavailableHint}
               steerQueued={stopControls.stopping ? undefined : submits.queuedMessages.steerNewest}
               structuredTransport={transport}
-              launchSeed={{ ...launchDraftSignal, ownsTabWideLaunchDraft: true }}
               notices={notices}
               recallSource={{ messages: session.messages, withoutImageMarkers: true }}
             />

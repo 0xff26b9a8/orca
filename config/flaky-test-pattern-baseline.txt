@@ -1101,7 +1101,6 @@
 1 test-no-wall-clock:src/renderer/src/components/native-chat/NativeChatMessageList.unsent-message.test.tsx
 5 test-no-wall-clock:src/renderer/src/components/native-chat/NativeChatResolvedView.turn-status.test.tsx
 1 test-no-wall-clock:src/renderer/src/components/native-chat/NativeChatStructuredSession.stopping.test.tsx
-2 test-no-wall-clock:src/renderer/src/components/native-chat/NativeChatStructuredSession.test.tsx
 2 test-no-wall-clock:src/renderer/src/components/native-chat/NativeChatStructuredSessionStatus.test.tsx
 8 test-no-wall-clock:src/renderer/src/components/native-chat/structured-child-records-switch.test.tsx
 2 test-no-wall-clock:src/renderer/src/components/native-chat/use-native-chat-interactive-send.test.tsx
