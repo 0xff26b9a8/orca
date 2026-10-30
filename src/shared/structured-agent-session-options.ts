@@ -184,8 +184,7 @@ export function applyStructuredAgentSessionOptions(
 ): StructuredAgentSessionOptionState {
   const { current } = result
   const installed = usesInstalledAgentModelCatalog(state.record.agent, launch.coherentCatalog)
-  const awaitingModel =
-    result.models.length === 0 && !current.model && current.confirmed === undefined
+  const awaitingModels = result.models.length === 0 && current.confirmed === undefined
   // Catalog defaults supply picker context without claiming the chat chose them.
   replaceStructuredAgentSessionAnsweredValues(
     state.record,
@@ -210,14 +209,14 @@ export function applyStructuredAgentSessionOptions(
     optionsAnswerPresent: true,
     reportedEffort: state.record.agent === 'pi' ? current.reportedEffort : undefined,
     catalog:
-      installed || awaitingModel
+      installed || awaitingModels
         ? state.catalog
         : structuredAgentSessionOptionCatalog(seed, result, state.record.agent),
     fastModeRestricted:
       installed &&
       result.fastModeSupport?.supported === false &&
       result.fastModeSupport.reason !== 'model-not-supported',
-    catalogSource: awaitingModel
+    catalogSource: awaitingModels
       ? state.catalogSource
       : installed && state.catalogSource === 'seed'
         ? 'seed'

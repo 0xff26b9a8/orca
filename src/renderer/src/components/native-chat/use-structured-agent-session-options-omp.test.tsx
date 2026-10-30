@@ -6,6 +6,7 @@ import {
   ATTACHED,
   renderOptions,
   descriptor,
+  currentValue,
   HOST_CATALOG,
   tick
 } from './use-structured-agent-session-options.test-fixture'
@@ -25,6 +26,54 @@ describe('OMP resting session options', () => {
     mocks.coherentCatalog = false
     resetHostModelCatalogSnapshotsForTests()
   })
+
+  it.each(['before', 'after'] as const)(
+    'keeps the full catalog when a saved-model-only answer lands %s discovery',
+    async (order) => {
+      mocks.coherentCatalog = true
+      const catalog = Promise.withResolvers<unknown>()
+      const options = Promise.withResolvers<unknown>()
+      answer({
+        modelCatalog: () => catalog.promise,
+        options: () => options.promise
+      })
+      const { result, unmount } = renderOptions(
+        { ...ATTACHED, agent: 'omp', launchSeedOptions: { model: 'gpt-hosted', effort: 'high' } },
+        mutateWith(async () => null).mutate
+      )
+      const resolveOptions = async () => {
+        await act(async () =>
+          options.resolve({
+            models: [],
+            current: { model: 'gpt-hosted', effort: 'high', defaulted: [] }
+          })
+        )
+      }
+      if (order === 'before') {
+        await resolveOptions()
+      }
+      await act(async () =>
+        catalog.resolve({
+          ...HOST_CATALOG,
+          origin: 'probe',
+          models: [
+            ...HOST_CATALOG.models,
+            { id: 'other/model', label: 'Another model', isDefault: false, efforts: [] }
+          ]
+        })
+      )
+      if (order === 'after') {
+        await resolveOptions()
+      }
+      await waitFor(() => {
+        const model = descriptor(result.current.optionSnapshot, 'model')
+        expect(model?.kind.type === 'select' && model.kind.choices.length).toBe(2)
+      })
+      expect(currentValue(result.current.optionSnapshot, 'model')).toBe('gpt-hosted')
+      expect(currentValue(result.current.optionSnapshot, 'effort')).toBe('high')
+      unmount()
+    }
+  )
 
   it('keeps a model picker before the first send when the resting options are empty', async () => {
     const catalog = Promise.withResolvers<unknown>()
