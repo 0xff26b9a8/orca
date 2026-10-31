@@ -442,7 +442,7 @@
       },
       "userAgent": {
         "title": "Identité du navigateur",
-        "description": "Choisissez l'agent utilisateur pour chaque profil et page de navigateur. Le mode natif désactive la connexion à Google. Les modifications prennent effet après un redémarrage.",
+        "description": "Choisissez l'agent utilisateur pour chaque profil et page de navigateur. Les modifications prennent effet après un redémarrage.",
         "remoteUnsupported": "Gérez l'identité du navigateur sur l'hôte distant avec la CLI Orca.",
         "loading": "Chargement…",
         "resetRequired": "Les données d'identité doivent être réinitialisées explicitement avant de pouvoir être modifiées.",
@@ -450,7 +450,7 @@
         "optionClean": "Nettoyé",
         "optionCleanTooltip": "Supprime les jetons Orca et Electron pour correspondre aux sessions Chrome importées.",
         "optionNative": "Indigène",
-        "optionNativeTooltip": "Conserve l'identité intégrée d'Electron pour les sites qui rejettent l'identité nettoyée. La connexion Google n'est pas disponible en mode natif.",
+        "optionNativeTooltip": "Conserve l'identité intégrée d'Electron pour les sites qui rejettent l'identité nettoyée.",
         "restartRequired": "Redémarrage requis",
         "unavailable": "L'identité du navigateur n'est pas disponible."
       },

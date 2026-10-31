@@ -653,7 +653,7 @@
       },
       "userAgent": {
         "title": "Browser-Identität",
-        "description": "Den User-Agent für alle Browser-Profile und Seiten auswählen. Der Modus „Nativ“ deaktiviert die Google-Anmeldung. Änderungen werden nach einem Neustart wirksam.",
+        "description": "Den User-Agent für alle Browser-Profile und Seiten auswählen. Änderungen werden nach einem Neustart wirksam.",
         "remoteUnsupported": "Die Browser-Identität auf dem Remote-Host mit der Orca-CLI verwalten.",
         "loading": "Wird geladen…",
         "resetRequired": "Die Identitätsdaten müssen vor einer Änderung ausdrücklich zurückgesetzt werden.",
@@ -661,7 +661,7 @@
         "optionClean": "Bereinigt",
         "optionCleanTooltip": "Entfernt Orca- und Electron-Tokens zur Übereinstimmung mit importierten Chrome-Sitzungen.",
         "optionNative": "Nativ",
-        "optionNativeTooltip": "Behält die integrierte Electron-Identität für Websites bei, die die bereinigte Identität ablehnen. Die Google-Anmeldung ist im Modus „Nativ“ nicht verfügbar.",
+        "optionNativeTooltip": "Behält die integrierte Electron-Identität für Websites bei, die die bereinigte Identität ablehnen.",
         "restartRequired": "Neustart erforderlich",
         "unavailable": "Die Browser-Identität ist nicht verfügbar."
       },
