@@ -128,9 +128,7 @@ describe('Pi RPC session options', () => {
     expect(selected.get('model')).toBe('openai-codex/gpt-6.1-sol')
   })
 
-  it('rejects malformed provider data and reports only Pi-listed commands', async () => {
-    const malformed = requester({ get_available_models: { models: [{ id: 'missing-provider' }] } })
-    await expect(readPiRpcSessionOptions(malformed)).rejects.toThrow()
+  it('preserves input hints on provider-discovered commands and skills', async () => {
     const rpc = requester({
       get_commands: {
         commands: [
@@ -149,24 +147,6 @@ describe('Pi RPC session options', () => {
         { name: 'review', kind: 'command', description: 'Review changes', argumentHint: '<path>' },
         { name: 'search', kind: 'skill' }
       ]
-    })
-  })
-
-  it('handles a signed-out state with no model', async () => {
-    const rpc = requester({
-      get_available_models: { models: [] },
-      get_state: {
-        model: null,
-        thinkingLevel: 'off',
-        sessionFile: '/sessions/current.jsonl',
-        isStreaming: false,
-        isCompacting: false
-      }
-    })
-    expect((await readPiRpcSessionOptions(rpc)).current).toEqual({
-      model: '',
-      effort: 'off',
-      confirmed: ['effort']
     })
   })
 

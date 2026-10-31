@@ -71,9 +71,13 @@ export function reportGoal(session: PiRpcSession, value: unknown): void {
             ? {
                 state: 'set',
                 goal: {
-                  ...goal,
+                  objective: goal.objective,
                   status: goal.status === 'budget-limited' ? 'budgetLimited' : goal.status,
-                  tokenBudget: goal.tokenBudget ?? null
+                  tokenBudget: goal.tokenBudget ?? null,
+                  tokensUsed: goal.tokensUsed,
+                  timeUsedSeconds: goal.timeUsedSeconds,
+                  createdAt: goal.createdAt,
+                  updatedAt: goal.updatedAt
                 }
               }
             : { state: 'cleared' }

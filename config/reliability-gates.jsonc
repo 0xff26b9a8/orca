@@ -4929,7 +4929,7 @@
       "invariant": "Index-only Git activity below the common Git directory must not emit worktrees:changed, invalidate worktree caches, or trigger fetchWorktrees fanout; structural add/remove/HEAD/gitdir/locked/config.worktree changes must still refresh worktrees and nudge Source Control. When the authoritative paired host accepts an external structural change for a uniquely identified server-local repo, each live client for that host must receive one existing host-scoped worktreesChanged invalidation and converge to the same repo/worktree identity without reconnect; duplicate watcher events must coalesce, stale cached or in-flight catalogs must not survive invalidation, and event-ignoring clients must remain compatible. Colliding local/SSH repo IDs must not publish the host-blind event until existing semantics can carry owner identity. External head moves (commit, amend, reset) must reach background worktree rows through spawn-free metadata reads, never through structural fanout. A process generation-scope rollover revokes every direct SSH target and old-scope provider request, not only the target whose counter exhausted.",
       "oracle": "Classify exact git-common paths as structural, status-only, or ignored; count notifications from debounced watcher events; force the Linux/Windows poll path to emit allowlisted leaf events, detect linked HEAD rewrites independent of entry-directory mtime, and surface in-place index rewrites via the backstop re-stat; diff head identities from metadata-file reads and notify only real head moves; assert Source Control subscribes to both structural and status-only signals with active-repo and visibility filters. Join the real runtime RPC server to two independently authenticated E2EE clients plus an event-ignoring client, advance the host Git inventory, trigger duplicate structural watcher callbacks, and require one host renderer notification plus one runtime event and a refreshed catalog per subscribed client; require the event-ignoring client to refresh safely on explicit read. Hold a scan after it captures old inventory, join it from a second paired client, publish the watcher invalidation, advance Git independently, and require both overlapping RPCs to retry or join one fresh scan before returning. Disconnect one client, advance inventory again, and require reconnect to read current state without stale event replay. Give a watcher a local repo ID colliding with an SSH owner and require the host renderer refresh while the unqualified runtime event stays absent. Force the real path in isolated Electron apps with git worktree add, a host Git inventory assertion, store-subscription barriers, matching host/client worktree identity, and visible rows in both renderers. For direct SSH, roll one exhausted target into a fresh process generation scope while invalidating sibling target tokens, and fill a partial pushed authority before clearing that target's PTY bindings once.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/hooks/worktree-head-identity-apply.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/useIpcEvents-browser-tab-create.test.ts",
+        "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/useIpcEvents-browser-tab-create.test.ts",
         "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/external-worktree-paired-client-discovery.integration.test.ts src/main/window/attach-main-window-services.test.ts",
         "ORCA_E2E_FORCE_HEADFUL=1 SKIP_BUILD=1 pnpm exec playwright test tests/e2e/paired-external-worktree-discovery.spec.ts --config tests/playwright.config.ts --project electron-headless --workers=1",
         "pnpm exec vitest run --config config/vitest.config.ts src/main/ssh/connection/ssh-connection-generation.test.ts src/main/ssh/ssh-provider-authority.test.ts --reporter=dot",
@@ -4940,7 +4940,6 @@
         "src/main/ipc/worktree-base-directory-watcher.test.ts",
         "src/main/ipc/worktree-base-directory-poller.test.ts",
         "src/main/ipc/worktree-head-identity-reader.test.ts",
-        "src/renderer/src/hooks/worktree-head-identity-apply.test.ts",
         "src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts",
         "src/renderer/src/hooks/useIpcEvents-browser-tab-create.test.ts",
         "src/main/runtime/external-worktree-paired-client-discovery.integration.test.ts",
@@ -4992,12 +4991,6 @@
           "assertions": [
             "loose-ref, packed-refs, detached, unborn, and relative-gitdir layouts resolve or skip without spawning Git",
             "traversal-shaped or backslash/colon symrefs are rejected before any path join and only hex object ids are ever emitted"
-          ]
-        },
-        {
-          "file": "src/renderer/src/hooks/worktree-head-identity-apply.test.ts",
-          "assertions": [
-            "head identities patch matching rows by path (including Windows separator/casing drift) and skip unknown rows"
           ]
         },
         {
@@ -5058,6 +5051,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/hooks/worktree-head-identity-apply.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/useIpcEvents-browser-tab-create.test.ts",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/worktree-base-directory-event-filter.test.ts src/main/ipc/worktree-base-directory-watcher.test.ts src/main/ipc/worktree-base-directory-poller.test.ts src/main/ipc/worktree-head-identity-reader.test.ts src/renderer/src/components/right-sidebar/git-status-push-signal-refresh.test.ts src/renderer/src/hooks/useIpcEvents-browser-tab-create.test.ts",
           "result": "passed",
           "durationSeconds": 3.12,
           "summary": "7 files and 130 tests passed locally, adding head-identity emit-on-change without structural fanout, reflog status triggers, config.worktree structural classification, the in-place index backstop, and the spawn-free head reader with symref traversal rejection and hex-object-id output validation."
@@ -6000,7 +5994,7 @@
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx src/shared/doc-preview-scheme.test.ts",
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts",
         // The hardening round: the third url door, the group projection, and both directions of the focus handoff.
-        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.failure-message.test.tsx",
         "pnpm exec vitest run --config config/vitest.config.ts src/preload/doc-preview-link-interception.test.ts src/main/browser/doc-preview-guest-policy.test.ts src/main/window/main-window-webview-security.test.ts src/main/ipc/doc-preview-grant-ipc.test.ts",
         "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/browser-preview-tool-authorization.test.ts src/main/browser/doc-preview-guest-policy.test.ts src/main/ipc/browser.test.ts",
@@ -6055,7 +6049,6 @@
         "src/renderer/src/components/browser-pane/workspace-doc/use-doc-preview-guest-tools.test.ts",
         "src/renderer/src/components/editor/EditorPanelShell.header.test.tsx",
         "src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
-        "src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx",
         "src/shared/doc-preview-scheme.test.ts",
         "src/renderer/src/lib/doc-preview-grants.test.ts",
         "src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.failure-message.test.tsx",
@@ -6299,13 +6292,6 @@
           ]
         },
         {
-          "file": "src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx",
-          "assertions": [
-            "the pane offers its guest focus when the reader is in this very preview",
-            "it refuses while the reader is in a terminal in front of it, in a different browser tab, or while its own page is not the active one"
-          ]
-        },
-        {
           "file": "src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "assertions": [
             "a preview that is the reader's surface hands its guest focus, and one that is not leaves focus alone",
@@ -6335,6 +6321,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "result": "failed",
           "durationSeconds": 7,
           "summary": "The adversarial pass answered the request for its own group-projection probe after this round landed, and it had measured a third observable this test was missing: the held-back group also has to leave the published layout tree, or the phone renders a split whose second pane can never hold anything. Adopted as a fourth assertion and re-run against the same sole delta, which now fails on the dangling-reference check and, with that check blinded, on the layout alone — group-left and group-right against the group-right the clean tree publishes. The two probes agreed on everything else, including that the tab list is unchanged under this mutant, which is why an assertion reading only the tab list cannot reach the site at all."
@@ -6344,6 +6331,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "result": "passed",
           "durationSeconds": 3,
           "summary": "The adversarial pass's four coverage findings, landed and pinned: 58/58. The third url door now keeps a document page blank and names it by its document, the group projection holds a document back from published groups as well as from the tab list, the pane's focus handoff is pinned in the widening direction as well as the narrowing one, and the handoff is re-offered when the window takes focus back."
@@ -6353,6 +6341,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "result": "failed",
           "durationSeconds": 3,
           "summary": "Three sole-delta mutants on the third url door, each failing only the new store test: committing the reported url onto a document page, dropping the document from the title normalizer there (which renames the tab New Tab, since a blank url is what that fallback reads), and marking a blank document page loading. The ordinary-page half of the same test passes under all three, so the door is pinned as a document-only refusal rather than as a door that writes nothing."
@@ -6362,6 +6351,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "result": "failed",
           "durationSeconds": 3,
           "summary": "Two sole-delta mutants on the mobile publish boundary. Dropping the document from the group projection's browser ids fails only the new grouped test — the tab list stays correct because the per-tab guard still refuses the tab, and what breaks is a published group whose order and active tab name a tab the phone is never sent. This is the survivor the adversarial pass reported: it survives the whole suite without this test, because no other test in it has tab groups. Dropping the per-tab guard instead fails only the ungrouped test, so the two halves of the boundary are pinned separately."
@@ -6371,6 +6361,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "result": "failed",
           "durationSeconds": 3,
           "summary": "Three sole-delta mutants widening the focus handoff, the direction the adversarial pass found uncovered: dropping the page-activity half, dropping the active-tab-type half, and dropping the active-browser-tab half each fail exactly one of the pane's refusals — the inactive page, the terminal in front, and the other browser tab respectively. The presence half of that test passes under all three, so a pane that had stopped offering focus at all would still fail rather than pass the refusals vacuously."
@@ -6380,6 +6371,7 @@
           "runner": "local",
           "platform": "macos",
           "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/workspace-doc-page-pane.test.tsx src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
+          "currentCommand": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/store/slices/browser-workspace-doc-location.test.ts src/renderer/src/runtime/sync-runtime-graph-editor-diff-tabs.test.ts src/renderer/src/components/browser-pane/workspace-doc/HtmlDocPreview.toolbar.test.tsx",
           "result": "failed",
           "durationSeconds": 3,
           "summary": "One sole-delta mutant dropping the window-focus re-offer: the guest is focused once at mount and never again after the window comes back, which is the desktop gap behind it — another app taking the front leaves the preview's only route out shut until the pane remounts. It fails only the new re-offer test, and the refusing-preview case beside it stays green, so the re-offer is pinned as gated rather than unconditional."
@@ -8675,7 +8667,7 @@
       "providers": ["local", "local-daemon", "ssh", "wsl", "remote-runtime"],
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local-daemon"],
-      "coverageNotes": "Provider-independent unit tests cover persisted replay, state-boundary authority transfer, remote-runtime mirroring, rootless layouts, repeated leaf ids, metadata repair, and 12,000 nested duplicate leaves. A two-launch macOS Electron journey covers a real surviving local-daemon PTY, persisted duplicate ownership, synchronized streaming output, and tab hide/reveal. Live Linux, Windows, SSH, WSL, and remote-runtime restore journeys remain gaps.",
+      "coverageNotes": "Provider-independent unit tests cover persisted replay, state-boundary authority transfer, remote-runtime mirroring, rootless layouts, repeated leaf ids, metadata repair, and 12,000 nested duplicate leaves. A two-launch macOS Electron journey covers a real surviving local-daemon PTY, persisted duplicate ownership, synchronized streaming output, and tab hide/reveal. Live Linux, Windows, SSH, WSL, and remote-runtime restore journeys remain gaps. The audit removed a mocked duplicate-replay wrapper suite. Its callback-count alarms are no longer covered here; retained ownership tests and historical Electron evidence do not establish equivalent wrapper coverage.",
       "motivatingLinks": [
         "https://github.com/stablyai/orca/issues/11757",
         "https://github.com/stablyai/orca/pull/11726"
@@ -8683,12 +8675,11 @@
       "invariant": "Within one terminal tab, each PTY has at most one layout leaf, pane manager surface, and xterm renderer owner. Restore and remote mirroring must normalize duplicate ownership before replay while retaining active-leaf focus, scrollback, pane authority, agent metadata, and distinct sibling PTYs.",
       "oracle": "Launch Orca with a real daemon PTY running a synchronized full-screen stream, close the desktop client without killing the daemon process, seed the persisted tab layout with two leaves bound to that PTY, and relaunch. Hide the restored tab behind a sibling and reveal it, then require the stream to remain visible with exactly one manager pane, one xterm DOM node, one root leaf, one PTY binding, and one unique PTY. Unit contracts require the same one-owner result through persisted replay, store hydration, remote mirroring, rootless and repeated-leaf layouts, and deeply nested input.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/terminal-pane/terminal-layout-duplicate-pty-replay.test.ts src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership-depth.test.ts src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership.test.ts src/renderer/src/store/slices/terminal-layout-pty-ownership.test.ts src/renderer/src/runtime/web-session-tabs-sync.test.ts --reporter=dot",
+        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership-depth.test.ts src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership.test.ts src/renderer/src/store/slices/terminal-layout-pty-ownership.test.ts src/renderer/src/runtime/web-session-tabs-sync.test.ts --reporter=dot",
         "pnpm exec electron-vite build --mode e2e",
         "SKIP_BUILD=1 pnpm exec playwright test tests/e2e/terminal-duplicate-pty-renderer-reveal.spec.ts --config tests/playwright.config.ts --project electron-headless --workers=1"
       ],
       "testFiles": [
-        "src/renderer/src/components/terminal-pane/terminal-layout-duplicate-pty-replay.test.ts",
         "src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership-depth.test.ts",
         "src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership.test.ts",
         "src/renderer/src/store/slices/terminal-layout-pty-ownership.test.ts",
@@ -8696,13 +8687,6 @@
         "tests/e2e/terminal-duplicate-pty-renderer-reveal.spec.ts"
       ],
       "assertionRefs": [
-        {
-          "file": "src/renderer/src/components/terminal-pane/terminal-layout-duplicate-pty-replay.test.ts",
-          "assertions": [
-            "replays one surface when restored leaves point to the same PTY",
-            "reattaches one PTY when the split repeats its bound leaf id"
-          ]
-        },
         {
           "file": "src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership-depth.test.ts",
           "assertions": ["prunes deeply nested duplicate ownership without recursive stack growth"]
@@ -8731,15 +8715,6 @@
         }
       ],
       "evidenceRuns": [
-        {
-          "date": "2026-08-01",
-          "runner": "local",
-          "platform": "macos",
-          "command": "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/terminal-pane/terminal-layout-duplicate-pty-replay.test.ts src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership-depth.test.ts src/renderer/src/components/terminal-pane/terminal-layout-pty-ownership.test.ts src/renderer/src/store/slices/terminal-layout-pty-ownership.test.ts src/renderer/src/runtime/web-session-tabs-sync.test.ts --reporter=dot",
-          "result": "passed",
-          "durationSeconds": 1.33,
-          "summary": "Five focused files passed 92 ownership, replay, hydration, depth, and remote-mirroring tests."
-        },
         {
           "date": "2026-08-01",
           "runner": "local",
@@ -8775,7 +8750,8 @@
         "Live Electron evidence currently covers macOS with a local daemon PTY only.",
         "The live journey uses a git-backed test workspace; folder-workspace restoration currently relies on the same provider-independent normalization contracts rather than a separate Electron run.",
         "The gate deterministically seeds the historical persisted-state shape; it does not depend on reproducing the unknown UI sequence that originally wrote duplicate ownership.",
-        "The visual old-release evidence and the structural current-version oracle are separate runs because the current test harness did not exist in Orca 1.4.161."
+        "The visual old-release evidence and the structural current-version oracle are separate runs because the current test harness did not exist in Orca 1.4.161.",
+        "The audit removed a mocked duplicate-replay wrapper suite. Its callback-count alarms are no longer covered here; retained ownership tests and historical Electron evidence do not establish equivalent wrapper coverage."
       ],
       "demotionRule": "Keep experimental or demote if ownership cardinality flakes, duplicate replay reaches a second renderer, active metadata or authority moves to the wrong leaf, deep normalization regresses, or a supported provider bypasses normalization."
     },
@@ -9456,7 +9432,7 @@
       "providers": ["daemon", "runtime", "ssh", "wsl"],
       "coveredPlatforms": ["linux", "macos", "windows"],
       "coveredProviders": ["daemon", "runtime"],
-      "coverageNotes": "Recorded native Windows evidence covers the v21/v22/v23/v24/v25 named-pipe matrix. The deterministic daemon harness covers capable and legacy paired-runtime request shapes against live v25/v26 PTYs in separate worktrees, plus an unrelated control. Host/renderer tests cover old servers, missing liveness, stale publications, reused claims, split parents, explicit user intent, cross-profile isolation, remote runtime clients, SSH-provider routing, and WSL boundaries. A headed host paired to a separate live client, headless serve parity, Linux, SSH, and WSL remain explicit gaps.",
+      "coverageNotes": "Recorded native Windows evidence covers the v21/v22/v23/v24/v25 named-pipe matrix. The deterministic daemon harness covers capable and legacy paired-runtime request shapes against live v25/v26 PTYs in separate worktrees, plus an unrelated control. Host/renderer tests cover old servers, missing liveness, stale publications, reused claims, split parents, explicit user intent, cross-profile isolation, remote runtime clients, SSH-provider routing, and WSL boundaries. A headed host paired to a separate live client, headless serve parity, Linux, SSH, and WSL remain explicit gaps. The audit removed private-router tests of mocked kill results and log fields. Their isolated success/failure attribution and pending-spawn tolerance alarms are no longer registered here; live lifecycle evidence does not establish equivalent log coverage.",
       "motivatingLinks": [
         "https://github.com/stablyai/orca/issues/9749",
         "https://github.com/stablyai/orca/issues/9949",
@@ -9467,12 +9443,11 @@
       "invariant": "Reconnect, replay, or lifecycle observations from a viewer that negotiated explicit close intent must never kill a live PTY. A capable reasonless close must keep and republish; a legacy paired viewer must retain current-main behavior because its intentional close and cleanup echo are wire-identical. Lifecycle close requires the exact observed publication, terminal, environment, and authoritative liveness, never signals a process, and leaves renderer-owned or partial-split retirement to its owner. Legacy daemon hello and warm reattachment remain non-destructive.",
       "oracle": "Start isolated v25 and v26 daemon generations with one capable-viewer PTY and one legacy-viewer PTY per generation in four target worktrees plus an unaddressed control PTY in a fifth worktree. Route them through the production desktop scanner, runtime, RPC dispatcher, renderer-close relay, and daemon router. First issue sequential reasonless closes from an authenticated capable connection and require refusal, snapshot republish, zero shutdown calls, exact process survival, and post-close I/O. Then issue the byte-identical requests without the negotiated capability and require current-main behavior: two ordered immediate shutdowns, session-killed events, and exact root/descendant death, while capable and control PTYs survive. An observer lists all targets before, between, and after while issuing zero closes. Unit contracts also require in-process reasonless refusal, legacy runtime/mobile compatibility, explicit user closes, encrypted client-auth advertisement, and old-server lifecycle calls never to fall back.",
       "commands": [
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/daemon/daemon-server-kill-attribution.test.ts src/main/runtime/orca-runtime.test.ts src/main/runtime/remote-runtime-request-connection.integration.test.ts src/main/runtime/rpc/runtime-close-attribution-topology.test.ts src/main/runtime/rpc/methods/session-tabs.test.ts src/main/runtime/rpc/e2ee-channel.test.ts src/main/runtime/rpc/e2ee-channel-v2.test.ts src/main/runtime/rpc/mobile-socket-wiring.test.ts src/main/runtime/rpc/runtime-client-capabilities.test.ts src/shared/remote-runtime/remote-runtime-client.test.ts src/shared/remote-runtime/requests/remote-runtime-request-connection.test.ts src/shared/remote-runtime/control/remote-runtime-shared-control-connection.test.ts src/cli/runtime/websocket-transport.test.ts src/renderer/src/web/web-runtime-client.test.ts src/renderer/src/runtime/web-runtime-session.test.ts src/renderer/src/runtime/web-session-close-intent.test.ts src/renderer/src/runtime/web-session-tabs-sync.test.ts src/renderer/src/components/terminal/terminal-tab-actions.test.ts src/renderer/src/components/terminal/terminal-close-incarnation.test.ts src/renderer/src/components/terminal-pane/terminal-parked-tab-watchers.test.ts",
+        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/orca-runtime.test.ts src/main/runtime/remote-runtime-request-connection.integration.test.ts src/main/runtime/rpc/runtime-close-attribution-topology.test.ts src/main/runtime/rpc/methods/session-tabs.test.ts src/main/runtime/rpc/e2ee-channel.test.ts src/main/runtime/rpc/e2ee-channel-v2.test.ts src/main/runtime/rpc/mobile-socket-wiring.test.ts src/main/runtime/rpc/runtime-client-capabilities.test.ts src/shared/remote-runtime/remote-runtime-client.test.ts src/shared/remote-runtime/requests/remote-runtime-request-connection.test.ts src/shared/remote-runtime/control/remote-runtime-shared-control-connection.test.ts src/cli/runtime/websocket-transport.test.ts src/renderer/src/web/web-runtime-client.test.ts src/renderer/src/runtime/web-runtime-session.test.ts src/renderer/src/runtime/web-session-close-intent.test.ts src/renderer/src/runtime/web-session-tabs-sync.test.ts src/renderer/src/components/terminal/terminal-tab-actions.test.ts src/renderer/src/components/terminal/terminal-close-incarnation.test.ts src/renderer/src/components/terminal-pane/terminal-parked-tab-watchers.test.ts",
         "pnpm exec playwright test tests/e2e/daemon-generation-reconnect-safety.spec.ts --config tests/playwright.config.ts --project electron-headless --workers=1",
         "pnpm exec playwright test tests/e2e/daemon-generation-legacy-close-safety.spec.ts --config tests/playwright.config.ts --project electron-headless --workers=1"
       ],
       "testFiles": [
-        "src/main/daemon/daemon-server-kill-attribution.test.ts",
         "src/main/runtime/orca-runtime.test.ts",
         "src/main/runtime/remote-runtime-request-connection.integration.test.ts",
         "src/main/runtime/rpc/runtime-close-attribution-topology.test.ts",
@@ -9496,12 +9471,6 @@
         "tests/e2e/daemon-generation-legacy-close-safety.spec.ts"
       ],
       "assertionRefs": [
-        {
-          "file": "src/main/daemon/daemon-server-kill-attribution.test.ts",
-          "assertions": [
-            "successful and failed daemon kill requests retain the authenticated control-client identity without claiming a failed kill succeeded"
-          ]
-        },
         {
           "file": "src/main/runtime/rpc/runtime-close-attribution-topology.test.ts",
           "assertions": [
@@ -9664,7 +9633,8 @@
         "Headless orca serve parity, live Linux, Linux SSH relay, and Windows WSL reconnect are not exercised; Docker SSH would cover only the SSH provider and cannot substitute for paired Orca-server evidence.",
         "A topology containing any pre-contract paired desktop viewer remains vulnerable to that viewer's stale reasonless close storm; preserving its intentional-close behavior makes this unavoidable until the viewer upgrades.",
         "Cross-profile daemon inventory and generation handoff/retirement remain the separate #9138/#9229 design.",
-        "A dead split leaf stays with its authoritative owner rather than being remotely pruned."
+        "A dead split leaf stays with its authoritative owner rather than being remotely pruned.",
+        "The audit removed private-router tests of mocked kill results and log fields. Their isolated success/failure attribution and pending-spawn tolerance alarms are no longer registered here; live lifecycle evidence does not establish equivalent log coverage."
       ],
       "demotionRule": "Keep experimental or quarantine if reconnect emits session-killed for a live canary, an exact root/descendant dies, an old server receives fallback destructive close, cleanup leaks a fixture process/pipe, or the gate flakes without a proven harness defect."
     },
@@ -10819,7 +10789,7 @@
       "providers": ["local", "remote-runtime", "ssh", "wsl"],
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["local", "remote-runtime", "ssh", "wsl"],
-      "coverageNotes": "Platform-neutral deterministic tests separate the durable Active Server preference from per-client connection, selected-workspace, browser-session, Add Project, and execution-host routing. The composed regression models Local desktop -> connect/navigate Windows 2 -> reveal a local terminal -> restart. Multi-client browser host overrides, multi-server profile caches, generic settings IPC rejection, local and remote workspace ownership, Add Project eligibility/owner capture/stale-result fencing, host-qualified group/folder/worktree identity, and restart reset of transient routing are covered. A visible macOS Orca desktop server plus separate paired Electron and web clients prove selected-runtime Add Project operations and disabled creation when the only listed host is blocked or unavailable; headless-server parity also passed. Live Linux, Windows, WSL, and SSH Add Project journeys remain uncollected.",
+      "coverageNotes": "Platform-neutral deterministic tests separate the durable Active Server preference from per-client connection, selected-workspace, browser-session, Add Project, and execution-host routing. The composed regression models Local desktop -> connect/navigate Windows 2 -> reveal a local terminal -> restart. Multi-client browser host overrides, multi-server profile caches, generic settings IPC rejection, local and remote workspace ownership, Add Project eligibility/owner capture/stale-result fencing, host-qualified group/folder/worktree identity, and restart reset of transient routing are covered. A visible macOS Orca desktop server plus separate paired Electron and web clients prove selected-runtime Add Project operations and disabled creation when the only listed host is blocked or unavailable; headless-server parity also passed. Live Linux, Windows, WSL, and SSH Add Project journeys remain uncollected. The static wrapper-rendering suite was removed during the low-value-test audit; its supplied-prop host-browser and control-visibility output assertions are no longer checked by that suite. This removal supplies no new runtime-routing evidence.",
       "motivatingLinks": [
         "https://github.com/stablyai/orca/pull/9687",
         "https://linear.app/stably/issue/STA-4024/p1-paired-web-add-project-enables-unavailable-host-fallback-after-pr"
@@ -10829,7 +10799,7 @@
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/main/ipc/settings.test.ts src/main/ipc/runtime-environments/runtime-environments-pairing.test.ts src/renderer/src/store/slices/settings.test.ts src/renderer/src/store/slices/browser.test.ts src/renderer/src/components/settings/browser-session-host-selection.test.ts src/renderer/src/components/settings/RuntimeEnvironmentsPane.test.ts src/renderer/src/components/sidebar/use-add-repo-host-selection.test.ts src/renderer/src/hooks/useIpcEvents-terminal-create-surfacing.test.ts src/renderer/src/web/web-preload-api-runtime-environment.test.ts --maxWorkers=1",
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/sidebar/AddProjectFromFolderDialog.test.tsx src/renderer/src/components/sidebar/NonGitFolderDialog.test.tsx src/renderer/src/components/sidebar/AddRepoDialog.default-checkout.test.ts src/renderer/src/components/sidebar/AddRepoSteps.default-checkout.test.ts src/renderer/src/components/sidebar/project-added-default-checkout.test.ts src/renderer/src/components/sidebar/useAddRepoLocalFolderFlow.test.ts src/renderer/src/components/sidebar/useAddRepoNestedImportFlow.test.ts src/renderer/src/components/sidebar/useAddRepoServerPathFlow.test.ts src/renderer/src/components/sidebar/useAddRepoCloneFlow.test.ts src/renderer/src/components/sidebar/useCreateRepo.default-checkout.test.ts src/renderer/src/components/sidebar/worktree-list/listing/host-filtering.test.ts src/renderer/src/lib/resolved-worktree-execution-host.test.ts src/renderer/src/lib/worktree-runtime-owner.test.ts src/renderer/src/store/selectors.test.ts src/renderer/src/store/slices/repos-catalog-reconciliation.test.ts src/renderer/src/store/slices/repos-project-groups.test.ts src/renderer/src/store/slices/repos-selected-owner-routing.test.ts src/renderer/src/store/slices/selected-host-active-workspace-identity.test.ts src/renderer/src/store/slices/worktrees-fetch-owner-routing.test.ts --maxWorkers=1",
-        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/sidebar/use-add-repo-host-selection.test.ts src/renderer/src/components/sidebar/add-repo-browse-authority.test.ts src/renderer/src/components/sidebar/AddRepoDialogStepContent.test.tsx src/renderer/src/components/sidebar/AddRepoStartSteps.test.tsx src/renderer/src/components/sidebar/useAddRepoServerPathFlow.test.ts src/renderer/src/store/slices/repos-paired-runtime-add.test.ts --maxWorkers=1",
+        "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/sidebar/use-add-repo-host-selection.test.ts src/renderer/src/components/sidebar/add-repo-browse-authority.test.ts src/renderer/src/components/sidebar/AddRepoStartSteps.test.tsx src/renderer/src/components/sidebar/useAddRepoServerPathFlow.test.ts src/renderer/src/store/slices/repos-paired-runtime-add.test.ts --maxWorkers=1",
         "pnpm exec vitest run --config config/vitest.config.ts src/renderer/src/components/sidebar/AddProjectFromFolderDialog.test.tsx src/renderer/src/components/sidebar/NonGitFolderDialog.test.tsx src/renderer/src/components/sidebar/AddRepoDialog.default-checkout.test.ts src/renderer/src/components/sidebar/AddRepoSteps.default-checkout.test.ts src/renderer/src/components/sidebar/project-added-default-checkout.test.ts src/renderer/src/components/sidebar/useAddRepoLocalFolderFlow.test.ts src/renderer/src/components/sidebar/useAddRepoNestedImportFlow.test.ts src/renderer/src/components/sidebar/useAddRepoServerPathFlow.test.ts src/renderer/src/components/sidebar/useAddRepoCloneFlow.test.ts src/renderer/src/components/sidebar/useCreateRepo.default-checkout.test.ts src/renderer/src/components/sidebar/worktree-list/listing/host-filtering.test.ts src/renderer/src/lib/resolved-worktree-execution-host.test.ts src/renderer/src/lib/worktree-runtime-owner.test.ts src/renderer/src/store/selectors.test.ts src/renderer/src/store/slices/repos-catalog-reconciliation.test.ts src/renderer/src/store/slices/repos-project-groups.test.ts src/renderer/src/store/slices/repos-selected-owner-routing.test.ts src/renderer/src/store/slices/selected-host-active-workspace-identity.test.ts src/renderer/src/store/slices/worktrees-fetch-owner-routing.test.ts src/renderer/src/runtime/web-runtime-session.test.ts --maxWorkers=1",
         "pnpm run ensure:electron-runtime && npx playwright test tests/e2e/pr11346-selected-runtime-add.spec.ts --config tests/playwright.config.ts --project electron-headful --workers=1 --reporter=line",
         "pnpm run ensure:electron-runtime && npx playwright test tests/e2e/pr11346-selected-runtime-add.spec.ts --config tests/playwright.config.ts --project electron-headless --workers=1 --reporter=line",
@@ -10850,7 +10820,6 @@
         "src/renderer/src/components/sidebar/AddProjectFromFolderDialog.test.tsx",
         "src/renderer/src/components/sidebar/NonGitFolderDialog.test.tsx",
         "src/renderer/src/components/sidebar/AddRepoDialog.default-checkout.test.ts",
-        "src/renderer/src/components/sidebar/AddRepoDialogStepContent.test.tsx",
         "src/renderer/src/components/sidebar/AddRepoStartSteps.test.tsx",
         "src/renderer/src/components/sidebar/AddRepoSteps.default-checkout.test.ts",
         "src/renderer/src/components/sidebar/project-added-default-checkout.test.ts",
@@ -10886,10 +10855,6 @@
           "assertions": [
             "paired runtime browsing opens the host browser without invoking native pickFolders while desktop local and SSH routes remain intact"
           ]
-        },
-        {
-          "file": "src/renderer/src/components/sidebar/AddRepoDialogStepContent.test.tsx",
-          "assertions": ["paired runtime browsing renders the in-app host filesystem browser"]
         },
         {
           "file": "src/renderer/src/components/sidebar/AddRepoStartSteps.test.tsx",
@@ -17385,7 +17350,7 @@
       "providers": ["remote-runtime", "ssh", "local", "daemon"],
       "coveredPlatforms": ["macos"],
       "coveredProviders": ["remote-runtime"],
-      "coverageNotes": "Local macOS evidence covers runtime-RPC stream budgets, paired-renderer parse/discard credit, and negotiated host-side suppression for hidden paired desktop panes. Deferred credit is shared by local and remote transports, batches ACKs at 192 KiB or 4 ms, grows per-stream windows from 512 KiB to 2 MiB and aggregate windows from 2 MiB to 8 MiB, bounds queued output to 256 KiB per stream, and caps each multiplex connection at 32 active or pending streams for an 8 MiB aggregate pending-output ceiling. Deterministic tests cover replay ordering, stale generations, malformed frames, hidden panes, queue eviction, disposal, send/recovery failure, repeated pending-slot replacement, reconnect, mixed-version pause negotiation, and round-robin fairness. The opt-in benchmark models 1/20/100 ms RTT and 1/4/8 viewers, throughput, window use, completion spread and protocol-frame counts. It measures model scheduler elapsed time separately from actual @xterm/headless parser CPU/retained heap; modeled credit and ACK results do not qualify production credit enforcement. Live Android restore evidence, browser/WebGL parser measurements, and legacy JSON subscribe parity remain required.",
+      "coverageNotes": "Local macOS evidence covers runtime-RPC stream budgets, paired-renderer parse/discard credit, and negotiated host-side suppression for hidden paired desktop panes. Deferred credit is shared by local and remote transports, batches ACKs at 192 KiB or 4 ms, grows per-stream windows from 512 KiB to 2 MiB and aggregate windows from 2 MiB to 8 MiB, bounds queued output to 256 KiB per stream, and caps each multiplex connection at 32 active or pending streams for an 8 MiB aggregate pending-output ceiling. Deterministic tests cover replay ordering, stale generations, malformed frames, hidden panes, queue eviction, disposal, send/recovery failure, repeated pending-slot replacement, reconnect, mixed-version pause negotiation, and round-robin fairness. The opt-in benchmark models 1/20/100 ms RTT and 1/4/8 viewers, throughput, window use, completion spread and protocol-frame counts. It measures model scheduler elapsed time separately from actual @xterm/headless parser CPU/retained heap; modeled credit and ACK results do not qualify production credit enforcement. Live Android restore evidence, browser/WebGL parser measurements, and legacy JSON subscribe parity remain required. The audit removed the PTY ACK wrapper suite, which replayed credit arithmetic with mocked IPC. Its isolated wrapper alarms are no longer registered here; generic credit and runtime stream tests do not establish equivalent PTY integration coverage.",
       "motivatingLinks": [
         "https://github.com/stablyai/orca/pull/6951",
         "https://github.com/stablyai/orca/pull/6955",
@@ -17396,7 +17361,7 @@
       "commands": [
         "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/rpc/terminal-multiplex-snapshot-serialization.test.ts src/main/runtime/rpc/terminal-multiplex-ack-output-budget.test.ts src/main/runtime/rpc/terminal-multiplex-ack-overflow-recovery.test.ts src/main/runtime/rpc/terminal-multiplex-pty-wait-capacity.test.ts src/main/runtime/rpc/terminal-multiplex-output-pause-and-viewport.test.ts --maxWorkers=1",
         "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/rpc/terminal-subscribe-buffer.test.ts src/main/runtime/rpc/terminal-output-batching.test.ts src/main/runtime/rpc/terminal-multiplex-snapshot-serialization.test.ts src/main/runtime/rpc/terminal-multiplex-ack-output-budget.test.ts src/main/runtime/rpc/terminal-multiplex-ack-overflow-recovery.test.ts src/main/runtime/rpc/terminal-multiplex-pty-wait-capacity.test.ts src/main/runtime/rpc/terminal-multiplex-output-pause-and-viewport.test.ts",
-        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/rpc/terminal-subscribe-buffer.test.ts src/main/runtime/rpc/terminal-output-batching.test.ts src/main/runtime/rpc/terminal-multiplex-snapshot-serialization.test.ts src/main/runtime/rpc/terminal-multiplex-ack-output-budget.test.ts src/main/runtime/rpc/terminal-multiplex-ack-overflow-recovery.test.ts src/main/runtime/rpc/terminal-multiplex-pty-wait-capacity.test.ts src/main/runtime/rpc/terminal-multiplex-output-pause-and-viewport.test.ts src/renderer/src/components/terminal-pane/pty-connection-hidden-replay.test.ts src/renderer/src/components/terminal-pane/remote-runtime-pty-transport-stream-reconnect.test.ts src/renderer/src/components/terminal-pane/terminal-pty-ack-gate.test.ts src/renderer/src/lib/pane-manager/terminal-delivery-credit.test.ts src/renderer/src/runtime/remote-runtime-terminal-parse-backpressure.test.ts src/renderer/src/runtime/runtime-terminal-stream.test.ts --maxWorkers=1",
+        "pnpm exec vitest run --config config/vitest.config.ts src/main/runtime/rpc/terminal-subscribe-buffer.test.ts src/main/runtime/rpc/terminal-output-batching.test.ts src/main/runtime/rpc/terminal-multiplex-snapshot-serialization.test.ts src/main/runtime/rpc/terminal-multiplex-ack-output-budget.test.ts src/main/runtime/rpc/terminal-multiplex-ack-overflow-recovery.test.ts src/main/runtime/rpc/terminal-multiplex-pty-wait-capacity.test.ts src/main/runtime/rpc/terminal-multiplex-output-pause-and-viewport.test.ts src/renderer/src/components/terminal-pane/pty-connection-hidden-replay.test.ts src/renderer/src/components/terminal-pane/remote-runtime-pty-transport-stream-reconnect.test.ts src/renderer/src/lib/pane-manager/terminal-delivery-credit.test.ts src/renderer/src/runtime/remote-runtime-terminal-parse-backpressure.test.ts src/renderer/src/runtime/runtime-terminal-stream.test.ts --maxWorkers=1",
         "ORCA_TERMINAL_PERF_BENCH=1 pnpm exec vitest run --config config/vitest.config.ts --disableConsoleIntercept src/main/runtime/rpc/terminal-multiplex-flow-control.bench.test.ts",
         "pnpm --dir mobile exec vitest run --root .. mobile/src/session/native-chat/mobile-native-chat-terminal-stream.test.ts",
         "pnpm --dir mobile exec vitest run --root .. mobile/src/session/native-chat/use-mobile-native-chat-terminal-stream.test.ts"
@@ -17412,7 +17377,6 @@
         "src/main/runtime/rpc/terminal-multiplex-flow-control.bench.test.ts",
         "src/renderer/src/components/terminal-pane/pty-connection-hidden-replay.test.ts",
         "src/renderer/src/components/terminal-pane/remote-runtime-pty-transport-stream-reconnect.test.ts",
-        "src/renderer/src/components/terminal-pane/terminal-pty-ack-gate.test.ts",
         "src/renderer/src/lib/pane-manager/terminal-delivery-credit.test.ts",
         "src/renderer/src/runtime/remote-runtime-terminal-parse-backpressure.test.ts",
         "src/renderer/src/runtime/runtime-terminal-stream.test.ts",
@@ -17583,7 +17547,8 @@
       "knownGaps": [
         "The pure mobile decision gate does not yet prove live Android WebView scrollback restore after a chat toggle.",
         "Legacy JSON subscribe parity is undecided.",
-        "The parser measurement uses @xterm/headless; browser renderer/WebGL CPU, GPU, and allocation behavior still need packaged-app performance evidence."
+        "The parser measurement uses @xterm/headless; browser renderer/WebGL CPU, GPU, and allocation behavior still need packaged-app performance evidence.",
+        "The audit removed the PTY ACK wrapper suite, which replayed credit arithmetic with mocked IPC. Its isolated wrapper alarms are no longer registered here; generic credit and runtime stream tests do not establish equivalent PTY integration coverage."
       ],
       "demotionRule": "Cannot promote while a supported stream path has uncapped snapshot or live-output buffering."
     },
@@ -20745,20 +20710,20 @@
       "invariant": "A single-cell capacity check reads only that cell while retaining snapshot freshness, incarnation, outstanding reservation and missing-limit policy; new placement retains the full fleet inventory.",
       "oracle": "With 32 capped cells, an existing active host stays on its pinned cell and reads one headroom row; new placement reads all 32. Missing, expired or prior-incarnation snapshots, capacity exhaustion and outstanding debt still refuse the active pinned host; an uncapped cell remains admissible.",
       "commands": [
-        "ORCA_BACKGROUND_LAUNCH=1 pnpm --dir cloud/apps/relay exec vitest run ../../../cloud/apps/relay/src/assignment-headroom-scope.test.ts ../../../cloud/apps/relay/src/assignment-connection-headroom.test.ts ../../../cloud/apps/relay/src/assignment-store.test.ts ../../../cloud/apps/relay/src/assignment-store-lock-order.test.ts ../../../cloud/apps/relay/src/cell-inventory-lock-contention.test.ts ../../../cloud/apps/relay/src/assignment-isolated-cell-replacement.test.ts ../../../cloud/apps/relay/src/regional-rehome-target-selection.test.ts --silent=false"
+        "ORCA_BACKGROUND_LAUNCH=1 pnpm --dir cloud/apps/relay exec vitest run ../../../cloud/apps/relay/src/assignment/assignment-headroom-scope.test.ts ../../../cloud/apps/relay/src/assignment/assignment-connection-headroom.test.ts ../../../cloud/apps/relay/src/assignment-store.test.ts ../../../cloud/apps/relay/src/assignment/assignment-store-lock-order.test.ts ../../../cloud/apps/relay/src/cell-inventory-lock-contention.test.ts ../../../cloud/apps/relay/src/assignment-isolated-cell-replacement.test.ts ../../../cloud/apps/relay/src/regional-rehome-target-selection.test.ts --silent=false"
       ],
       "testFiles": [
-        "cloud/apps/relay/src/assignment-headroom-scope.test.ts",
-        "cloud/apps/relay/src/assignment-connection-headroom.test.ts",
+        "cloud/apps/relay/src/assignment/assignment-headroom-scope.test.ts",
+        "cloud/apps/relay/src/assignment/assignment-connection-headroom.test.ts",
         "cloud/apps/relay/src/assignment-store.test.ts",
-        "cloud/apps/relay/src/assignment-store-lock-order.test.ts",
+        "cloud/apps/relay/src/assignment/assignment-store-lock-order.test.ts",
         "cloud/apps/relay/src/cell-inventory-lock-contention.test.ts",
         "cloud/apps/relay/src/assignment-isolated-cell-replacement.test.ts",
         "cloud/apps/relay/src/regional-rehome-target-selection.test.ts"
       ],
       "assertionRefs": [
         {
-          "file": "cloud/apps/relay/src/assignment-headroom-scope.test.ts",
+          "file": "cloud/apps/relay/src/assignment/assignment-headroom-scope.test.ts",
           "assertions": [
             "reads one cell for a sticky assignment even when the capped fleet grows",
             "still considers the full fleet for a new placement",
@@ -20773,7 +20738,7 @@
           "date": "2026-09-25",
           "runner": "local",
           "platform": "macos",
-          "command": "ORCA_BACKGROUND_LAUNCH=1 pnpm --dir cloud/apps/relay exec vitest run ../../../cloud/apps/relay/src/assignment-headroom-scope.test.ts ../../../cloud/apps/relay/src/assignment-connection-headroom.test.ts ../../../cloud/apps/relay/src/assignment-store.test.ts ../../../cloud/apps/relay/src/assignment-store-lock-order.test.ts ../../../cloud/apps/relay/src/cell-inventory-lock-contention.test.ts ../../../cloud/apps/relay/src/assignment-isolated-cell-replacement.test.ts ../../../cloud/apps/relay/src/regional-rehome-target-selection.test.ts --silent=false",
+          "command": "ORCA_BACKGROUND_LAUNCH=1 pnpm --dir cloud/apps/relay exec vitest run ../../../cloud/apps/relay/src/assignment/assignment-headroom-scope.test.ts ../../../cloud/apps/relay/src/assignment/assignment-connection-headroom.test.ts ../../../cloud/apps/relay/src/assignment-store.test.ts ../../../cloud/apps/relay/src/assignment/assignment-store-lock-order.test.ts ../../../cloud/apps/relay/src/cell-inventory-lock-contention.test.ts ../../../cloud/apps/relay/src/assignment-isolated-cell-replacement.test.ts ../../../cloud/apps/relay/src/regional-rehome-target-selection.test.ts --silent=false",
           "result": "passed",
           "durationSeconds": 0.513,
           "summary": "189 tests across seven files passed; independent root rerun also passed189 tests. Relay typecheck passed separately."

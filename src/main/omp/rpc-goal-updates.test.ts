@@ -33,6 +33,14 @@ it('updates Goal usage without appending the same active Goal notice after every
     timeUsedSeconds: 12,
     updatedAt: 13
   })
+  expect(h.rig.journal.threadGoal()).not.toHaveProperty('id')
+  const reopened = await h.rig.reopenJournal()
+  expect(reopened.threadGoal()).toMatchObject({
+    objective: goal.objective,
+    tokensUsed: 1200,
+    timeUsedSeconds: 12,
+    updatedAt: 13
+  })
 })
 
 it('retains pause, resume, completion and clear while revising queued usage in place', async () => {
