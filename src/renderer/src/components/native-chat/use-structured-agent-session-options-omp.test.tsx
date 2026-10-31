@@ -45,6 +45,7 @@ describe('OMP resting session options', () => {
         await act(async () =>
           options.resolve({
             models: [],
+            modelsKnown: false,
             current: { model: 'gpt-hosted', effort: 'high', defaulted: [] }
           })
         )
@@ -79,7 +80,7 @@ describe('OMP resting session options', () => {
     const catalog = Promise.withResolvers<unknown>()
     answer({
       modelCatalog: () => catalog.promise,
-      options: async () => ({ models: [], current: {} })
+      options: async () => ({ models: [], modelsKnown: false, current: {} })
     })
     const { result, unmount } = renderOptions(
       { ...ATTACHED, agent: 'omp' },

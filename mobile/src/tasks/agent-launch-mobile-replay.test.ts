@@ -10,8 +10,8 @@ import {
   AGENT_SESSION_OPERATION_FUTURE_SKEW_MS
 } from '../../../src/shared/agent-session-host-authority'
 import type { AgentSessionRecordStore } from '../../../src/main/runtime/agent-session-record-store'
+import { closeTestJournalHostDatabases } from '../../../src/main/native-chat/agent-session-journal/journal-host-database-test-support'
 import { openTestAgentSessionRecordStore } from '../../../src/main/runtime/agent-session-record-store-test-harness'
-import { closeTestJournalHostDatabase } from '../../../src/main/native-chat/agent-session-journal/journal-host-database-test-support'
 import type { OrcaRuntimeService } from '../../../src/main/runtime/orca-runtime'
 import { RpcDispatcher } from '../../../src/main/runtime/rpc/dispatcher'
 import {
@@ -48,7 +48,7 @@ beforeEach(async () => {
 afterEach(async () => {
   vi.restoreAllMocks()
   setAgentLaunchRecordStore(null)
-  closeTestJournalHostDatabase(directory)
+  await closeTestJournalHostDatabases()
   await rm(directory, { recursive: true, force: true })
 })
 

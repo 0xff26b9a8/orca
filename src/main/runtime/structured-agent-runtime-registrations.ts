@@ -4,6 +4,7 @@ import { resolveNativeChatVisualsSkillLocation } from '../native-chat/native-cha
 import { withSupportedCodexCli } from '../codex/codex-cli-installation-error'
 import { codexStructuredLaunchPart } from '../codex/codex-structured-launch-resolution'
 import { claudeStructuredLaunchPart } from '../claude/claude-structured-launch-resolution'
+import { claudeNamingInvocation } from '../claude/claude-naming-invocation'
 import { createClaudeCommandCatalogProbe } from '../claude/claude-command-catalog-probe'
 import { CodexStructuredSessionAdapter } from '../codex/codex-structured-session-adapter'
 import { createCodexAtRestSkillCatalog } from '../codex/codex-at-rest-skills-probe'
@@ -51,17 +52,21 @@ export type {
 
 function createCodexAdapter(context: StructuredAgentAdapterContext): StructuredAgentRuntimeAdapter {
   const { deps, followUps, host } = context
+  const renameInvocation = {
+    resolveLaunchArgs: () => deps.resolveLaunchArgs('codex'),
+    resolveWorkspacePath: deps.resolveWorkspacePath,
+    resolveEnvironment: () => context.environment.resolveAgentEnvironment('codex'),
+    refreshEnvironmentAfterMiss: context.environment.refreshAfterMissingProgram,
+    ...(deps.resolveCodexCommand ? { resolveCommand: deps.resolveCodexCommand } : {})
+  }
   return new CodexStructuredSessionAdapter({
+    renameInvocation,
     resolveAccountKind: deps.resolveCodexAccountKind,
     atRestCommands: createCodexAtRestSkillCatalog({
-      resolveLaunchArgs: () => deps.resolveLaunchArgs('codex'),
-      resolveWorkspacePath: deps.resolveWorkspacePath,
-      resolveEnvironment: () => context.environment.resolveAgentEnvironment('codex'),
-      refreshEnvironmentAfterMiss: context.environment.refreshAfterMissingProgram,
+      ...renameInvocation,
       ...(deps.prepareCodexCatalogProbeHome
         ? { prepareHome: deps.prepareCodexCatalogProbeHome }
-        : {}),
-      ...(deps.resolveCodexCommand ? { resolveCommand: deps.resolveCodexCommand } : {})
+        : {})
     }),
     resolveLaunch: withSupportedCodexCli(
       composeStructuredLaunch(
@@ -109,6 +114,11 @@ function createClaudeAdapter(
   const resolveAccountHome = deps.resolveAgentAccountHome
   return createStructuredClaudeRuntimeAdapter({
     store,
+    namingInputs: claudeNamingInvocation(
+      structuredAgentLaunchSources(context),
+      () => deps.resolveLaunchArgs('claude'),
+      deps.resolveClaudeCommand
+    ),
     resolveWorkspacePath: deps.resolveWorkspacePath,
     ...(resolveAccountHome ? { resolveAccountHome: () => resolveAccountHome('claude') } : {}),
     resolveLaunch: composeStructuredLaunch(
