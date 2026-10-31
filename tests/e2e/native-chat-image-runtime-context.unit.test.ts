@@ -5,19 +5,36 @@ import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { shallow } from 'zustand/shallow'
 import type { AppState } from '@/store/types'
+import type { RuntimeFileOperationArgs } from '../../src/renderer/src/runtime/runtime-file-client-types'
 import { useAppStore } from '@/store'
-import type { TerminalTab } from '../../../../shared/terminal-tab-types'
-import type { Tab } from '../../../../shared/tab-types'
-import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultSettings } from '../../../../shared/constants'
+import type { TerminalTab } from '../../src/shared/terminal-tab-types'
+import type { Tab } from '../../src/shared/tab-types'
+import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultSettings } from '../../src/shared/constants'
 import {
   createNativeChatImageOwnerSelector,
   createNativeChatImageRuntimeContextSelector,
   resolveNativeChatImageRuntimeContext,
   resolveNativeChatImageRuntimeContextForOwner,
   selectNativeChatImageOwnerState,
-  useNativeChatImageRuntimeContext,
-  type NativeChatImageRuntimeContext
-} from './native-chat-image-runtime-context'
+  useNativeChatImageRuntimeContext
+} from '../../src/renderer/src/components/native-chat/native-chat-image-runtime-context'
+import {
+  makeFolderWorkspace,
+  makeProjectGroup
+} from '../../src/renderer/src/components/sidebar/folder-workspace-composer-submit-fixtures'
+import { resolveNativeChatFileLinkContext } from '../../src/renderer/src/components/native-chat/native-chat-file-link'
+import {
+  resolveNativeChatSkillDiscoveryContext,
+  selectNativeChatSkillStateInputs
+} from '../../src/renderer/src/components/native-chat/native-chat-skill-discovery-context'
+import { getEditorFileOperationContext } from '@/lib/editor-file-operation-owner'
+import { captureWorktreeSshMutationExpectation } from '@/lib/ssh-mutation-expectation'
+import { adoptFromEndpoint } from '@/store/adopt-from-endpoint'
+import { assertRuntimeFileMutationExpectation } from '../../src/main/runtime/files/file-mutation-expectation'
+import {
+  resetSshConnectionGenerations,
+  setSshConnectionGeneration
+} from '../../src/main/ssh/connection/ssh-connection-generation'
 import {
   agentSessionTabFixture,
   nativeChatFanoutFixture,
@@ -25,7 +42,7 @@ import {
   repoFixture,
   terminalTabFixture,
   worktreeFixture
-} from './native-chat-workspace-test-fixtures'
+} from '../../src/renderer/src/components/native-chat/native-chat-workspace-test-fixtures'
 
 const originalState = useAppStore.getState()
 afterEach(() => {
@@ -69,6 +86,128 @@ function state(overrides: Partial<AppState> = {}): AppState {
 }
 
 describe('resolveNativeChatImageRuntimeContext', () => {
+  it.each(['inherited', 'adopted'] as const)(
+    'retains a paired folder target through real file, image, skill and write contexts: %s',
+    (shape) => {
+      const target = { kind: 'environment', environmentId: 'owner-a' } as const
+      const original = makeFolderWorkspace({
+        id: 'paired-folder',
+        projectGroupId: 'paired-project',
+        folderPath: '/remote/folder',
+        connectionId: 'box'
+      })
+      const folder =
+        shape === 'adopted'
+          ? adoptFromEndpoint(target, {
+              kind: 'folderWorkspace',
+              row: original,
+              resolveOwnHostId: () => 'ssh:box' as const
+            })
+          : { ...original, connectionId: null }
+      const workspaceId = `folder:${folder.id}`
+      const snapshot = state({
+        activeWorktreeId: workspaceId,
+        activeWorkspaceExecutionHostId: 'runtime:owner-a',
+        folderWorkspaces: [folder],
+        projectGroups: [
+          adoptFromEndpoint(target, {
+            kind: 'projectGroup',
+            row: {
+              ...makeProjectGroup(),
+              id: 'paired-project',
+              executionHostId: 'ssh:box',
+              connectionId: 'box'
+            }
+          })
+        ],
+        repos: [],
+        worktreesByRepo: {},
+        tabsByWorktree: {
+          [workspaceId]: [{ ...state().tabsByWorktree['wt-1'][0], worktreeId: workspaceId }]
+        },
+        runtimeEnvironments: [],
+        sshStateByEnvironment: new Map([
+          [
+            'owner-a',
+            {
+              targetsHydrated: true,
+              targetLabels: new Map([['box', 'Server box']]),
+              targetGenerations: new Map([['box', 7]]),
+              removedTargetLabels: new Map(),
+              connectionStates: new Map([
+                [
+                  'box',
+                  {
+                    targetId: 'box',
+                    status: 'connected',
+                    error: null,
+                    reconnectAttempt: 0,
+                    connectionGeneration: 7
+                  }
+                ]
+              ])
+            }
+          ]
+        ])
+      })
+      expect.soft(resolveNativeChatFileLinkContext(snapshot, 'tab-1')).toMatchObject({
+        worktreeId: workspaceId,
+        worktreePath: '/remote/folder',
+        runtimeEnvironmentId: 'owner-a'
+      })
+      expect
+        .soft(
+          resolveNativeChatImageRuntimeContext(selectNativeChatImageOwnerState(snapshot), 'tab-1')
+        )
+        .toMatchObject({
+          target: { kind: 'environment', environmentId: 'owner-a' },
+          worktreePath: '/remote/folder',
+          expectedExecutionHostId: 'ssh:box',
+          expectedSshConnectionGeneration: 7
+        })
+      expect
+        .soft(
+          resolveNativeChatSkillDiscoveryContext(
+            selectNativeChatSkillStateInputs(snapshot),
+            'tab-1'
+          )
+        )
+        .toMatchObject({
+          cwd: '/remote/folder',
+          runtimeTarget: { kind: 'environment', environmentId: 'owner-a' },
+          discoveryTarget: { worktreeId: workspaceId }
+        })
+      const editor = getEditorFileOperationContext(
+        snapshot,
+        { worktreeId: workspaceId },
+        '/remote/folder'
+      )
+      expect.soft(editor).toMatchObject({
+        target: { kind: 'environment', environmentId: 'owner-a' },
+        expectedExecutionHostId: 'ssh:box',
+        expectedSshConnectionGeneration: 7
+      })
+      resetSshConnectionGenerations()
+      setSshConnectionGeneration('box', 7)
+      expect
+        .soft(() =>
+          assertRuntimeFileMutationExpectation(
+            'ssh:box',
+            editor.expectedExecutionHostId,
+            editor.expectedSshTargetId,
+            editor.expectedSshConnectionGeneration
+          )
+        )
+        .not.toThrow()
+      resetSshConnectionGenerations()
+      expect.soft(captureWorktreeSshMutationExpectation(snapshot, workspaceId)).toEqual({
+        expectedExecutionHostId: 'ssh:box',
+        expectedSshTargetId: 'box',
+        expectedSshConnectionGeneration: 7
+      })
+    }
+  )
+
   it('keeps unrelated store writes out of the image-owner selector', () => {
     const storeState = state()
     const first = selectNativeChatImageOwnerState(storeState)
@@ -332,7 +471,7 @@ describe('resolveNativeChatImageRuntimeContext', () => {
     const cases: [
       name: string,
       snapshot: AppState,
-      expected: Partial<NonNullable<NativeChatImageRuntimeContext>> | null
+      expected: Partial<RuntimeFileOperationArgs> | null
     ][] = [
       ['terminal-first and first duplicate', duplicate, local('wt-1', '/repo/worktree')],
       ['unified fallback', fallback, local('wt-2', '/repo/second')],
@@ -461,7 +600,7 @@ describe('resolveNativeChatImageRuntimeContext', () => {
         null
       ]
     ]
-    let observed: NativeChatImageRuntimeContext = null
+    let observed: RuntimeFileOperationArgs | null = null
     function Probe() {
       observed = useNativeChatImageRuntimeContext('tab-1')
       return null
