@@ -17,11 +17,11 @@ import type { PiRpcSession, PiRpcSessionDeps } from './rpc-session'
 
 type DispatchInput = Parameters<StructuredAgentSessionAdapter['dispatch']>[0]
 
-function exited(): AgentSessionDispatchOutcome {
+function exited(agentName: string): AgentSessionDispatchOutcome {
   return {
     state: 'rejected',
     ...agentSessionFailureWords(agentSessionFailureFact('providerExited'), {
-      agentName: 'Pi',
+      agentName,
       surface: 'rejection'
     })
   }
@@ -49,13 +49,13 @@ export async function dispatchPiRpcMessage(
         error instanceof PiRpcPromptError || error instanceof ClaudeDispatchContentError
           ? error.failure
           : agentSessionFailureFact('attachmentUnreadable'),
-        { agentName: 'Pi', surface: 'rejection' }
+        { agentName: session.agentName, surface: 'rejection' }
       )
     }
   }
   input.signal?.throwIfAborted()
   if (!isCurrent() || session.connection.closed) {
-    return exited()
+    return exited(session.agentName)
   }
   input.onInputPreparation?.()
   if (!input.executionOptions) {
@@ -84,7 +84,7 @@ export async function dispatchPiRpcMessage(
     } catch (error) {
       input.signal?.throwIfAborted()
       if (session.connection.closed) {
-        return exited()
+        return exited(session.agentName)
       }
       if (error instanceof JsonlRpcResponseError) {
         throw withProviderDiagnostic(
@@ -97,7 +97,7 @@ export async function dispatchPiRpcMessage(
   }
   input.signal?.throwIfAborted()
   if (!isCurrent() || session.connection.closed) {
-    return exited()
+    return exited(session.agentName)
   }
   return submitPiRpcPrompt(session, input, prompt)
 }

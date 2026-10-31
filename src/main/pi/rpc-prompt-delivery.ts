@@ -20,6 +20,7 @@ type Submission = {
   signInRefusal?: string
 }
 type DeliveryDeps = {
+  agentName?: string
   correlated?: boolean
   send: (frame: JsonlRpcRecord) => Promise<void>
   accepted: (id: string, at: number) => void
@@ -38,10 +39,13 @@ export function piRpcFailureFact(error: string) {
   )
 }
 
-function piRejection(fact: SubmissionRejectionFact): AgentSessionDispatchOutcome {
+function piRejection(
+  fact: SubmissionRejectionFact,
+  agentName: string
+): AgentSessionDispatchOutcome {
   return {
     state: 'rejected',
-    ...agentSessionFailureWords(fact, { agentName: 'Pi', surface: 'rejection' })
+    ...agentSessionFailureWords(fact, { agentName, surface: 'rejection' })
   }
 }
 
@@ -74,7 +78,7 @@ export class PiRpcPromptDelivery {
       return {
         state: 'rejected',
         ...agentSessionFailureWords(agentSessionFailureFact('queueFull'), {
-          agentName: 'Pi',
+          agentName: this.deps.agentName ?? 'Pi',
           surface: 'rejection'
         })
       }
@@ -121,7 +125,7 @@ export class PiRpcPromptDelivery {
       throw new Error('Pi prompt reply has no request')
     }
     if (!reply.success) {
-      const error = reply.error ?? 'Pi rejected the prompt'
+      const error = reply.error ?? `${this.deps.agentName ?? 'Pi'} rejected the prompt`
       const fact = piRpcFailureFact(error)
       if (
         !this.deps.correlated &&
@@ -160,7 +164,7 @@ export class PiRpcPromptDelivery {
         fact.kind === 'notSignedIn' && !submission.accepted
           ? { ...fact, neverReachedAgent: true as const }
           : fact
-      this.deps.settled(submission.id, piRejection(settledFact))
+      this.deps.settled(submission.id, piRejection(settledFact, this.deps.agentName ?? 'Pi'))
       if (submission.accepted) {
         this.deps.rejectedAfterAcceptance(error)
       } else {
@@ -187,7 +191,10 @@ export class PiRpcPromptDelivery {
       if (submission.signInRefusal !== undefined) {
         this.deps.settled(
           submission.id,
-          piRejection({ ...piRpcFailureFact(submission.signInRefusal), neverReachedAgent: true })
+          piRejection(
+            { ...piRpcFailureFact(submission.signInRefusal), neverReachedAgent: true },
+            this.deps.agentName ?? 'Pi'
+          )
         )
       } else if (!submission.accepted) {
         this.deps.settled(submission.id, {
@@ -241,14 +248,18 @@ export class PiRpcPromptDelivery {
   }
 }
 
-export function piRpcFailureStatus(turn: string, error: string): ProviderTimelineEvent {
+export function piRpcFailureStatus(
+  turn: string,
+  error: string,
+  agentName = 'Pi'
+): ProviderTimelineEvent {
   return {
     type: 'item.close',
     item: `error:${turn}`,
     body: {
       kind: 'status',
       tone: 'error',
-      ...agentSessionFailureWords(piRpcFailureFact(error), { agentName: 'Pi', surface: 'row' })
+      ...agentSessionFailureWords(piRpcFailureFact(error), { agentName, surface: 'row' })
     }
   }
 }

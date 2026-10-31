@@ -20,11 +20,13 @@ import type { StructuredAgentSessionProviderOpenResult } from '../native-chat/ag
 import type { AgentSessionProviderHandleLink } from '../../shared/agent-session-provider-handle'
 import { PiRpcSessionStartup } from './rpc-session-startup'
 import { PiHistoryCapture } from './rpc-history-capture'
+import { tuiAgentDisplayName } from '../../shared/tui-agent-display-names'
 
 export type { PiRpcConnection, PiRpcSessionDeps } from './rpc-session-contract'
 import type { PiRpcConnection, PiRpcSessionDeps } from './rpc-session-contract'
 
 export class PiRpcSession {
+  readonly agentName: string
   readonly connection: PiRpcConnection
   readonly lane: JsonlRpcTimelineLane
   readonly turns: PiRpcTurns
@@ -58,6 +60,7 @@ export class PiRpcSession {
     /** A new Pi session starts on its config's model; a resumed or forked one keeps its own. */
     readonly resolvesConfig = false
   ) {
+    this.agentName = tuiAgentDisplayName(deps.dialect?.agent ?? 'pi') ?? 'Pi'
     const sink = input.events && providerTimelineSink(input.events)
     if (!sink) {
       throw new Error('Pi structured chat requires the shared timeline sink')
@@ -82,6 +85,7 @@ export class PiRpcSession {
         })
     })
     this.turns = new PiRpcTurns({
+      agentName: this.agentName,
       correlatedPrompts: deps.dialect?.correlatedPrompts,
       lane: this.lane,
       generation,

@@ -14,6 +14,7 @@ import { piRpcRetryActivity } from './rpc-retry-activity'
 import { type PiRpcState, piRpcMessageSchema, piRpcSkippedEvent } from './rpc-protocol'
 
 export type PiRpcTurnDeps = {
+  agentName?: string
   correlatedPrompts?: boolean
   lane: JsonlRpcTimelineLane
   generation: string
@@ -62,11 +63,10 @@ export class PiRpcTurns {
       failed: deps.failed
     })
     this.delivery = new PiRpcPromptDelivery({
+      ...deps,
       correlated: deps.correlatedPrompts,
       send: (frame) =>
         deps.send({ ...frame, streamingBehavior: this.working ? 'steer' : 'followUp' }),
-      settled: deps.settled,
-      failed: deps.failed,
       accepted: (id, at) => {
         this.open(at)
         this.deps.lane.apply([{ type: 'input.accepted', clientMessageId: id, requestedAt: at }])
@@ -147,7 +147,7 @@ export class PiRpcTurns {
             this.lastStopReason = message.data.stopReason
             this.failure =
               message.data.stopReason === 'error'
-                ? (message.data.errorMessage ?? 'Pi request failed')
+                ? (message.data.errorMessage ?? 'Agent request failed')
                 : undefined
           }
         }
@@ -190,16 +190,16 @@ export class PiRpcTurns {
         return
       case 'auto_retry_start':
         this.touch()
-        this.deps.lane.apply([piRpcRetryActivity(frame)])
+        this.deps.lane.apply([piRpcRetryActivity(frame, this.deps.agentName)])
         return
       case 'auto_retry_end':
-        this.deps.lane.apply([piRpcRetryActivity(frame)])
+        this.deps.lane.apply([piRpcRetryActivity(frame, this.deps.agentName)])
         if (frame.success === true) {
           this.failure = undefined
           this.lastStopReason = undefined
         } else {
           this.failure =
-            typeof frame.finalError === 'string' ? frame.finalError : 'Pi auto-retry failed'
+            typeof frame.finalError === 'string' ? frame.finalError : 'Agent auto-retry failed'
         }
         break
     }
@@ -290,7 +290,7 @@ export class PiRpcTurns {
         : 'success'
     const events: ProviderTimelineEvent[] = []
     if (outcome === 'failure' && this.failure) {
-      events.push(piRpcFailureStatus(this.active, this.failure))
+      events.push(piRpcFailureStatus(this.active, this.failure, this.deps.agentName))
     }
     events.push({
       type: 'turn.end',
