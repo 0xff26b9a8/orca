@@ -17,7 +17,10 @@ export async function closeOmpRpcAdapterFixtures(): Promise<void> {
   await closeProviderTimelineRigs()
 }
 
-export async function setupOmpRpcAdapter(childReporting: 'attempt' | 'registration' = 'attempt') {
+export async function setupOmpRpcAdapter(
+  childReporting: 'attempt' | 'registration' = 'attempt',
+  configure?: (connection: FakeConnection) => void
+) {
   const rig = await openProviderTimelineRig({ agent: 'omp', sessionId: 'omp-test' })
   let connection: FakeConnection | undefined
   const childWork =
@@ -37,6 +40,7 @@ export async function setupOmpRpcAdapter(childReporting: 'attempt' | 'registrati
     readProcessStartTime: async () => 12345,
     openConnection: (_launch, handlers) => {
       connection = new FakeConnection(handlers)
+      configure?.(connection)
       return connection
     },
     onLifecycle: vi.fn(),

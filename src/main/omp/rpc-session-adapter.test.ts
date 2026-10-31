@@ -88,6 +88,41 @@ it('opens an OMP history identity and commits grouped Ask selections through exi
   })
 })
 
+it('keeps OMP todo calls on the shared task-list projection through settlement', async () => {
+  const h = await setup()
+  const phases = [
+    {
+      name: 'Discovery',
+      tasks: [{ content: 'Inspect the protocol', status: 'in_progress' as const }]
+    }
+  ]
+  h.connection.receive({
+    type: 'tool_execution_start',
+    toolCallId: 'todo-1',
+    toolName: 'todo',
+    args: { op: 'init', items: ['Inspect the protocol'], list: [] }
+  })
+  h.connection.receive({
+    type: 'tool_execution_update',
+    toolCallId: 'todo-1',
+    toolName: 'todo',
+    partialResult: { content: [{ type: 'text', text: 'working' }] }
+  })
+  expect((await h.rig.rows()).map((row) => row.body)).toEqual([
+    expect.objectContaining({ kind: 'tool-call', name: 'update_plan', state: 'running' })
+  ])
+  h.connection.receive({
+    type: 'tool_execution_end',
+    toolCallId: 'todo-1',
+    toolName: 'todo',
+    result: { content: [], details: { op: 'init', phases } },
+    isError: false
+  })
+  expect((await h.rig.rows()).map((row) => row.body)).toEqual([
+    expect.objectContaining({ kind: 'tool-call', name: 'update_plan', state: 'completed' })
+  ])
+})
+
 it('keeps an initially empty Goal silent while reporting a later Goal removal', async () => {
   const h = await setup()
   h.connection.receive({

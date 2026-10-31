@@ -31,6 +31,7 @@ const commandsSchema = z.object({
     z.object({
       name: z.string().min(1),
       description: z.string().optional(),
+      input: z.object({ hint: z.string().optional() }).optional(),
       source: z.string().optional()
     })
   )
@@ -275,7 +276,8 @@ export async function readPiRpcCommands(rpc: PiRpcRequester): Promise<AgentSessi
       name: command.name,
       kind: command.source === 'skill' ? 'skill' : 'command',
       ...(command.source === undefined ? { kindUnspecified: true as const } : {}),
-      ...(command.description ? { description: command.description } : {})
+      ...(command.description ? { description: command.description } : {}),
+      ...(command.input?.hint ? { argumentHint: command.input.hint } : {})
     }))
   }
 }

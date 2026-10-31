@@ -134,14 +134,19 @@ describe('Pi RPC session options', () => {
     const rpc = requester({
       get_commands: {
         commands: [
-          { name: 'review', description: 'Review changes', source: 'extension' },
+          {
+            name: 'review',
+            description: 'Review changes',
+            source: 'extension',
+            input: { hint: '<path>' }
+          },
           { name: 'search', source: 'skill' }
         ]
       }
     })
     expect(await readPiRpcCommands(rpc)).toEqual({
       commands: [
-        { name: 'review', kind: 'command', description: 'Review changes' },
+        { name: 'review', kind: 'command', description: 'Review changes', argumentHint: '<path>' },
         { name: 'search', kind: 'skill' }
       ]
     })

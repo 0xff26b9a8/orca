@@ -3,6 +3,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, vi } from 'vitest'
 import { isSubagentBlock } from '../../shared/native-chat-types'
+import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session-mutation-envelope'
+import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { structuredSessionBackgroundTasksView } from '../../shared/structured-session-background-tasks-view'
 import { acpChildWorkStatusSink } from '../acp/acp-structured-child-work.test-support'
 import { FakeConnection } from '../pi/rpc-session-adapter.test-fixture'
@@ -18,12 +20,13 @@ import {
   HOST_TEST_SESSION as SESSION,
   HOST_TEST_NOW,
   hostTestAttachParams,
+  hostTestOperationId,
   resetHostTestOperationIds
 } from '../native-chat/agent-session-wire/structured-agent-session-host-test-data'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
 
-it('publishes concurrent native children to the shared composer strip and retains finished transcript rows', async () => {
+it('publishes native children and background commands to the shared composer strip', async () => {
   resetHostTestOperationIds()
   const root = await mkdtemp(join(tmpdir(), 'orca-omp-subagent-publication-'))
   const store = await openTestAgentSessionRecordStore(root)
@@ -36,7 +39,13 @@ it('publishes concurrent native children to the shared composer strip and retain
     openConnection: (_launch, handlers) => {
       connection = new FakeConnection(handlers)
       connection.requestOverride = (command) =>
-        command === 'get_entries' ? Promise.resolve({ entries: [], leafId: null }) : undefined
+        command === 'cancel_subagent'
+          ? Promise.reject(
+              new JsonlRpcResponseError(command, '`subagentId` must be a non-empty string.')
+            )
+          : command === 'get_entries'
+            ? Promise.resolve({ entries: [], leafId: null })
+            : undefined
       return connection
     },
     onLifecycle: (event) => void host.handleAdapterEvent(event),
@@ -102,6 +111,64 @@ it('publishes concurrent native children to the shared composer strip and retain
     }
     await vi.waitFor(async () => expect((await strip()).children).toHaveLength(2))
     expect((await strip()).show).toBe(true)
+    expect((await strip()).supportsStop).toBe(true)
+    expect((await strip()).children?.every((child) => child.stoppable)).toBe(true)
+    wire.receive({
+      type: 'tool_execution_end',
+      toolCallId: 'call-ci',
+      toolName: 'eval',
+      result: {
+        content: [{ type: 'text', text: 'Running in background' }],
+        details: {
+          cells: [
+            {
+              index: 0,
+              status: 'complete',
+              views: [
+                {
+                  view: {
+                    kind: 'json',
+                    value: {
+                      text: 'Backgrounded',
+                      details: {
+                        async: { state: 'running', jobId: 'bg_48', type: 'bash' }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      isError: false
+    })
+    await vi.waitFor(async () =>
+      expect((await strip()).children).toContainEqual(
+        expect.objectContaining({ providerId: 'omp-job:bg_48', kind: 'command', stoppable: false })
+      )
+    )
+    wire.receive({
+      type: 'message_end',
+      message: { role: 'assistant', timestamp: 100, content: [] }
+    })
+    wire.receive({
+      type: 'tool_execution_start',
+      toolName: 'bash',
+      toolCallId: 'service-ci',
+      args: { command: 'ci-wait', name: 'ci' }
+    })
+    wire.receive({
+      type: 'tool_execution_end',
+      toolName: 'bash',
+      toolCallId: 'service-ci',
+      result: { content: [], details: { service: { name: 'ci', state: 'ready', pid: 123 } } }
+    })
+    await vi.waitFor(async () =>
+      expect((await strip()).children).toContainEqual(
+        expect.objectContaining({ providerId: 'omp-service:ci', kind: 'command', name: 'ci' })
+      )
+    )
     wire.receive({
       type: 'subagent_progress',
       payload: {
@@ -130,8 +197,37 @@ it('publishes concurrent native children to the shared composer strip and retain
         })
       )
     )
-    wire.receive({ type: 'agent_end', messages: [] })
+    wire.receive({ type: 'agent_end', messages: [], awaitingAsyncWork: true })
     await vi.waitFor(async () => expect((await strip()).show).toBe(true))
+    const originalRequest = wire.request.bind(wire)
+    const cancellations: unknown[] = []
+    wire.request = async (command: string, params?: Record<string, unknown>) => {
+      if (command === 'cancel_subagent') {
+        cancellations.push(params)
+        return { cancelled: true }
+      }
+      return originalRequest(command)
+    }
+    const stopFields = { scope: 'background-tasks' as const, taskId: 'eval-child' }
+    expect(
+      await host.cancel(
+        { callerKey: 'client' },
+        {
+          ...stopFields,
+          envelope: {
+            sessionId: SESSION,
+            clientOperationId: hostTestOperationId(),
+            expectedRuntimeFence: null,
+            payloadFingerprint: computeAgentSessionPayloadFingerprint({
+              method: 'agentSession.cancel',
+              sessionId: SESSION,
+              fields: stopFields
+            })
+          }
+        }
+      )
+    ).toMatchObject({ ok: true, value: { cancelled: true } })
+    expect(cancellations).toEqual([{ subagentId: 'eval-child' }])
     for (const id of ['task-child', 'eval-child']) {
       wire.receive({
         type: 'subagent_lifecycle',
@@ -139,12 +235,36 @@ it('publishes concurrent native children to the shared composer strip and retain
           id,
           agent: 'task',
           agentSource: 'bundled',
-          status: 'completed',
+          status: id === 'eval-child' ? 'aborted' : 'completed',
           index: 0,
           parentToolCallId: `call-${id}`
         }
       })
     }
+    await vi.waitFor(async () => expect((await strip()).children).toHaveLength(2))
+    wire.receive({
+      type: 'message_end',
+      message: {
+        role: 'custom',
+        customType: 'launch-completion',
+        content: '',
+        details: {
+          daemons: [{ id: 'daemon', name: 'ci', state: 'exited', startedAt: 110, exitCode: 0 }]
+        }
+      }
+    })
+    await vi.waitFor(async () => expect((await strip()).children).toHaveLength(1))
+    expect((await strip()).show).toBe(true)
+    wire.receive({
+      type: 'message_end',
+      message: {
+        role: 'custom',
+        customType: 'async-result',
+        content: 'CI completed',
+        timestamp: Date.now(),
+        details: { jobs: [{ jobId: 'bg_48', type: 'bash', status: 'completed' }] }
+      }
+    })
     await vi.waitFor(async () => expect((await strip()).show).toBe(false))
     await vi.waitFor(async () => {
       await host.flushStreamedEvents(SESSION)
@@ -153,12 +273,12 @@ it('publishes concurrent native children to the shared composer strip and retain
         item.body.kind === 'message' ? item.body.blocks.filter(isSubagentBlock) : []
       )
       expect(children).toHaveLength(2)
-      expect(children.every((child) => child.state === 'completed')).toBe(true)
+      expect(children.map((child) => child.state).sort()).toEqual(['completed', 'stopped'])
     })
   } finally {
     await adapter.closeAll()
     await host.flushAllStreamedEvents()
-    closeTestJournalHostDatabase(root)
+    await closeTestJournalHostDatabase(root)
     await rm(root, { recursive: true, force: true })
   }
 })

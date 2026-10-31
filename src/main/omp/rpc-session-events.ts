@@ -1,5 +1,9 @@
 import { z } from 'zod'
 import { OmpRpcSubagents } from './rpc-subagents'
+import { OmpRpcBackgroundTasks } from './rpc-background-tasks'
+import { OmpRpcSubagentMessages } from './rpc-subagent-messages'
+import { ompEditResultEvents } from './rpc-edit-results'
+import { ompTodoEvents } from './rpc-todo'
 import { receiveOmpNotification } from './rpc-notifications'
 import type { PiRpcSession } from '../pi/rpc-session'
 import type { PiRpcSessionAdapterDeps } from '../pi/rpc-session-adapter'
@@ -21,6 +25,13 @@ const reportedGoals = new WeakMap<
   { snapshot: string; signature: string; item: string; occurrence: number }
 >()
 const subagents = new WeakMap<PiRpcSession, OmpRpcSubagents>()
+const backgroundTasks = new WeakMap<PiRpcSession, OmpRpcBackgroundTasks>()
+const subagentMessages = new WeakMap<PiRpcSession, OmpRpcSubagentMessages>()
+const mappedTodoCalls = new WeakMap<PiRpcSession, Set<string>>()
+
+export function captureOmpSubagentStop(session: PiRpcSession, id: string) {
+  return subagents.get(session)?.captureStop(id)
+}
 const fileMentionSchema = z.looseObject({
   role: z.literal('fileMention'),
   files: z.array(z.looseObject({ path: z.string(), content: z.string() })),
@@ -74,9 +85,55 @@ export function reportGoal(session: PiRpcSession, value: unknown): void {
 export function receiveOmpFrame(
   frame: JsonlRpcRecord,
   session: PiRpcSession,
-  logger: PiRpcSessionAdapterDeps['logger']
+  logger: PiRpcSessionAdapterDeps['logger'],
+  supportsSubagentStop: () => boolean = () => false
 ): boolean {
+  let transcripts = subagentMessages.get(session)
+  if (!transcripts) {
+    transcripts = new OmpRpcSubagentMessages(session.generation)
+    subagentMessages.set(session, transcripts)
+  }
+  const transcriptEvents = transcripts.receive(frame)
+  if (transcriptEvents.length > 0) {
+    session.lane.apply(transcriptEvents)
+  }
+  if (frame.type === 'subagent_event') {
+    return true
+  }
+  const todoEdits = ompTodoEvents(frame)
+  const todoCallId = typeof frame.toolCallId === 'string' ? frame.toolCallId : undefined
+  let mappedTodos = mappedTodoCalls.get(session)
+  if (frame.type === 'tool_execution_start' && todoCallId && todoEdits.length > 0) {
+    mappedTodos ??= new Set<string>()
+    mappedTodoCalls.set(session, mappedTodos)
+    mappedTodos.add(todoCallId)
+  }
+  const mappedTodoUpdate =
+    todoCallId !== undefined &&
+    mappedTodos?.has(todoCallId) === true &&
+    frame.type === 'tool_execution_update'
+  const mappedTodoStart =
+    todoCallId !== undefined &&
+    mappedTodos?.has(todoCallId) === true &&
+    frame.type === 'tool_execution_start'
+  const mappedTodoEnd =
+    todoCallId !== undefined &&
+    mappedTodos?.has(todoCallId) === true &&
+    frame.type === 'tool_execution_end'
+  const edits = [...ompEditResultEvents(frame), ...todoEdits]
+  let tasks = backgroundTasks.get(session)
+  if (!tasks) {
+    tasks = new OmpRpcBackgroundTasks()
+    backgroundTasks.set(session, tasks)
+  }
+  const taskEvidence = tasks.receive(frame)
+  if (taskEvidence.length > 0) {
+    session.lane.childWork(taskEvidence)
+  }
   if (receiveOmpNotification(frame, session)) {
+    return true
+  }
+  if (mappedTodoUpdate) {
     return true
   }
   if (frame.type === 'message_start' || frame.type === 'message_end') {
@@ -88,11 +145,13 @@ export function receiveOmpFrame(
   }
   let children = subagents.get(session)
   if (!children) {
-    children = new OmpRpcSubagents((message) =>
-      logger.warn(message, {
-        scope: 'omp-rpc-subagents',
-        sessionId: session.input.identity.sessionId
-      })
+    children = new OmpRpcSubagents(
+      (message) =>
+        logger.warn(message, {
+          scope: 'omp-rpc-subagents',
+          sessionId: session.input.identity.sessionId
+        }),
+      supportsSubagentStop
     )
     subagents.set(session, children)
   }
@@ -151,5 +210,18 @@ export function receiveOmpFrame(
     return true
   }
 
+  if (edits.length > 0) {
+    if (!mappedTodoStart && !mappedTodoEnd) {
+      session.turns.receive(frame)
+    }
+    session.lane.apply(edits)
+    if (frame.type === 'tool_execution_end' && todoCallId && mappedTodos) {
+      mappedTodos.delete(todoCallId)
+    }
+    return true
+  }
+  if (frame.type === 'tool_execution_end' && todoCallId && mappedTodos) {
+    mappedTodos.delete(todoCallId)
+  }
   return false
 }

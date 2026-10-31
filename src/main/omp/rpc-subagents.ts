@@ -23,10 +23,18 @@ const progressSchema = z
 const lifecycleSchema = z.object({ payload: childSchema }).transform(({ payload }) => payload)
 
 export class OmpRpcSubagents {
-  private readonly children = new Map<string, z.infer<typeof childSchema>>()
+  private readonly children = new Map<string, z.infer<typeof childSchema> & { run: object }>()
   private readonly completed = new Set<string>()
 
-  constructor(private readonly onDiagnostic: (message: string) => void) {}
+  constructor(
+    private readonly onDiagnostic: (message: string) => void,
+    private readonly supportsStop: () => boolean = () => false
+  ) {}
+
+  captureStop(id: string): (() => boolean) | undefined {
+    const child = this.children.get(id)
+    return this.supportsStop() && child ? () => this.children.get(id)?.run === child.run : undefined
+  }
 
   receive(frame: JsonlRpcRecord): AgentChildWorkEvidence[] | null {
     if (frame.type !== 'subagent_lifecycle' && frame.type !== 'subagent_progress') {
@@ -50,7 +58,7 @@ export class OmpRpcSubagents {
       return []
     }
     this.completed.delete(incoming.id)
-    const child = { ...previous, ...incoming }
+    const child = { ...previous, ...incoming, run: restart ? {} : (previous?.run ?? {}) }
     this.children.set(child.id, child)
     const observedAt = Date.now()
     const handle = {
@@ -80,7 +88,7 @@ export class OmpRpcSubagents {
               observedAt
             }
           : null,
-        stoppable: false
+        stoppable: this.supportsStop() && !ended(child.status)
       }
     }
     if (!ended(child.status)) {

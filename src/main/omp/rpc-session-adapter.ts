@@ -11,6 +11,8 @@ import { goalSchema, reportGoal, receiveOmpFrame } from './rpc-session-events'
 import { OmpRpcFastOptions } from './rpc-options'
 import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
 import { OmpRpcRewind, rewindOmpSession, supportsOmpRewind } from './rpc-rewind'
+import { stopOmpSubagents, supportsOmpSubagentStop } from './rpc-subagent-stops'
+import { importOmpSubagentHistory } from './rpc-subagent-history'
 
 export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
   readonly atRestCommands: StructuredAgentSessionAdapter['atRestCommands']
@@ -21,6 +23,7 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
     const fastOptions = new WeakMap<PiRpcSession['connection'], OmpRpcFastOptions>()
     const rewindConnections = new WeakSet<PiRpcSession['connection']>()
     const rewinds = new WeakMap<PiRpcSession, OmpRpcRewind>()
+    const subagentStops = new WeakSet<PiRpcSession['connection']>()
     super({
       ...deps,
       buildLaunch: buildOmpRpcLaunch,
@@ -37,7 +40,10 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
         correlatedPrompts: true,
         idleAbort: true,
         prepare: async (connection) => {
-          await connection.request('set_subagent_subscription', { level: 'progress' })
+          if (await supportsOmpSubagentStop(connection)) {
+            subagentStops.add(connection)
+          }
+          await connection.request('set_subagent_subscription', { level: 'events' })
           if (await supportsOmpRewind(connection)) {
             rewindConnections.add(connection)
           }
@@ -70,11 +76,30 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
             rewinds.set(session, rewind)
           }
           rewind.receive(frame, session)
-          return receiveOmpFrame(frame, session, deps.logger)
+          return receiveOmpFrame(frame, session, deps.logger, () =>
+            subagentStops.has(session.connection)
+          )
         }
       }
     })
     this.atRestCommands = deps.atRestCommands
+    this.backgroundTaskStops = (sessionId) => {
+      const session = this.sessions.get(sessionId)
+      return session && !session.connection.closed
+        ? { supportsTaskStop: subagentStops.has(session.connection), supportsStopAll: false }
+        : undefined
+    }
+    this.stopBackgroundTasks = (input) => {
+      const session = this.session(input.sessionId, input.fence)
+      if (!subagentStops.has(session.connection)) {
+        throw new Error('This OMP version does not support native subagent cancellation')
+      }
+      return stopOmpSubagents(
+        session,
+        input,
+        () => this.sessions.get(input.sessionId) === session && !session.connection.closed
+      )
+    }
     this.rewindSupport = (sessionId) => {
       const session = this.sessions.get(sessionId)
       return !session || rewindConnections.has(session.connection)
@@ -86,9 +111,30 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
       const options = await session.readOptions()
       return fastOptions.get(session.connection)?.read(options) ?? options
     }
+    const parentOpen = this.open
+    this.open = async (input) => {
+      const result = await parentOpen(input)
+      const session = this.session(input.sessionId, input.fence)
+      if (session.sessionFile) {
+        await importOmpSubagentHistory({
+          parentSession: session.sessionFile,
+          sink: session.input.events,
+          signal: input.signal,
+          logger: (message, error) =>
+            this.deps.logger.warn(message, {
+              scope: 'omp-subagent-history',
+              sessionId: input.sessionId,
+              error
+            })
+        })
+      }
+      return result
+    }
   }
 
   rewindSupport: NonNullable<StructuredAgentSessionAdapter['rewindSupport']>
+  backgroundTaskStops: NonNullable<StructuredAgentSessionAdapter['backgroundTaskStops']>
+  stopBackgroundTasks: NonNullable<StructuredAgentSessionAdapter['stopBackgroundTasks']>
 
   rewind: NonNullable<StructuredAgentSessionAdapter['rewind']> = (input) =>
     rewindOmpSession(this.session(input.sessionId, input.fence), input.beforeTurnId)
