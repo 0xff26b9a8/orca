@@ -5,6 +5,7 @@ import { OmpRpcSubagentMessages } from './rpc-subagent-messages'
 import { ompEditResultEvents } from './rpc-edit-results'
 import { ompTodoEvents } from './rpc-todo'
 import { receiveOmpNotification } from './rpc-notifications'
+import { ompRpcUserMessageSchema } from './rpc-user-message'
 import type { PiRpcSession } from '../pi/rpc-session'
 import type { PiRpcSessionAdapterDeps } from '../pi/rpc-session-adapter'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
@@ -141,6 +142,12 @@ export function receiveOmpFrame(
     return true
   }
   if (frame.type === 'message_start' || frame.type === 'message_end') {
+    const user = ompRpcUserMessageSchema.safeParse(frame.message)
+    if (user.success && user.data.role === 'custom') {
+      // User-invoked skills and collaboration prompts acknowledge queued input like user echoes.
+      session.turns.receive({ ...frame, message: { ...user.data, role: 'user', content: [] } })
+      return true
+    }
     const mention = fileMentionSchema.safeParse(frame.message)
     if (mention.success) {
       session.turns.receive({ ...frame, message: { ...mention.data, content: [] } })

@@ -9,17 +9,8 @@ import { readPiEntries } from '../pi/rpc-history-catch-up'
 import { piBranchInTree } from '../pi/rpc-history-import'
 import type { PiSessionEntry } from '../pi/rpc-history-import'
 import { JsonlRpcResponseError, type JsonlRpcRecord } from '../jsonl-rpc/peer'
+import { ompRpcUserMessageSchema } from './rpc-user-message'
 
-const customRequestSchema = z.object({
-  role: z.literal('custom'),
-  customType: z.enum(['skill-prompt', 'collab-prompt']),
-  attribution: z.literal('user'),
-  timestamp: z.number().finite()
-})
-const requestSchema = z.union([
-  z.object({ role: z.literal('user'), timestamp: z.number().finite() }),
-  customRequestSchema
-])
 const stateSchema = z.object({
   sessionFile: z.string(),
   isSettled: z.literal(true),
@@ -42,7 +33,7 @@ function requestTimestamp(entry: PiSessionEntry): number | undefined {
             timestamp: typeof entry.timestamp === 'string' ? Date.parse(entry.timestamp) : undefined
           }
         : null
-  const parsed = requestSchema.safeParse(message)
+  const parsed = ompRpcUserMessageSchema.safeParse(message)
   return parsed.success ? parsed.data.timestamp : undefined
 }
 
@@ -72,7 +63,7 @@ export class OmpRpcRewind {
     if (frame.type !== 'message_end') {
       return
     }
-    const user = requestSchema.safeParse(frame.message)
+    const user = ompRpcUserMessageSchema.safeParse(frame.message)
     const turn = session.lane.openTurnId
     const sessionFile = session.sessionFile
     if (!user.success || !turn || !sessionFile || turn === this.turn) {
