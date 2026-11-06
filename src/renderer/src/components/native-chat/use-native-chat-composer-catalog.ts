@@ -26,6 +26,7 @@ export function useNativeChatComposerCatalog(
   const conversationCommands = structuredTransport?.conversationCommands
   const hostSetsGoals = structuredTransport?.threadGoal !== undefined
   const compactInstructions = structuredTransport?.compactInstructions
+  const accountUsage = structuredTransport?.accountUsage !== undefined
   const agentCommands = useMemo(() => {
     if (!structured) {
       return getVerifiedNativeChatCommands(agent)
@@ -48,9 +49,18 @@ export function useNativeChatComposerCatalog(
               )
             }
           ]
-        : commands
+        : commands,
+      accountUsage
     )
-  }, [agent, compactInstructions, conversationCommands, reported, structured, hostSetsGoals])
+  }, [
+    accountUsage,
+    agent,
+    compactInstructions,
+    conversationCommands,
+    reported,
+    structured,
+    hostSetsGoals
+  ])
   const sessionSkills = useMemo(() => nativeChatSessionSkills(agent, reported), [agent, reported])
   return { agentCommands, sessionSkills }
 }

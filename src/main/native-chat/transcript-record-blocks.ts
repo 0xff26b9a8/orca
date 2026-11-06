@@ -4,6 +4,12 @@ import type {
   NativeChatToolResultBlock
 } from '../../shared/native-chat/native-chat-types'
 import { asRecord, extractString } from '../ai-vault/session-scanner-values'
+import {
+  isClaudeToolUseContent,
+  isClaudeToolResultContent,
+  claudeToolResultText,
+  claudeToolResultFailed
+} from '../../shared/claude-tool-content'
 import { buildImageDataUri } from '../../shared/image-data-uri'
 
 export function inlineToolResultImages(content: unknown): NativeChatImageRefBlock[] {
@@ -100,8 +106,25 @@ function claudeContentBlock(record: Record<string, unknown>): NativeChatBlock | 
       return toolResultBlock(record)
     case 'image':
       return imageRefBlock(record)
-    default:
+    default: {
+      if (isClaudeToolUseContent(record)) {
+        return {
+          type: 'tool-call',
+          name: String(record.name),
+          input: record.input,
+          callId: String(record.id)
+        }
+      }
+      if (isClaudeToolResultContent(record)) {
+        return {
+          type: 'tool-result',
+          callId: String(record.tool_use_id),
+          output: claudeToolResultText(record.content),
+          ...(claudeToolResultFailed(record) ? { isError: true } : {})
+        }
+      }
       return null
+    }
   }
 }
 
