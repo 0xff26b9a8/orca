@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { translate } from '@/i18n/i18n'
+import { useTranslate } from '@/i18n/use-translate'
 import type { AgentType } from '../../../../../../shared/agent-status/contracts/agent-status-types'
 import { getVerifiedNativeChatCommands } from '../../../../../../shared/native-chat/native-chat-agent-profiles'
 import type {
@@ -22,6 +22,7 @@ export function useNativeChatComposerCatalog(
   agent: AgentType,
   structuredTransport?: NativeChatStructuredComposerTransport
 ): NativeChatComposerCatalog {
+  const t = useTranslate()
   const structured = Boolean(structuredTransport)
   const reported = structuredTransport?.sessionCommands
   const conversationCommands = structuredTransport?.conversationCommands
@@ -50,7 +51,7 @@ export function useNativeChatComposerCatalog(
             ...sessionCommands,
             {
               name: 'goal',
-              description: translate(
+              description: t(
                 'components.native-chat.slashCommandDescriptions.goal',
                 'Set or view the goal'
               )
@@ -72,7 +73,8 @@ export function useNativeChatComposerCatalog(
     reported,
     structured,
     interactionModeSupported,
-    hostSetsGoals
+    hostSetsGoals,
+    t
   ])
   const sessionSkills = useMemo(() => nativeChatSessionSkills(agent, reported), [agent, reported])
   return { agentCommands, sessionSkills }
