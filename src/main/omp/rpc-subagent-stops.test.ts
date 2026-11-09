@@ -102,6 +102,10 @@ it('stops only native children and preserves acknowledged targets when a later c
 it('does not acknowledge native refusals or cancel a replacement child with a stale response', async () => {
   const h = await setup()
   h.connection.receive(lifecycle('child'))
+  h.connection.requestOverride = (command) =>
+    command === 'get_subagents'
+      ? Promise.resolve({ subagents: [{ id: 'child', agent: 'task', status: 'running' }] })
+      : undefined
   const acknowledge = vi.fn()
   const stop = () =>
     h.adapter.stopBackgroundTasks({
@@ -143,3 +147,35 @@ it('does not acknowledge a cancellation after the provider connection exits', as
   await stopping
   expect(acknowledge).not.toHaveBeenCalled()
 })
+
+it.each(['refused', 'failed'])(
+  'retires a vanished subagent when cancellation is %s and the native roster is empty',
+  async (outcome) => {
+    const h = await setup()
+    h.connection.receive(lifecycle('finished-child'))
+    h.connection.requestOverride = (command) =>
+      command === 'get_subagents' ? Promise.resolve({ subagents: [] }) : undefined
+    h.setCancel(async () => {
+      if (outcome === 'failed') {
+        throw new Error('Subagent unavailable')
+      }
+      return { cancelled: false }
+    })
+    const acknowledge = vi.fn()
+    await expect(
+      h.adapter.stopBackgroundTasks({
+        sessionId: 'omp-test',
+        fence: 1,
+        taskIds: ['finished-child'],
+        acknowledge
+      })
+    ).resolves.toEqual({ cancelled: false })
+    expect(h.childWork.mock.calls.flatMap(([entries]) => entries)).toContainEqual({
+      type: 'ended',
+      observedAt: expect.any(Number),
+      handle: { idKind: 'task_id', id: 'finished-child', runId: 'call-finished-child' },
+      outcome: 'unknown'
+    })
+    expect(acknowledge).not.toHaveBeenCalled()
+  }
+)

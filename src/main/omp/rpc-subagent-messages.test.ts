@@ -1,7 +1,48 @@
-import { afterEach, expect, it } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
 import { setupOmpRpcAdapter, closeOmpRpcAdapterFixtures } from './rpc-session-adapter.test-fixture'
 
 afterEach(closeOmpRpcAdapterFixtures)
+
+it.each([
+  { type: 'agent_settled' },
+  { type: 'agent_end', awaitingAsyncWork: false },
+  { type: 'prompt_result', status: 'completed', sessionSettled: true }
+])('reconciles vanished children and their unfinished tools on $type', async (settled) => {
+  const h = await setupOmpRpcAdapter()
+  h.connection.requestOverride = (command) =>
+    command === 'get_subagents' ? Promise.resolve({ subagents: [] }) : undefined
+  h.connection.receive({
+    type: 'subagent_lifecycle',
+    payload: { id: 'child', agent: 'task', status: 'started', parentToolCallId: 'parent' }
+  })
+  h.connection.receive({
+    type: 'subagent_event',
+    payload: {
+      id: 'child',
+      event: {
+        type: 'tool_execution_start',
+        toolCallId: 'unfinished',
+        toolName: 'read',
+        args: { path: 'README.md' }
+      }
+    }
+  })
+  h.connection.receive(settled)
+  await vi.waitFor(() =>
+    expect(h.childWork.mock.calls.flatMap(([entries]) => entries)).toContainEqual({
+      type: 'ended',
+      observedAt: expect.any(Number),
+      handle: { idKind: 'task_id', id: 'child', runId: 'parent' },
+      outcome: 'unknown'
+    })
+  )
+  const rows = await h.rig.rows()
+  expect(
+    rows.find((row) => row.agentId === 'child' && row.body.kind === 'tool-call')?.body
+  ).toMatchObject({
+    state: 'failed'
+  })
+})
 
 const lifecycle = (id: string, status: string) => ({
   type: 'subagent_lifecycle',

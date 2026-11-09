@@ -74,3 +74,69 @@ it('keeps the peer alive for bad progress but explicitly fails for invalid lifec
     output.destroy()
   }
 })
+
+it('reconciles missing children without retiring live runs or applying stale snapshots', () => {
+  const children = new OmpRpcSubagents(vi.fn(), () => true)
+  const start = (id: string) =>
+    children.receive({
+      type: 'subagent_lifecycle',
+      payload: { id, agent: 'task', status: 'started', parentToolCallId: `call-${id}` }
+    })
+  start('finished')
+  start('working')
+  const reconcile = children.captureRoster()
+  expect(reconcile?.({})).toEqual([])
+  expect(reconcile?.({ subagents: [{ id: 'working', agent: 'task', status: 'future' }] })).toEqual(
+    []
+  )
+  const stopWorking = children.captureStop('working')
+  expect(reconcile?.({ subagents: [{ id: 'working', agent: 'task', status: 'running' }] })).toEqual(
+    [
+      {
+        type: 'ended',
+        observedAt: expect.any(Number),
+        handle: { idKind: 'task_id', id: 'finished', runId: 'call-finished' },
+        outcome: 'unknown'
+      }
+    ]
+  )
+  expect(stopWorking?.()).toBe(true)
+  const stale = children.captureRoster()
+  children.receive({
+    type: 'subagent_lifecycle',
+    payload: { id: 'working', agent: 'task', status: 'completed' }
+  })
+  start('working')
+  start('new-child')
+  expect(stale?.({ subagents: [] })).toEqual([])
+  expect(children.captureStop('working')?.()).toBe(true)
+  expect(children.captureStop('new-child')?.()).toBe(true)
+  expect(stopWorking?.()).toBe(false)
+})
+
+it('ignores late progress for vanished children and accepts their actual terminal outcome', () => {
+  const children = new OmpRpcSubagents(vi.fn(), () => true)
+  children.receive({
+    type: 'subagent_lifecycle',
+    payload: { id: 'child', agent: 'task', status: 'started', parentToolCallId: 'parent' }
+  })
+  children.captureRoster()?.({ subagents: [] })
+  expect(
+    children.receive({
+      type: 'subagent_progress',
+      payload: { progress: { id: 'child', agent: 'task', status: 'running' } }
+    })
+  ).toEqual([])
+  expect(children.captureStop('child')).toBeUndefined()
+  expect(
+    children.receive({
+      type: 'subagent_lifecycle',
+      payload: { id: 'child', agent: 'task', status: 'completed' }
+    })
+  ).toContainEqual({
+    type: 'ended',
+    observedAt: expect.any(Number),
+    handle: { idKind: 'task_id', id: 'child', runId: 'parent' },
+    outcome: 'succeeded'
+  })
+})

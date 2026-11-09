@@ -45,33 +45,7 @@ export class OmpRpcSubagentMessages {
       if (!run) {
         return []
       }
-      const events = run.messages.message(
-        {
-          type: 'message_end',
-          message: { role: 'assistant', content: [] }
-        },
-        Date.now()
-      )
-      for (const [toolCallId, toolName] of run.tools) {
-        events.push(
-          ...run.messages.tool({
-            type: 'tool_execution_end',
-            toolCallId,
-            toolName,
-            isError: true,
-            result: {
-              content: [
-                {
-                  type: 'text',
-                  text: `Subagent ended (${child.status}) before this tool returned.`
-                }
-              ]
-            }
-          })
-        )
-      }
-      this.runs.delete(child.id)
-      return this.attribute(child.id, run, events)
+      return this.finish(child.id, child.status)
     }
     if (frame.type !== 'subagent_event') {
       return []
@@ -99,6 +73,34 @@ export class OmpRpcSubagentMessages {
       events.push(...ompTodoEvents(event))
     }
     return this.attribute(payload.id, run, events)
+  }
+
+  finish(id: string, status: string): ProviderTimelineEvent[] {
+    const run = this.runs.get(id)
+    if (!run) {
+      return []
+    }
+    const events = run.messages.message(
+      { type: 'message_end', message: { role: 'assistant', content: [] } },
+      Date.now()
+    )
+    for (const [toolCallId, toolName] of run.tools) {
+      events.push(
+        ...run.messages.tool({
+          type: 'tool_execution_end',
+          toolCallId,
+          toolName,
+          isError: true,
+          result: {
+            content: [
+              { type: 'text', text: `Subagent ended (${status}) before this tool returned.` }
+            ]
+          }
+        })
+      )
+    }
+    this.runs.delete(id)
+    return this.attribute(id, run, events)
   }
 
   private attribute(

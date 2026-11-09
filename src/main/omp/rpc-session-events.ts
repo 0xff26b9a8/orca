@@ -33,6 +33,28 @@ const mappedTodoCalls = new WeakMap<PiRpcSession, Set<string>>()
 export function captureOmpSubagentStop(session: PiRpcSession, id: string) {
   return subagents.get(session)?.captureStop(id)
 }
+
+export async function refreshOmpSubagents(session: PiRpcSession): Promise<void> {
+  const reconcile = subagents.get(session)?.captureRoster()
+  if (!reconcile || session.connection.closed) {
+    return
+  }
+  const roster = await session.connection.request('get_subagents')
+  if (session.connection.closed) {
+    return
+  }
+  const evidence = reconcile(roster)
+  for (const entry of evidence) {
+    if (entry.type === 'ended') {
+      session.lane.apply(
+        subagentMessages.get(session)?.finish(entry.handle.id, entry.outcome) ?? []
+      )
+    }
+  }
+  if (evidence.length > 0) {
+    session.lane.childWork(evidence)
+  }
+}
 const fileMentionSchema = z.looseObject({
   role: z.literal('fileMention'),
   files: z.array(z.looseObject({ path: z.string(), content: z.string() })),
@@ -93,6 +115,19 @@ export function receiveOmpFrame(
   logger: PiRpcSessionAdapterDeps['logger'],
   supportsSubagentStop: () => boolean = () => false
 ): boolean {
+  if (
+    frame.type === 'agent_settled' ||
+    (frame.type === 'agent_end' && frame.awaitingAsyncWork !== true) ||
+    (frame.type === 'prompt_result' && frame.sessionSettled === true)
+  ) {
+    void refreshOmpSubagents(session).catch((error: unknown) =>
+      logger.warn('OMP subagent roster refresh failed', {
+        scope: 'omp-rpc-subagents',
+        sessionId: session.input.identity.sessionId,
+        error
+      })
+    )
+  }
   let transcripts = subagentMessages.get(session)
   if (!transcripts) {
     transcripts = new OmpRpcSubagentMessages(session.generation)

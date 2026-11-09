@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import { captureOmpSubagentStop } from './rpc-session-events'
+import { captureOmpSubagentStop, refreshOmpSubagents } from './rpc-session-events'
 import type { PiRpcConnection, PiRpcSession } from '../pi/rpc-session'
 import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 
@@ -40,9 +40,23 @@ export async function stopOmpSubagents(
     if (!target.current?.()) {
       continue
     }
-    const result = z
-      .object({ cancelled: z.boolean() })
-      .parse(await session.connection.request('cancel_subagent', { subagentId: target.id }))
+    let response: unknown
+    try {
+      response = await session.connection.request('cancel_subagent', { subagentId: target.id })
+    } catch (error) {
+      if (!isCurrent()) {
+        break
+      }
+      if (target.current()) {
+        // Preserve the cancellation error unless the roster can prove this run ended.
+        await refreshOmpSubagents(session).catch(() => {})
+      }
+      if (isCurrent() && target.current()) {
+        throw error
+      }
+      continue
+    }
+    const result = z.object({ cancelled: z.boolean() }).parse(response)
     cancelled ||= result.cancelled
     if (!isCurrent()) {
       break
@@ -50,7 +64,10 @@ export async function stopOmpSubagents(
     if (result.cancelled && target.current()) {
       input.acknowledge?.({ taskId: target.id })
     } else if (target.current()) {
-      stillRunning = true
+      await refreshOmpSubagents(session)
+      if (isCurrent() && target.current()) {
+        stillRunning = true
+      }
     }
   }
   return { cancelled, ...(stillRunning ? { stillRunning: true as const } : {}) }
