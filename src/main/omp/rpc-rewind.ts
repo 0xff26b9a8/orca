@@ -115,6 +115,40 @@ function rewindCandidates(
   })
 }
 
+/** OMP may append process bookkeeping after a committed tree move. These records do not add
+ * conversation content and are safe to skip while proving the native leaf. */
+function isOmpRewindRuntimeEntry(entry: PiSessionEntry): boolean {
+  return (
+    (entry.type === 'custom_message' &&
+      entry.customType === 'eval-state-context' &&
+      entry.attribution === 'agent' &&
+      entry.display === false) ||
+    (entry.type === 'custom' && entry.customType === 'session_exit')
+  )
+}
+
+/** Return true when the native leaf is the requested parent with only OMP bookkeeping after it. */
+function ompLeafReached(
+  answer: { entries: readonly PiSessionEntry[]; leafId: string | null },
+  parentId: string | null
+): boolean {
+  const byId = new Map(answer.entries.map((entry) => [entry.id, entry]))
+  const visited = new Set<string>()
+  let current = answer.leafId
+  while (current !== parentId) {
+    if (current === null || visited.has(current)) {
+      return false
+    }
+    visited.add(current)
+    const entry = byId.get(current)
+    if (!entry || !isOmpRewindRuntimeEntry(entry)) {
+      return false
+    }
+    current = entry.parentId
+  }
+  return true
+}
+
 export async function prepareOmpRewind(
   session: PiRpcSession,
   beforeTurnId: string
@@ -191,7 +225,7 @@ export async function rewindOmpSession(
     return { ok: false, reason: 'proof-mismatch' }
   }
   if (options.recover) {
-    if (answer.leafId === entry.parentId) {
+    if (ompLeafReached(answer, entry.parentId)) {
       return applied()
     }
     return {
@@ -230,7 +264,7 @@ export async function rewindOmpSession(
         return { ok: false, reason: 'unsupported' }
       }
       const after = await entries()
-      if (after.leafId === entry.parentId) {
+      if (ompLeafReached(after, entry.parentId)) {
         return applied()
       }
       return {
@@ -245,5 +279,7 @@ export async function rewindOmpSession(
     return { ok: false, reason: 'provider-refused' }
   }
   const after = await entries()
-  return after.leafId === entry.parentId ? applied() : { ok: false, reason: 'outcome-unknown' }
+  return ompLeafReached(after, entry.parentId)
+    ? applied()
+    : { ok: false, reason: 'outcome-unknown' }
 }

@@ -168,6 +168,70 @@ it('recovers a lost reply from the native parent leaf without a second navigatio
   expect(h.navigate).toHaveBeenCalledTimes(1)
 })
 
+it.each(['navigate', 'recover', 'hook-error'] as const)(
+  'confirms %s after OMP appends hidden eval state and exit diagnostics at the rewind point',
+  async (operation) => {
+    const h = await setup()
+    const restore = () => {
+      h.setEntries([
+        ...entries,
+        {
+          type: 'custom_message',
+          id: 'eval',
+          parentId: 'tool1',
+          customType: 'eval-state-context',
+          attribution: 'agent',
+          display: false
+        },
+        { type: 'custom', id: 'exit', parentId: 'eval', customType: 'session_exit' }
+      ])
+      h.setLeaf('exit')
+    }
+    if (operation === 'recover') {
+      restore()
+    } else {
+      h.navigate.mockImplementationOnce(async () => {
+        restore()
+        if (operation === 'hook-error') {
+          throw new JsonlRpcResponseError('navigate_tree', 'Hook failed after navigation')
+        }
+        return { cancelled: false }
+      })
+    }
+    const target = { ...input, beforeTurnId: encodeOmpRewindTarget({ entryId: 'u2' }) }
+    await expect(
+      operation === 'recover'
+        ? h.adapter.recoverRewind({ ...target, keptTurnId: 'tool1' })
+        : h.adapter.rewind(target)
+    ).resolves.toEqual({ ok: true })
+  }
+)
+
+it.each([
+  { type: 'message', message: { role: 'user', timestamp: 300 } },
+  { type: 'message', message: { role: 'assistant' } },
+  { type: 'message', message: { role: 'toolResult' } },
+  { type: 'custom_message', customType: 'eval-state-context', attribution: 'user', display: false },
+  { type: 'custom_message', customType: 'eval-state-context', attribution: 'agent', display: true },
+  { type: 'custom_message', customType: 'eval-state-context', attribution: 'agent' },
+  { type: 'custom', customType: 'extension-state' },
+  { type: 'mode_change', mode: 'goal' }
+])(
+  'does not mistake additional conversation or unknown state for a confirmed rewind: %j',
+  async (suffix) => {
+    const h = await setup()
+    h.setEntries([...entries, { ...suffix, id: 'later', parentId: 'tool1' }])
+    h.setLeaf('later')
+    await expect(
+      h.adapter.recoverRewind({
+        ...input,
+        beforeTurnId: encodeOmpRewindTarget({ entryId: 'u2' }),
+        keptTurnId: 'tool1'
+      })
+    ).resolves.toEqual({ ok: false, reason: 'outcome-unknown' })
+  }
+)
+
 it('observes the native leaf when a hook reports an error after committing navigation', async () => {
   const h = await setup()
   h.navigate.mockImplementationOnce(async () => {

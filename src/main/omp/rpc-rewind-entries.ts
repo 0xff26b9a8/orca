@@ -28,7 +28,10 @@ function rewindEntry(entry: PiSessionEntry): PiSessionEntry {
     timestamp: entry.timestamp,
     customType: entry.customType,
     attribution: entry.attribution,
-    ...(user.success ? { message: user.data } : {})
+    ...(user.success ? { message: user.data } : {}),
+    ...(entry.type === 'custom_message' && entry.display !== undefined
+      ? { display: entry.display }
+      : {})
   }
 }
 
