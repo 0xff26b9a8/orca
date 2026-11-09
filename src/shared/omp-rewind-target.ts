@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import * as z from 'zod'
 
 const targetSchema = z.union([
   z.object({ entryId: z.string().min(1) }),
