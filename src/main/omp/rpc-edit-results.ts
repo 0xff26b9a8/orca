@@ -4,7 +4,7 @@ import { ompNativeToolResults } from './rpc-tool-results'
 import type { NativeChatBlock } from '../../shared/native-chat/native-chat-types'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { ProviderTimelineEvent } from '../native-chat/agent-session-timeline/provider-timeline-event'
-import { journalPayload } from '../native-chat/agent-session-journal/journal-payload-bounds'
+import { journalPayload } from '../native-chat/agent-session-journal/item-lifecycle/journal-payload-bounds'
 
 const editSchema = z.object({
   path: z.string().min(1),

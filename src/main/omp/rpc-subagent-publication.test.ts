@@ -6,23 +6,23 @@ import { isSubagentBlock } from '../../shared/native-chat/native-chat-types'
 import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session/lifecycle/agent-session-mutation-envelope'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { structuredSessionBackgroundTasksView } from '../../shared/structured-session-background-tasks-view'
-import { acpChildWorkStatusSink } from '../acp/acp-structured-child-work.test-support'
+import { acpChildWorkStatusSink } from '../acp/session/testing/acp-structured-child-work.test-support'
 import { FakeConnection } from '../pi/rpc-session-adapter.test-fixture'
 import { openTestAgentSessionRecordStore } from '../runtime/agent-session/records/agent-session-record-store-test-harness'
 import {
   closeTestJournalHostDatabase,
   openTestJournalHostDatabase
-} from '../native-chat/agent-session-journal/journal-host-database-test-support'
-import { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/structured-agent-session-host'
-import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/structured-agent-registry'
-import { recordingStructuredAgentSessionLogger } from '../native-chat/agent-session-wire/structured-agent-session-logger-test-support'
+} from '../native-chat/agent-session-journal/store-lifecycle/journal-host-database-test-support'
+import { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/host/structured-agent-session-host'
+import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/providers/structured-agent-registry'
+import { recordingStructuredAgentSessionLogger } from '../native-chat/agent-session-wire/host/testing/structured-agent-session-logger-test-support'
 import {
   HOST_TEST_SESSION as SESSION,
   HOST_TEST_NOW,
   hostTestAttachParams,
   hostTestOperationId,
   resetHostTestOperationIds
-} from '../native-chat/agent-session-wire/structured-agent-session-host-test-data'
+} from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-data'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
 

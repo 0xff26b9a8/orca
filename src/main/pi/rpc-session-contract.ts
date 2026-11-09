@@ -13,11 +13,11 @@ import type {
   StructuredAgentSessionAcquireInput,
   StructuredAgentSessionLifecycleEvent,
   AgentSessionDispatchOutcome
-} from '../native-chat/agent-session-wire/structured-agent-session-adapter'
-import type { StructuredAgentSessionLogger } from '../native-chat/agent-session-wire/structured-agent-session-logger'
+} from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
+import type { StructuredAgentSessionLogger } from '../native-chat/agent-session-wire/host/structured-agent-session-logger'
 import type { ProviderProcessLaunch } from '../provider-process/provider-process-launch'
 import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
-import type { StructuredAgentSessionChildWorkProducer } from '../native-chat/agent-session-wire/structured-agent-session-subagent-rows'
+import type { StructuredAgentSessionChildWorkProducer } from '../native-chat/agent-session-wire/observations/structured-agent-session-subagent-rows'
 import type { AgentSessionExecutionOptions } from '../../shared/agent-session/options/agent-session-execution-options'
 
 export type PiRpcConnection = Pick<

@@ -5,14 +5,14 @@ import { z } from 'zod'
 import { agentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
 import type { AgentJournalItemIdentity } from '../../shared/agent-session/journal/agent-session-journal-identity'
-import { legacyItemBody } from '../native-chat/agent-session-journal/journal-legacy-import'
+import { legacyItemBody } from '../native-chat/agent-session-journal/history-import/journal-legacy-import'
 import { decodeOmpTranscriptLine } from '../native-chat/transcript-line-decoders-omp'
 import {
   createHistoryCatchUpBatch,
   runHistoryCatchUp
-} from '../native-chat/agent-session-wire/structured-agent-session-history-catch-up'
-import type { StructuredAgentSessionEventSink } from '../native-chat/agent-session-wire/structured-agent-session-event-sink'
-import { journalLifecycleItemMutation } from '../native-chat/agent-session-journal/journal-row-builders'
+} from '../native-chat/agent-session-wire/acquisition/structured-agent-session-history-catch-up'
+import type { StructuredAgentSessionEventSink } from '../native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink'
+import { journalLifecycleItemMutation } from '../native-chat/agent-session-journal/writing/journal-lifecycle-mutation'
 
 const MAX_CHILD_FILES = 64
 const MAX_CHILD_BYTES = 16 * 1024 * 1024

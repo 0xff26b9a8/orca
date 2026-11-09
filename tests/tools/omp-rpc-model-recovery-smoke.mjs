@@ -21,8 +21,8 @@ await build({
     resolveDir: process.cwd(),
     contents: `export {OmpRpcSessionAdapter} from './src/main/omp/rpc-session-adapter';
       export {piRpcSessionlessEnvironment} from './src/main/pi/rpc-launch';
-      export {createDeferredStructuredAgentSessionEventSink} from './src/main/native-chat/agent-session-wire/structured-agent-session-event-sink';
-      export {JournalHostDatabase} from './src/main/native-chat/agent-session-journal/journal-host-database';
+      export {createDeferredStructuredAgentSessionEventSink} from './src/main/native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink';
+      export {JournalHostDatabase} from './src/main/native-chat/agent-session-journal/database/journal-host-database';
       export {openAgentSessionJournal} from './src/main/native-chat/agent-session-journal/journal-store-factory';`
   },
   bundle: true,

@@ -10,7 +10,7 @@ import {
   claudeToolResultText,
   claudeToolResultFailed
 } from '../../shared/claude-tool-content'
-import { buildImageDataUri } from '../../shared/image-data-uri'
+import { buildImageDataUri } from '../../shared/file-preview/image-data-uri'
 
 export function inlineToolResultImages(content: unknown): NativeChatImageRefBlock[] {
   if (!Array.isArray(content)) {

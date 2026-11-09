@@ -6,7 +6,7 @@ import { agentSessionRecordFixture } from '../native-chat/agent-session-record-t
 import { agentSessionConversationView } from '../../shared/agent-session/lifecycle/agent-session-conversation-view'
 import { createAgentModelCatalogService } from '../native-chat/agent-model-catalog/agent-model-catalog-service'
 import { AgentModelCatalogStore } from '../native-chat/agent-model-catalog/agent-model-catalog-store'
-import { agentDrivesSession } from '../native-chat/agent-session-wire/structured-agent-session-provider-support'
+import { agentDrivesSession } from '../native-chat/agent-session-wire/providers/structured-agent-session-provider-support'
 import { composeStructuredLaunchRead } from '../runtime/agent-session/launch/structured-agent-launch-composition'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { ompRpcProviderLink, resolveOmpRpcResume } from './rpc-launch'
@@ -58,6 +58,7 @@ it('lists models and resolves the same transcript for an existing ACP chat throu
     getConversation: () => agentSessionConversationView(record),
     drivesRecord: (saved) => agentDrivesSession(agents, saved),
     resolveAccountHome: async () => record.accountHome,
+    recordWorkspacePath: async () => cwd,
     probes: {
       omp: Object.assign(
         async () => ({
@@ -77,6 +78,7 @@ it('lists models and resolves the same transcript for an existing ACP chat throu
       agent: 'omp',
       sessionId: record.sessionId,
       workspacePath: cwd,
+      inSessionWorkspace: true,
       waitForListing: true
     })
     expect(listing).toMatchObject({

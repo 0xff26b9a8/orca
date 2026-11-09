@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { PiRpcSessionAdapter, type PiRpcSessionAdapterDeps } from '../pi/rpc-session-adapter'
 import type { PiRpcSession } from '../pi/rpc-session'
-import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
+import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 import { applyPiRpcSessionOption } from '../pi/rpc-options'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { createOmpRpcDialogs } from './rpc-dialogs'
@@ -9,7 +9,7 @@ import { buildOmpRpcLaunch, ompRpcProviderLink } from './rpc-launch'
 import { openOmpRpcConnection } from './rpc-connection'
 import { goalSchema, reportGoal, receiveOmpFrame } from './rpc-session-events'
 import { OmpRpcFastOptions, setOmpFastMode } from './rpc-options'
-import { OmpRpcRewind, rewindOmpSession, supportsOmpRewind } from './rpc-rewind'
+import { OmpRpcRewind, prepareOmpRewind, rewindOmpSession, supportsOmpRewind } from './rpc-rewind'
 import { stopOmpSubagents, supportsOmpSubagentStop } from './rpc-subagent-stops'
 import { importOmpSubagentHistory } from './rpc-subagent-history'
 import { OmpRpcConversationCopies } from './rpc-conversation-copies'
@@ -155,14 +155,22 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
     await Promise.all([super.closeAll(), this.copies.closeAll()])
   }
 
+  prepareRewind: NonNullable<StructuredAgentSessionAdapter['prepareRewind']> = (input) =>
+    prepareOmpRewind(this.session(input.sessionId, input.fence), input.beforeTurnId)
+
   rewind: NonNullable<StructuredAgentSessionAdapter['rewind']> = (input) =>
     rewindOmpSession(this.session(input.sessionId, input.fence), input.beforeTurnId)
 
-  recoverRewind: NonNullable<StructuredAgentSessionAdapter['recoverRewind']> = (input) =>
-    rewindOmpSession(this.session(input.sessionId, input.fence), input.beforeTurnId, {
+  recoverRewind: NonNullable<StructuredAgentSessionAdapter['recoverRewind']> = (input) => {
+    const session = this.session(input.sessionId, input.fence)
+    if (input.threadId !== undefined && input.threadId !== session.sessionFile) {
+      return Promise.resolve({ ok: false, reason: 'invalid-target' })
+    }
+    return rewindOmpSession(session, input.beforeTurnId, {
       recover: true,
       signal: input.signal
     })
+  }
 
   setOption: StructuredAgentSessionAdapter['setOption'] = async (input) => {
     const session = this.session(input.sessionId, input.fence)

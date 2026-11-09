@@ -25,8 +25,8 @@ await build({
       export {openOmpRpcConnection} from './src/main/omp/rpc-connection';
       export {piRpcSessionlessEnvironment} from './src/main/pi/rpc-launch';
       export {OMP_RPC_AGENT} from './src/main/omp/rpc-agent-definition';
-      export {StructuredAgentRegistry} from './src/main/native-chat/agent-session-wire/structured-agent-registry';
-      export {StructuredAgentSessionAdapterRouter} from './src/main/native-chat/agent-session-wire/structured-agent-session-adapter-router';`
+      export {StructuredAgentRegistry} from './src/main/native-chat/agent-session-wire/providers/structured-agent-registry';
+      export {StructuredAgentSessionAdapterRouter} from './src/main/native-chat/agent-session-wire/providers/structured-agent-session-adapter-router';`
   },
   bundle: true,
   platform: 'node',

@@ -7,10 +7,10 @@ import {
   insertTestJournalRowJson,
   openTestJournalHostDatabase,
   publishTestJournalEpoch
-} from './journal-host-database-test-support'
-import type { JournalHostDatabase } from './journal-host-database'
-import { restoreJournal } from './journal-open'
-import { prepareJournalOutcomeWrite } from './journal-outcome-write'
+} from './store-lifecycle/journal-host-database-test-support'
+import type { JournalHostDatabase } from './database/journal-host-database'
+import { restoreJournal } from './replay/journal-open'
+import { prepareJournalOutcomeWrite } from './outcomes/journal-outcome-write'
 
 const sessionId = 'omp-legacy-goal'
 const epoch = 'epoch-1'

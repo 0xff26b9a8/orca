@@ -9,11 +9,11 @@ import {
   currentValue,
   HOST_CATALOG,
   tick
-} from './use-structured-agent-session-options.test-fixture'
+} from './session/options/structured/use-structured-agent-session-options.test-fixture'
 import { act, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { forgetStructuredSessionSelection } from '@/lib/structured-agent-session-selection-controller'
-import { resetHostModelCatalogSnapshotsForTests } from '@/runtime/host-model-catalog-snapshots'
+import { forgetStructuredSessionSelection } from '@/lib/agent-session/options/structured-agent-session-selection-controller'
+import { resetHostModelCatalogSnapshotsForTests } from '@/runtime/native-chat/model-catalogs/host-model-catalog-snapshots'
 
 describe('OMP resting session options', () => {
   beforeEach(() => {

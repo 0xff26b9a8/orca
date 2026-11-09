@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { encodeOmpRewindTarget } from '../../shared/omp-rewind-target'
 import { agentJournalSubmissionKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
-import { structuredRewindCut } from '../native-chat/agent-session-wire/structured-rewind-cut'
+import { structuredRewindCut } from '../native-chat/agent-session-wire/rewind/structured-rewind-cut'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import type { PiRpcConnection } from '../pi/rpc-session'
 import type { PiSessionEntry } from '../pi/rpc-history-import'
@@ -94,11 +94,36 @@ it('detects native navigation without changing the leaf, and declines older RPC 
 it('rewinds identical prompts by native identity, retaining the whole earlier tool batch', async () => {
   const h = await setup()
   const beforeTurnId = encodeOmpRewindTarget({ sessionFile: file, timestamp: 200 })
+  await expect(h.adapter.prepareRewind({ ...input, beforeTurnId })).resolves.toEqual({
+    ok: true,
+    revert: {
+      threadId: file,
+      beforeTurnId: encodeOmpRewindTarget({ entryId: 'u2' }),
+      keptTurnId: 'tool1'
+    }
+  })
+  expect(h.navigate).not.toHaveBeenCalled()
   await expect(h.adapter.rewind({ ...input, beforeTurnId })).resolves.toEqual({ ok: true })
   expect(h.navigate).toHaveBeenCalledWith({ entryId: 'u2', summarize: false })
   await expect(
     h.adapter.recoverRewind({ ...input, beforeTurnId, keptTurnId: null })
   ).resolves.toEqual({ ok: true })
+  await expect(
+    h.adapter.recoverRewind({
+      ...input,
+      beforeTurnId: encodeOmpRewindTarget({ entryId: 'u2' }),
+      keptTurnId: 'tool1',
+      threadId: file
+    })
+  ).resolves.toEqual({ ok: true })
+  await expect(
+    h.adapter.recoverRewind({
+      ...input,
+      beforeTurnId,
+      keptTurnId: 'tool1',
+      threadId: '/different/session.jsonl'
+    })
+  ).resolves.toEqual({ ok: false, reason: 'invalid-target' })
   expect(h.navigate).toHaveBeenCalledTimes(1)
 })
 

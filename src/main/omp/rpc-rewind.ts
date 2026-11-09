@@ -3,7 +3,7 @@ import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
 import { decodeOmpRewindTarget, encodeOmpRewindTarget } from '../../shared/omp-rewind-target'
 import { parseAgentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
-import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
+import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 import type { PiRpcSession, PiRpcConnection } from '../pi/rpc-session'
 import { readOmpRewindEntries } from './rpc-rewind-entries'
 import { piBranchInTree } from '../pi/rpc-history-import'
@@ -99,6 +99,53 @@ export class OmpRpcRewind {
   }
 }
 
+function rewindCandidates(
+  entries: readonly PiSessionEntry[],
+  target: NonNullable<ReturnType<typeof decodeOmpRewindTarget>>,
+  sessionFile: string
+): PiSessionEntry[] {
+  return entries.filter((entry) => {
+    const timestamp = requestTimestamp(entry)
+    return (
+      timestamp !== undefined &&
+      ('entryId' in target
+        ? entry.id === target.entryId
+        : target.sessionFile === sessionFile && timestamp === target.timestamp)
+    )
+  })
+}
+
+export async function prepareOmpRewind(
+  session: PiRpcSession,
+  beforeTurnId: string
+): ReturnType<NonNullable<StructuredAgentSessionAdapter['prepareRewind']>> {
+  const target = decodeOmpRewindTarget(beforeTurnId)
+  const sessionFile = session.sessionFile
+  if (!target || !sessionFile) {
+    return { ok: false, reason: 'invalid-target' }
+  }
+  const answer = await readOmpRewindEntries(session.connection, sessionFile)
+  const candidates = rewindCandidates(answer.entries, target, sessionFile)
+  const branch = piBranchInTree(answer, null)
+  const entry = candidates.length === 1 ? candidates[0] : undefined
+  if (
+    !entry ||
+    !branch ||
+    branch === 'unknown-claim' ||
+    !branch.path.some((row) => row.id === entry.id)
+  ) {
+    return { ok: false, reason: 'invalid-target' }
+  }
+  return {
+    ok: true,
+    revert: {
+      threadId: sessionFile,
+      beforeTurnId: encodeOmpRewindTarget({ entryId: entry.id }),
+      keptTurnId: entry.parentId
+    }
+  }
+}
+
 export async function rewindOmpSession(
   session: PiRpcSession,
   beforeTurnId: string,
@@ -129,15 +176,7 @@ export async function rewindOmpSession(
   }
   const entries = () => read(readOmpRewindEntries(session.connection, sessionFile, options.signal))
   const answer = await entries()
-  const candidates = answer.entries.filter((entry) => {
-    const timestamp = requestTimestamp(entry)
-    return (
-      timestamp !== undefined &&
-      ('entryId' in target
-        ? entry.id === target.entryId
-        : target.sessionFile === session.sessionFile && timestamp === target.timestamp)
-    )
-  })
+  const candidates = rewindCandidates(answer.entries, target, sessionFile)
   // Timestamps are native correlation evidence only when unique, including abandoned branches.
   if (candidates.length !== 1) {
     return { ok: false, reason: 'invalid-target' }

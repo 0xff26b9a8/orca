@@ -34,7 +34,7 @@ import {
 import { resolveOmpSessionsDir } from '../ai-vault/scanners/omp/omp-session-root'
 import { findOmpSessionByCwd } from './omp-session-cwd-lookup'
 import { parsePiModelOptionId } from '../pi/rpc-options'
-import type { StructuredAgentSessionAcquireInput } from '../native-chat/agent-session-wire/structured-agent-session-adapter'
+import type { StructuredAgentSessionAcquireInput } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 
 export const OMP_RPC_MINIMUM_VERSIONS = ['18.4.5'] as const
 

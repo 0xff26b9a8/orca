@@ -2,17 +2,17 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
 import { FakeConnection, state } from '../pi/rpc-session-adapter.test-fixture'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
-import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/structured-agent-registry'
-import { StructuredAgentSessionAdapterRouter } from '../native-chat/agent-session-wire/structured-agent-session-adapter-router'
-import { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/structured-agent-session-host'
+import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/providers/structured-agent-registry'
+import { StructuredAgentSessionAdapterRouter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter-router'
+import { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/host/structured-agent-session-host'
 import {
   CALLER,
   attachParams,
   envelope,
   hostTestState,
   replaceHostTestState
-} from '../native-chat/agent-session-wire/structured-agent-session-host-test-harness'
-import { HOST_TEST_SESSION as SESSION } from '../native-chat/agent-session-wire/structured-agent-session-host-test-data'
+} from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-harness'
+import { HOST_TEST_SESSION as SESSION } from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-data'
 
 let adapter: OmpRpcSessionAdapter | undefined
 afterEach(async () => {
