@@ -1,6 +1,6 @@
 import type { AgentModelCatalogProbe } from '../native-chat/agent-model-catalog/agent-model-catalog-store'
 import type { StructuredAgentModelCatalogContext } from '../runtime/agent-session/installation/structured-agent-runtime-registration-types'
-import { readPiRpcSessionOptions } from '../pi/rpc-options'
+import { readPiRpcSessionOptions } from '../pi/rpc/options/rpc-options'
 import { readOmpFastOptions } from './rpc-options'
 import { runOmpRpcCatalogSession } from './rpc-catalog-session'
 

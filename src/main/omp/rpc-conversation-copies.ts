@@ -8,9 +8,9 @@ import { requireLegacyAgentSessionAccountHome } from '../../shared/agent-session
 import type { AiVaultConversationCopy } from '../../shared/ai-vault/resume/ai-vault-resume-preparation'
 import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 import { ProviderAcquisitionStarts } from '../provider-process/provider-acquisition-starts'
-import { piRpcSessionlessEnvironment } from '../pi/rpc-launch'
-import { readPiSessionHeader, samePiDirectory } from '../pi/rpc-launch-resolution'
-import type { PiRpcConnection, PiRpcSessionAdapterDeps } from '../pi/rpc-session-contract'
+import { piRpcSessionlessEnvironment } from '../pi/rpc/launch/rpc-launch'
+import { readPiSessionHeader, samePiDirectory } from '../pi/rpc/launch/rpc-launch-resolution'
+import type { PiRpcConnection, PiRpcSessionAdapterDeps } from '../pi/rpc/rpc-session-contract'
 import { buildOmpRpcLaunch } from './rpc-launch'
 import { openOmpRpcConnection } from './rpc-connection'
 

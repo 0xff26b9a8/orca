@@ -23,7 +23,7 @@ await build({
     contents: `export {OmpRpcSessionAdapter} from './src/main/omp/rpc-session-adapter';
       export {buildOmpRpcLaunch,resolveOmpRpcResume} from './src/main/omp/rpc-launch';
       export {openOmpRpcConnection} from './src/main/omp/rpc-connection';
-      export {piRpcSessionlessEnvironment} from './src/main/pi/rpc-launch';
+      export {piRpcSessionlessEnvironment} from './src/main/pi/rpc/launch/rpc-launch';
       export {OMP_RPC_AGENT} from './src/main/omp/rpc-agent-definition';
       export {StructuredAgentRegistry} from './src/main/native-chat/agent-session-wire/providers/structured-agent-registry';
       export {StructuredAgentSessionAdapterRouter} from './src/main/native-chat/agent-session-wire/providers/structured-agent-session-adapter-router';`

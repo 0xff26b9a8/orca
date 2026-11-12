@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { PiRpcPromptDelivery } from '../pi/rpc-prompt-delivery'
+import { PiRpcPromptDelivery } from '../pi/rpc/prompts/rpc-prompt-delivery'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 
 afterEach(() => vi.useRealTimers())

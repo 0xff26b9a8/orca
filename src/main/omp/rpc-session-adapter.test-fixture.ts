@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
-import { FakeConnection } from '../pi/rpc-session-adapter.test-fixture'
+import { FakeConnection } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import {
   closeProviderTimelineRigs,
   openProviderTimelineRig

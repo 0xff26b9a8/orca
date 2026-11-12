@@ -10,8 +10,8 @@ import {
   assertStructuredAgentResolutionCurrent,
   type StructuredAgentResolutionOperation
 } from '../native-chat/structured-agent-command-resolution'
-import { piRpcSessionlessEnvironment } from '../pi/rpc-launch'
-import type { PiRpcConnection } from '../pi/rpc-session'
+import { piRpcSessionlessEnvironment } from '../pi/rpc/launch/rpc-launch'
+import type { PiRpcConnection } from '../pi/rpc/rpc-session'
 import type { StructuredAgentModelCatalogContext } from '../runtime/agent-session/installation/structured-agent-runtime-registration-types'
 import { openOmpRpcConnection } from './rpc-connection'
 import { buildOmpRpcLaunch, resolveOmpRpcInvocation } from './rpc-launch'

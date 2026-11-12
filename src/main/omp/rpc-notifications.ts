@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
-import type { PiRpcSession } from '../pi/rpc-session'
+import type { PiRpcSession } from '../pi/rpc/rpc-session'
 
 export function ompRpcNoticeTone(level: unknown): 'notice' | 'warning' | 'error' {
   return level === 'error' || level === 'warning' ? level : 'notice'

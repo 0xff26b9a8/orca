@@ -5,7 +5,7 @@ import { expect, it, vi } from 'vitest'
 import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session/lifecycle/agent-session-mutation-envelope'
 import { agentSessionProviderHandleChainHead } from '../../shared/agent-session/lifecycle/agent-session-provider-handle'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import { FakeConnection, file, state } from '../pi/rpc-session-adapter.test-fixture'
+import { FakeConnection, file, state } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { openTestAgentSessionRecordStore } from '../runtime/agent-session/records/agent-session-record-store-test-harness'
 import {
   closeTestJournalHostDatabase,

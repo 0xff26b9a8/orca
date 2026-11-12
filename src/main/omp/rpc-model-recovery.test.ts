@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { FakeConnection, state } from '../pi/rpc-session-adapter.test-fixture'
+import { FakeConnection, state } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import {
   closeProviderTimelineRigs,
   openProviderTimelineRig

@@ -6,8 +6,8 @@ import { ompEditResultEvents } from './rpc-edit-results'
 import { ompTodoEvents } from './rpc-todo'
 import { receiveOmpNotification } from './rpc-notifications'
 import { ompRpcUserMessageSchema } from './rpc-user-message'
-import type { PiRpcSession } from '../pi/rpc-session'
-import type { PiRpcSessionAdapterDeps } from '../pi/rpc-session-adapter'
+import type { PiRpcSession } from '../pi/rpc/rpc-session'
+import type { PiRpcSessionAdapterDeps } from '../pi/rpc/rpc-session-adapter'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 
 export const goalSchema = z.object({

@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
-import type { PiRpcDialogCallbacks } from '../pi/rpc-dialog-callbacks'
-import type { PiRpcDialogPresentation } from '../pi/rpc-extension-dialogs'
+import type { PiRpcDialogCallbacks } from '../pi/rpc/rpc-dialog-callbacks'
+import type { PiRpcDialogPresentation } from '../pi/rpc/rpc-extension-dialogs'
 import { MAX_JOURNAL_GROUPED_PROMPT_QUESTIONS } from '../native-chat/agent-session-journal/item-lifecycle/journal-prompt-body-bounds'
 
 const answersSchema = z.object({

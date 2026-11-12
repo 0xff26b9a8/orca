@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, expect, it } from 'vitest'
-import { readPiSessionHeader } from '../pi/rpc-launch-resolution'
+import { readPiSessionHeader } from '../pi/rpc/launch/rpc-launch-resolution'
 
 const directories: string[] = []
 afterEach(async () => {

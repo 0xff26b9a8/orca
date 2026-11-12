@@ -3,7 +3,7 @@ import {
   closePiRpcAdapterFixtures,
   sessionId as piSessionId,
   setup as setupPi
-} from '../pi/rpc-session-adapter.test-fixture'
+} from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { closeOmpRpcAdapterFixtures, setupOmpRpcAdapter } from './rpc-session-adapter.test-fixture'
 
 let closeFixtures: () => Promise<void>

@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, expect, it } from 'vitest'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import { piBranchInTree } from '../pi/rpc-history-import'
-import type { PiRpcConnection } from '../pi/rpc-session'
+import { piBranchInTree } from '../pi/rpc/history/rpc-history-import'
+import type { PiRpcConnection } from '../pi/rpc/rpc-session'
 import { readOmpRewindEntries } from './rpc-rewind-entries'
 
 const roots: string[] = []

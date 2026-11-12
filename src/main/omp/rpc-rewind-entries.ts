@@ -1,14 +1,17 @@
 import { z } from 'zod'
-import { readPiEntries } from '../pi/rpc-history-catch-up'
+import { readPiEntries } from '../pi/rpc/history/rpc-history-catch-up'
 import {
   piEntriesAnswerSchema,
   type PiEntriesAnswer,
   type PiSessionEntry
-} from '../pi/rpc-history-import'
-import type { PiRpcConnection } from '../pi/rpc-session'
+} from '../pi/rpc/history/rpc-history-import'
+import type { PiRpcConnection } from '../pi/rpc/rpc-session'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import { readJsonlLinesFromOffset } from '../usage/jsonl-line-offsets'
-import { readJsonlFileSnapshot, sameJsonlFileSnapshot } from '../usage/jsonl-file-snapshot'
+import { readJsonlLinesFromOffset } from '../usage/source-input/jsonl/jsonl-line-offsets'
+import {
+  readJsonlFileSnapshot,
+  sameJsonlFileSnapshot
+} from '../usage/source-input/jsonl/jsonl-file-snapshot'
 import { ompRpcUserMessageSchema } from './rpc-user-message'
 
 const titleSlot = z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })

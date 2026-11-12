@@ -4,9 +4,9 @@ import { agentJournalSubmissionKey } from '../../shared/agent-session/journal/ag
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
 import { structuredRewindCut } from '../native-chat/agent-session-wire/rewind/structured-rewind-cut'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import type { PiRpcConnection } from '../pi/rpc-session'
-import type { PiSessionEntry } from '../pi/rpc-history-import'
-import { file, state } from '../pi/rpc-session-adapter.test-fixture'
+import type { PiRpcConnection } from '../pi/rpc/rpc-session'
+import type { PiSessionEntry } from '../pi/rpc/history/rpc-history-import'
+import { file, state } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { closeOmpRpcAdapterFixtures, setupOmpRpcAdapter } from './rpc-session-adapter.test-fixture'
 import { supportsOmpRewind } from './rpc-rewind'
 

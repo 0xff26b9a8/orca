@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
-import { FakeConnection, state } from '../pi/rpc-session-adapter.test-fixture'
+import { FakeConnection, state } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/providers/structured-agent-registry'
 import { StructuredAgentSessionAdapterRouter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter-router'

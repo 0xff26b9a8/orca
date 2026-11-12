@@ -7,7 +7,7 @@ import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-sessio
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { structuredSessionBackgroundTasksView } from '../../shared/structured-session-background-tasks-view'
 import { acpChildWorkStatusSink } from '../acp/session/testing/acp-structured-child-work.test-support'
-import { FakeConnection } from '../pi/rpc-session-adapter.test-fixture'
+import { FakeConnection } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { openTestAgentSessionRecordStore } from '../runtime/agent-session/records/agent-session-record-store-test-harness'
 import {
   closeTestJournalHostDatabase,

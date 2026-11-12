@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { captureOmpSubagentStop, refreshOmpSubagents } from './rpc-session-events'
-import type { PiRpcConnection, PiRpcSession } from '../pi/rpc-session'
+import type { PiRpcConnection, PiRpcSession } from '../pi/rpc/rpc-session'
 import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 
 export async function supportsOmpSubagentStop(

@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { state } from '../pi/rpc-session-adapter.test-fixture'
+import { state } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { projectStructuredItemsToNativeChat } from '../../shared/agent-session/view/structured-agent-session-projection'
 import {

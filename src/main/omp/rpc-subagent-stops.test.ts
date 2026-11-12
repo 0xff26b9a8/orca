@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { closeOmpRpcAdapterFixtures, setupOmpRpcAdapter } from './rpc-session-adapter.test-fixture'
 import { supportsOmpSubagentStop } from './rpc-subagent-stops'
-import type { PiRpcConnection } from '../pi/rpc-session'
+import type { PiRpcConnection } from '../pi/rpc/rpc-session'
 
 afterEach(closeOmpRpcAdapterFixtures)
 

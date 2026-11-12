@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { PiRpcMessages } from '../pi/rpc-messages'
-import { PiRpcContextUsage } from '../pi/rpc-context-usage'
+import { PiRpcMessages } from '../pi/rpc/rpc-messages'
+import { PiRpcContextUsage } from '../pi/rpc/rpc-context-usage'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { ProviderTimelineEvent } from '../native-chat/agent-session-timeline/provider-timeline-event'
 import { ompEditResultEvents } from './rpc-edit-results'

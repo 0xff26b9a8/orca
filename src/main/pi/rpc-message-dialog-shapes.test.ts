@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { PiRpcMessages } from './rpc-messages'
-import { PiRpcContextUsage } from './rpc-context-usage'
-import { piRpcDialogPresentation } from './rpc-extension-dialogs'
+import { PiRpcMessages } from './rpc/rpc-messages'
+import { PiRpcContextUsage } from './rpc/rpc-context-usage'
+import { piRpcDialogPresentation } from './rpc/rpc-extension-dialogs'
 
 describe('recorded Pi message and extension shapes', () => {
   it('keeps tool image results as native attachments while retaining text output', () => {

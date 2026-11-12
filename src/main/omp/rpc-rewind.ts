@@ -4,10 +4,10 @@ import { decodeOmpRewindTarget, encodeOmpRewindTarget } from '../../shared/omp-r
 import { parseAgentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
 import type { StructuredAgentSessionAdapter } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
-import type { PiRpcSession, PiRpcConnection } from '../pi/rpc-session'
+import type { PiRpcSession, PiRpcConnection } from '../pi/rpc/rpc-session'
 import { readOmpRewindEntries } from './rpc-rewind-entries'
-import { piBranchInTree } from '../pi/rpc-history-import'
-import type { PiSessionEntry } from '../pi/rpc-history-import'
+import { piBranchInTree } from '../pi/rpc/history/rpc-history-import'
+import type { PiSessionEntry } from '../pi/rpc/history/rpc-history-import'
 import { JsonlRpcResponseError, type JsonlRpcRecord } from '../jsonl-rpc/peer'
 import { ompRpcUserMessageSchema } from './rpc-user-message'
 

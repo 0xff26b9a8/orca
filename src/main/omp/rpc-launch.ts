@@ -24,16 +24,16 @@ import {
   readPiSessionHeader,
   samePiDirectory,
   type PiRpcResolvedLaunch
-} from '../pi/rpc-launch-resolution'
+} from '../pi/rpc/launch/rpc-launch-resolution'
 import {
   buildPiRpcLaunch,
   PI_RPC_SESSION_ENV_TO_DELETE,
   withoutPiCallerEnv,
   type PiRpcLaunchOptions
-} from '../pi/rpc-launch'
+} from '../pi/rpc/launch/rpc-launch'
 import { resolveOmpSessionsDir } from '../ai-vault/scanners/omp/omp-session-root'
 import { findOmpSessionByCwd } from './omp-session-cwd-lookup'
-import { parsePiModelOptionId } from '../pi/rpc-options'
+import { parsePiModelOptionId } from '../pi/rpc/options/rpc-model-options'
 import type { StructuredAgentSessionAcquireInput } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 
 export const OMP_RPC_MINIMUM_VERSIONS = ['18.4.5'] as const

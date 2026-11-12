@@ -5,7 +5,7 @@ import {
 } from '../jsonl-rpc/agent-connection'
 import { JsonlRpcResponseError, type JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { ProviderProcessLaunch } from '../provider-process/provider-process-launch'
-import type { PiRpcConnection } from '../pi/rpc-session'
+import type { PiRpcConnection } from '../pi/rpc/rpc-session'
 import { OmpRpcFrameDecoder, encodeOmpRpcFrame } from './rpc-frame-decoder'
 import { OmpRpcCommandPolicy } from './rpc-command-policy'
 import { jsonlRpcRequestTimeout } from '../jsonl-rpc/peer-limits'

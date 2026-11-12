@@ -3,7 +3,7 @@ import { isLegacyAgentSessionAccountHome } from '../../shared/agent-session/life
 import { AtRestCommandCatalog } from '../native-chat/agent-session-wire/options/at-rest-command-catalog'
 import { supportsSupervisedProviderChildLocation } from '../provider-process/supervised-provider-child-location'
 import type { StructuredAgentModelCatalogContext } from '../runtime/agent-session/installation/structured-agent-runtime-registration-types'
-import { readPiRpcCommands } from '../pi/rpc-options'
+import { readPiRpcCommands } from '../pi/rpc/options/rpc-options'
 import { runOmpRpcCatalogSession } from './rpc-catalog-session'
 
 export function createOmpRpcAtRestCommands(

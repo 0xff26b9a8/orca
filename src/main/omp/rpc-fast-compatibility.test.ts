@@ -1,5 +1,5 @@
 import { afterEach, expect, it } from 'vitest'
-import { state } from '../pi/rpc-session-adapter.test-fixture'
+import { state } from '../pi/rpc/rpc-session-adapter.test-fixture'
 import { setOmpFastMode } from './rpc-options'
 import { closeOmpRpcAdapterFixtures, setupOmpRpcAdapter } from './rpc-session-adapter.test-fixture'
 

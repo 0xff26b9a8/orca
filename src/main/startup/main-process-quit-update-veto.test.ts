@@ -26,7 +26,7 @@ const dependencyExports: [string, string[]][] = [
     ['shutdownPairedRuntimeBrowserClientHosts']
   ],
   ['../ipc/browser/desktop-browser-bridge-wiring', ['disposeDesktopBrowserBridge']],
-  ['../orca-profiles/profile-cloud-session-owner', ['flushUnsavedCloudSessions']],
+  ['../orca-profiles/cloud-session/profile-cloud-session-owner', ['flushUnsavedCloudSessions']],
   ['../browser/guest-lifecycle/manager/browser-manager', ['browserManager']],
   ['../browser/sessions/profiles/browser-session-registry', ['browserSessionRegistry']],
   ['../codex/codex-state-db-backfill-recovery', ['stopCodexStateDbBackfillRecoveries']],

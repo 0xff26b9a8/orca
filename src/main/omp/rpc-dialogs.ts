@@ -1,6 +1,9 @@
 import { z } from 'zod'
-import { PiRpcDialogCallbacks } from '../pi/rpc-dialog-callbacks'
-import { piRpcDialogPresentation, type PiRpcDialogPresentation } from '../pi/rpc-extension-dialogs'
+import { PiRpcDialogCallbacks } from '../pi/rpc/rpc-dialog-callbacks'
+import {
+  piRpcDialogPresentation,
+  type PiRpcDialogPresentation
+} from '../pi/rpc/rpc-extension-dialogs'
 import type { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import { ompRpcNoticeTone } from './rpc-notifications'
