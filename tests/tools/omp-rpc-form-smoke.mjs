@@ -117,7 +117,13 @@ const outfile = join(root, 'adapter.cjs')
 await build({
   stdin: {
     resolveDir: process.cwd(),
-    contents: `export {openOmpRpcConnection} from './src/main/omp/rpc-connection'; export {ensureOmpRpcFormBridge} from './src/main/omp/rpc-form-bridge';`
+    contents: `
+      export {openOmpRpcConnection} from './src/main/omp/rpc-connection';
+      export {ensureOmpRpcFormBridge} from './src/main/omp/rpc-form-bridge';
+      export {ompRpcDialogPresentation} from './src/main/omp/rpc-dialogs';
+      export {structuredQuestionAnswers} from './src/shared/structured-agent-question-card';
+      export {isValidAgentSessionQuestionAnswers} from './src/shared/agent-session/agent-session-question-answer';
+    `
   },
   bundle: true,
   platform: 'node',
@@ -125,7 +131,13 @@ await build({
   packages: 'external',
   outfile
 })
-const { openOmpRpcConnection, ensureOmpRpcFormBridge } = createRequire(import.meta.url)(outfile)
+const {
+  openOmpRpcConnection,
+  ensureOmpRpcFormBridge,
+  ompRpcDialogPresentation,
+  structuredQuestionAnswers,
+  isValidAgentSessionQuestionAnswers
+} = createRequire(import.meta.url)(outfile)
 const env = {
   ...process.env,
   HOME: root,
@@ -202,17 +214,24 @@ try {
   )
   assert.equal(group.questions[2].textInput.initialValue, '5')
   assert.equal(group.questions[3].textInput.multiline, true)
-  const answer = async (id, number) =>
-    connection.send({
+  const answer = async (id, number, leaveUnselected = false) => {
+    const presentation = ompRpcDialogPresentation(groupFrames().find((frame) => frame.id === id))
+    assert.equal(presentation.body.kind, 'question')
+    const questions = presentation.body.questions
+    const answers = structuredQuestionAnswers(questions, [
+      { indices: leaveUnselected ? [0] : [2], other: '' },
+      { indices: leaveUnselected ? [0] : [1, 3], other: '' },
+      { indices: [], other: number },
+      { indices: [], other: '  first\nsecond  ' }
+    ])
+    assert.ok(answers)
+    assert.equal(isValidAgentSessionQuestionAnswers(questions, answers), true)
+    await connection.send({
       type: 'extension_ui_response',
       id,
-      answers: [
-        { id: 'field-0', selectedOptions: ['Detailed'] },
-        { id: 'field-1', selectedOptions: ['Forms', 'Subagents'] },
-        { id: 'field-2', selectedOptions: [], customInput: JSON.stringify(number) },
-        { id: 'field-3', selectedOptions: [], customInput: JSON.stringify('  first\nsecond  ') }
-      ]
+      ...presentation.reply({ kind: 'answers', answers })
     })
+  }
   await answer(group.id, '99')
   await wait(() => groupFrames().length === 2)
   const retry = groupFrames()[1]
@@ -233,17 +252,33 @@ try {
   })
   await wait(async () => (await connection.request('get_state')).isSettled)
   invoked = false
-  await connection.send({ type: 'prompt', id: 'cancel-replay', message: 'REPLAY_HTML_ASK' })
+  await connection.send({ type: 'prompt', id: 'empty-replay', message: 'REPLAY_HTML_ASK' })
   await wait(() => groupFrames().length === 3)
-  await connection.send({ type: 'extension_ui_response', id: groupFrames()[2].id, cancelled: true })
+  await answer(groupFrames()[2].id, '7', true)
   await wait(() => toolResults().length === 2)
-  assert.equal(toolResults()[1].isError, true)
-  assert.match(toolResults()[1].result.content[0].text, /Ask tool was cancelled by the user/)
+  assert.equal(toolResults()[1].isError, false)
+  const emptyText = toolResults()[1].result.content.find((c) => c.type === 'text').text
+  assert.deepEqual(JSON.parse(emptyText.slice(emptyText.indexOf('{'))), {
+    marker: 'native-form',
+    features: [],
+    number: 7,
+    message: '  first\nsecond  '
+  })
+  await wait(async () => (await connection.request('get_state')).isSettled)
+  invoked = false
+  await connection.send({ type: 'prompt', id: 'cancel-replay', message: 'REPLAY_HTML_ASK' })
+  await wait(() => groupFrames().length === 4)
+  await connection.send({ type: 'extension_ui_response', id: groupFrames()[3].id, cancelled: true })
+  await wait(() => toolResults().length === 3)
+  assert.equal(toolResults()[2].isError, true)
+  assert.match(toolResults()[2].result.content[0].text, /Ask tool was cancelled by the user/)
   const result = {
     binary: resolve(process.argv[2]),
     transport: 'real OMP RPC v2',
     model: 'isolated local SSE fixture',
     groupedForm: true,
+    hostAnswerValidation: true,
+    emptyChoices: true,
     nativeValidation: true,
     retryKeepsInput: true,
     typedValues: true,

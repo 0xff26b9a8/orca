@@ -1,7 +1,62 @@
 import { afterEach, expect, it } from 'vitest'
 import { closeOmpRpcAdapterFixtures, setupOmpRpcAdapter } from './rpc-session-adapter.test-fixture'
+import { ompRpcDialogPresentation } from './rpc-dialogs'
+import { structuredQuestionAnswers } from '../../shared/structured-agent-question-card'
+import { isValidAgentSessionQuestionAnswers } from '../../shared/agent-session/agent-session-question-answer'
 
 afterEach(closeOmpRpcAdapterFixtures)
+
+it('submits closed form choices through the Native Chat answer validation', () => {
+  const presentation = ompRpcDialogPresentation({
+    id: 'optional-choice',
+    method: 'ask',
+    questions: [
+      {
+        id: 'style',
+        question: 'Response style',
+        options: [{ label: 'Concise' }, { label: 'Detailed' }],
+        allowCustom: false,
+        textInput: { allowEmpty: true }
+      },
+      {
+        id: 'features',
+        question: 'Features',
+        options: [{ label: 'Forms' }, { label: 'Subagents' }],
+        multi: true,
+        allowCustom: false,
+        textInput: { allowEmpty: true }
+      }
+    ]
+  })
+  if (presentation?.body.kind !== 'question' || !presentation.body.questions) {
+    throw new Error('Missing form questions')
+  }
+  const questions = presentation.body.questions
+  const answers = structuredQuestionAnswers(questions, [
+    { indices: [2], other: '' },
+    { indices: [1, 2], other: '' }
+  ])
+  expect(answers).not.toBeNull()
+  expect(isValidAgentSessionQuestionAnswers(questions, answers!)).toBe(true)
+  expect(presentation.reply({ kind: 'answers', answers: answers! })).toEqual({
+    answers: [
+      { id: 'style', selectedOptions: ['Detailed'] },
+      { id: 'features', selectedOptions: ['Forms', 'Subagents'] }
+    ]
+  })
+  const skipped = structuredQuestionAnswers(questions, [
+    { indices: [0], other: '' },
+    { indices: [0], other: '' }
+  ])
+  expect(skipped).not.toBeNull()
+  expect(isValidAgentSessionQuestionAnswers(questions, skipped!)).toBe(true)
+  expect(presentation.reply({ kind: 'answers', answers: skipped! })).toEqual({
+    answers: [
+      { id: 'style', selectedOptions: [] },
+      { id: 'features', selectedOptions: [] }
+    ]
+  })
+})
 
 it('keeps a form as one grouped request and preserves optional and multiline text on submission', async () => {
   const h = await setupOmpRpcAdapter()
@@ -44,10 +99,10 @@ it('keeps a form as one grouped request and preserves optional and multiline tex
       question: 'Features',
       multiSelect: true,
       options: [
+        { id: 'omp-empty-choice', label: 'Leave unselected' },
         { id: 'option-0', label: 'Forms' },
         { id: 'option-1', label: 'Subagents' }
-      ],
-      freeTextInput: { allowEmpty: true }
+      ]
     },
     {
       id: 'field-1',
