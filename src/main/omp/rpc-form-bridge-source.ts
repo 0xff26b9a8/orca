@@ -1,11 +1,13 @@
 // The child loads its own parser, so form semantics stay with the installed OMP version.
+const OMP_TUI_PACKAGE = '@oh-my-pi/pi-tui'
+
 export const OMP_RPC_FORM_BRIDGE_SOURCE = String.raw`
 export default async function (pi) {
   let parse, data, render
   try {
-    parse = await import('@oh-my-pi/pi-tui/html-form/parse')
-    data = await import('@oh-my-pi/pi-tui/html-form/data')
-    render = await import('@oh-my-pi/pi-tui/render/render-utils')
+    parse = await import('${OMP_TUI_PACKAGE}/html-form/parse')
+    data = await import('${OMP_TUI_PACKAGE}/html-form/data')
+    render = await import('${OMP_TUI_PACKAGE}/render/render-utils')
   } catch {
     return
   }
