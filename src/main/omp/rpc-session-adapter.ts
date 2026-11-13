@@ -13,6 +13,7 @@ import { OmpRpcRewind, prepareOmpRewind, rewindOmpSession, supportsOmpRewind } f
 import { stopOmpSubagents, supportsOmpSubagentStop } from './rpc-subagent-stops'
 import { importOmpSubagentHistory } from './rpc-subagent-history'
 import { OmpRpcConversationCopies } from './rpc-conversation-copies'
+import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
 
 export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
   readonly atRestCommands: StructuredAgentSessionAdapter['atRestCommands']
@@ -27,6 +28,28 @@ export class OmpRpcSessionAdapter extends PiRpcSessionAdapter {
     const subagentStops = new WeakSet<PiRpcSession['connection']>()
     super({
       ...deps,
+      onLifecycle: (event) => {
+        try {
+          if (event.type === 'ended') {
+            const session = this.sessions.get(event.sessionId)
+            if (
+              session?.generation === event.acquisitionGeneration &&
+              session.input.fence === event.fence
+            ) {
+              const evidence: AgentChildWorkEvidence[] = [
+                { type: 'session-ended', observedAt: event.observedAt ?? Date.now() }
+              ]
+              if (session.input.childWork) {
+                session.input.childWork(evidence)
+              } else {
+                deps.onChildWorkEvidence?.(event.sessionId, evidence, session.input.events)
+              }
+            }
+          }
+        } finally {
+          deps.onLifecycle(event)
+        }
+      },
       buildLaunch: buildOmpRpcLaunch,
       openConnection: (launch, handlers) => {
         const connection = (deps.openConnection ?? openOmpRpcConnection)(launch, handlers)
