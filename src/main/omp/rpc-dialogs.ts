@@ -8,9 +8,6 @@ import type { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import { ompRpcNoticeTone } from './rpc-notifications'
 import { OmpRpcAskGroups } from './rpc-ask-groups'
-import { MAX_JOURNAL_PROMPT_OPTIONS } from '../native-chat/agent-session-journal/item-lifecycle/journal-prompt-body-bounds'
-
-const EMPTY_CHOICE_ID = 'omp-empty-choice'
 
 const askSchema = z.object({
   id: z.string(),
@@ -31,22 +28,47 @@ const askSchema = z.object({
           )
           .max(64),
         multi: z.boolean().optional(),
-        recommended: z.number().optional(),
-        allowCustom: z.boolean().optional(),
-        encodedText: z.boolean().optional(),
-        textInput: z
-          .object({
-            allowEmpty: z.boolean().optional(),
-            multiline: z.boolean().optional(),
-            initialValue: z.string().optional(),
-            placeholder: z.string().optional()
-          })
-          .optional()
+        recommended: z.number().optional()
       })
     )
     .min(1)
     .max(64)
 })
+
+const checkboxSchema = z.object({
+  method: z.literal('select'),
+  selectionMarker: z.literal('checkbox'),
+  checkedIndices: z.array(z.number().int().nonnegative()),
+  markableCount: z.number().int().nonnegative().optional()
+})
+
+function ompRpcPrimitiveDialogPresentation(value: unknown): PiRpcDialogPresentation | null {
+  const presentation = piRpcDialogPresentation(value)
+  const checkbox = checkboxSchema.safeParse(value)
+  if (!presentation || presentation.body.kind !== 'question' || !checkbox.success) {
+    return presentation
+  }
+  const { checkedIndices, markableCount = presentation.body.options.length } = checkbox.data
+  return {
+    ...presentation,
+    body: {
+      ...presentation.body,
+      options: presentation.body.options.map((option, index) =>
+        index < markableCount
+          ? {
+              ...option,
+              description: [
+                checkedIndices.includes(index) ? 'Selected' : 'Not selected',
+                option.description
+              ]
+                .filter(Boolean)
+                .join('\n')
+            }
+          : option
+      )
+    }
+  }
+}
 
 export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentation | null {
   if (z.object({ secret: z.literal(true) }).safeParse(value).success) {
@@ -57,18 +79,10 @@ export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentatio
   }
   const ask = askSchema.safeParse(value)
   if (!ask.success) {
-    return piRpcDialogPresentation(value)
+    return ompRpcPrimitiveDialogPresentation(value)
   }
   const { id, questions } = ask.data
   if (new Set(questions.map((question) => question.id)).size !== questions.length) {
-    return null
-  }
-  if (
-    questions.some(
-      (question) =>
-        question.textInput?.allowEmpty && question.options.length >= MAX_JOURNAL_PROMPT_OPTIONS
-    )
-  ) {
     return null
   }
   return {
@@ -83,20 +97,12 @@ export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentatio
         question: question.question,
         ...(question.header ? { header: question.header } : {}),
         multiSelect: question.multi === true,
-        ...(question.allowCustom !== false ? { freeTextQuestionId: question.id } : {}),
-        ...(question.textInput && question.options.length === 0
-          ? { freeTextInput: question.textInput }
-          : {}),
-        options: [
-          ...(question.options.length > 0 && question.textInput?.allowEmpty
-            ? [{ id: EMPTY_CHOICE_ID, label: 'Leave unselected' }]
-            : []),
-          ...question.options.map((option, index) => ({
-            id: `option-${index}`,
-            label: option.label,
-            ...(option.description ? { description: option.description } : {})
-          }))
-        ]
+        freeTextQuestionId: question.id,
+        options: question.options.map((option, index) => ({
+          id: `option-${index}`,
+          label: option.label,
+          ...(option.description ? { description: option.description } : {})
+        }))
       }))
     },
     reply: (response) => {
@@ -120,35 +126,20 @@ export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentatio
         ) {
           throw new Error('OMP Ask answer has invalid selections')
         }
-        const selectedOptions = answer.optionIds.flatMap((optionId) => {
-          if (
-            optionId === EMPTY_CHOICE_ID &&
-            question.options.length > 0 &&
-            question.textInput?.allowEmpty
-          ) {
-            return []
-          }
+        const selectedOptions = answer.optionIds.map((optionId) => {
           const index = question.options.findIndex((_, index) => optionId === `option-${index}`)
           if (index === -1) {
             throw new Error('OMP Ask answer selected an unavailable option')
           }
-          return [question.options[index]!.label]
+          return question.options[index]!.label
         })
-        if (
-          (question.allowCustom === false && answer.other?.trim()) ||
-          (!question.multi &&
-            selectedOptions.length === 0 &&
-            !answer.other?.trim() &&
-            !question.textInput?.allowEmpty)
-        ) {
+        if (!question.multi && selectedOptions.length === 0 && !answer.other?.trim()) {
           throw new Error('OMP Ask requires a selection or text')
         }
         return {
           id: question.id,
           selectedOptions,
-          ...(answer.other !== undefined
-            ? { customInput: question.encodedText ? JSON.stringify(answer.other) : answer.other }
-            : {})
+          ...(answer.other !== undefined ? { customInput: answer.other } : {})
         }
       })
       return { answers }

@@ -119,10 +119,10 @@ await build({
     resolveDir: process.cwd(),
     contents: `
       export {openOmpRpcConnection} from './src/main/omp/rpc-connection';
-      export {ensureOmpRpcFormBridge} from './src/main/omp/rpc-form-bridge';
       export {ompRpcDialogPresentation} from './src/main/omp/rpc-dialogs';
       export {structuredQuestionAnswers} from './src/shared/structured-agent-question-card';
       export {isValidAgentSessionQuestionAnswers} from './src/shared/agent-session/agent-session-question-answer';
+      export {agentSessionPromptQuestions} from './src/shared/agent-session/agent-session-question-answer';
     `
   },
   bundle: true,
@@ -133,10 +133,10 @@ await build({
 })
 const {
   openOmpRpcConnection,
-  ensureOmpRpcFormBridge,
   ompRpcDialogPresentation,
   structuredQuestionAnswers,
-  isValidAgentSessionQuestionAnswers
+  isValidAgentSessionQuestionAnswers,
+  agentSessionPromptQuestions
 } = createRequire(import.meta.url)(outfile)
 const env = {
   ...process.env,
@@ -160,7 +160,8 @@ for (const key of Object.keys(env)) {
     delete env[key]
   }
 }
-const bridge = await ensureOmpRpcFormBridge(join(root, 'bridge'))
+const config = join(root, 'rpc.yml')
+await writeFile(config, 'ask:\n  timeout: 0\n')
 const connection = openOmpRpcConnection(
   {
     command: resolve(process.argv[2]),
@@ -174,8 +175,8 @@ const connection = openOmpRpcConnection(
       '--no-extensions',
       '--tools',
       'ask',
-      '--extension',
-      bridge
+      '--config',
+      config
     ],
     cwd,
     env
@@ -196,79 +197,117 @@ const wait = async (predicate) => {
     )}`
   )
 }
+const dialogs = () =>
+  frames.filter(
+    (frame) =>
+      frame.type === 'extension_ui_request' &&
+      ['select', 'input', 'editor', 'ask'].includes(frame.method)
+  )
+let dialogIndex = 0
+const nextDialog = async () => {
+  await wait(() => dialogs().length > dialogIndex)
+  const frame = dialogs()[dialogIndex++]
+  assert.notEqual(frame.method, 'ask', 'Native HTML Ask must keep its own field-by-field flow')
+  return frame
+}
+const answer = async (frame, selection) => {
+  const presentation = ompRpcDialogPresentation(frame)
+  assert.equal(presentation?.body.kind, 'question')
+  const questions = agentSessionPromptQuestions(presentation.body)
+  const answers = structuredQuestionAnswers(questions, [selection])
+  assert.ok(answers)
+  assert.equal(isValidAgentSessionQuestionAnswers(questions, answers), true)
+  await connection.send({
+    type: 'extension_ui_response',
+    id: frame.id,
+    ...presentation.reply({ kind: 'answers', answers })
+  })
+}
+const pick = async (frame, label) => {
+  const index = frame.options.indexOf(label)
+  assert.notEqual(index, -1, `Missing native option: ${label}`)
+  await answer(frame, { indices: [index], other: '' })
+}
+const finishChoices = async (frame) => {
+  const index = frame.options.findIndex((label) => /Done selecting/.test(label))
+  assert.notEqual(index, -1)
+  await answer(frame, { indices: [index], other: '' })
+}
+const toolResults = () =>
+  frames.filter((frame) => frame.type === 'tool_execution_end' && frame.toolName === 'ask')
+const resultData = (result) => {
+  assert.equal(result.isError, false)
+  const text = result.result.content.find((content) => content.type === 'text').text
+  return JSON.parse(text.slice(text.indexOf('{')))
+}
 try {
   await connection.request('get_state')
   await connection.send({ type: 'prompt', id: 'replay', message: 'REPLAY_HTML_ASK' })
-  const groupFrames = () =>
-    frames.filter((f) => f.type === 'extension_ui_request' && f.method === 'ask')
-  await wait(() => groupFrames().length === 1)
-  const group = groupFrames()[0]
-  assert.equal(group.questions.length, 4)
-  assert.equal(
-    frames.some((f) => f.type === 'extension_ui_request' && f.method === 'select'),
-    false
-  )
-  assert.deepEqual(
-    group.questions.map((q) => q.id),
-    ['field-0', 'field-1', 'field-2', 'field-3']
-  )
-  assert.equal(group.questions[2].textInput.initialValue, '5')
-  assert.equal(group.questions[3].textInput.multiline, true)
-  const answer = async (id, number, leaveUnselected = false) => {
-    const presentation = ompRpcDialogPresentation(groupFrames().find((frame) => frame.id === id))
-    assert.equal(presentation.body.kind, 'question')
-    const questions = presentation.body.questions
-    const answers = structuredQuestionAnswers(questions, [
-      { indices: leaveUnselected ? [0] : [2], other: '' },
-      { indices: leaveUnselected ? [0] : [1, 3], other: '' },
-      { indices: [], other: number },
-      { indices: [], other: '  first\nsecond  ' }
-    ])
-    assert.ok(answers)
-    assert.equal(isValidAgentSessionQuestionAnswers(questions, answers), true)
-    await connection.send({
-      type: 'extension_ui_response',
-      id,
-      ...presentation.reply({ kind: 'answers', answers })
-    })
-  }
-  await answer(group.id, '99')
-  await wait(() => groupFrames().length === 2)
-  const retry = groupFrames()[1]
-  assert.match(retry.questions[2].question, /Must be at most 10/)
-  assert.equal(retry.questions[2].textInput.initialValue, '99')
-  await answer(retry.id, '7')
-  const toolResults = () =>
-    frames.filter((f) => f.type === 'tool_execution_end' && f.toolName === 'ask')
+  const radio = await nextDialog()
+  assert.equal(radio.method, 'select')
+  assert.equal(radio.selectionMarker, 'radio')
+  assert.equal(radio.initialIndex, 0)
+  assert.deepEqual(radio.options.slice(0, 2), ['Concise', 'Detailed'])
+  await pick(radio, 'Concise')
+  const checked = await nextDialog()
+  assert.equal(checked.selectionMarker, 'checkbox')
+  assert.deepEqual(checked.checkedIndices, [0])
+  await pick(checked, 'Background tasks')
+  const added = await nextDialog()
+  assert.deepEqual(added.checkedIndices, [0, 1])
+  await pick(added, 'Subagents')
+  const expanded = await nextDialog()
+  assert.deepEqual(expanded.checkedIndices, [0, 1, 2])
+  await pick(expanded, 'Forms')
+  const removed = await nextDialog()
+  assert.deepEqual(removed.checkedIndices, [1, 2])
+  await finishChoices(removed)
+  const numeric = await nextDialog()
+  assert.equal(numeric.method, 'editor')
+  assert.equal(numeric.prefill, '5')
+  await answer(numeric, { indices: [], other: '99' })
+  const retry = await nextDialog()
+  assert.match(retry.title, /Must be at most 10/)
+  assert.equal(retry.prefill, '99')
+  await answer(retry, { indices: [], other: '7' })
+  const notes = await nextDialog()
+  await answer(notes, { indices: [], other: '  first\nsecond  ' })
   await wait(() => toolResults().length === 1)
-  assert.equal(toolResults()[0].isError, false)
-  const text = toolResults()[0].result.content.find((c) => c.type === 'text').text
-  assert.deepEqual(JSON.parse(text.slice(text.indexOf('{'))), {
+  assert.deepEqual(resultData(toolResults()[0]), {
     marker: 'native-form',
-    response_style: 'detailed',
-    features: ['forms', 'subagents'],
+    response_style: 'concise',
+    features: ['background_tasks', 'subagents'],
     number: 7,
     message: '  first\nsecond  '
   })
   await wait(async () => (await connection.request('get_state')).isSettled)
   invoked = false
   await connection.send({ type: 'prompt', id: 'empty-replay', message: 'REPLAY_HTML_ASK' })
-  await wait(() => groupFrames().length === 3)
-  await answer(groupFrames()[2].id, '7', true)
+  await pick(await nextDialog(), 'Detailed')
+  await pick(await nextDialog(), 'Forms')
+  const empty = await nextDialog()
+  assert.deepEqual(empty.checkedIndices, [])
+  await finishChoices(empty)
+  await answer(await nextDialog(), { indices: [], other: '5' })
+  await answer(await nextDialog(), { indices: [], other: '' })
   await wait(() => toolResults().length === 2)
-  assert.equal(toolResults()[1].isError, false)
-  const emptyText = toolResults()[1].result.content.find((c) => c.type === 'text').text
-  assert.deepEqual(JSON.parse(emptyText.slice(emptyText.indexOf('{'))), {
+  assert.deepEqual(resultData(toolResults()[1]), {
     marker: 'native-form',
+    response_style: 'detailed',
     features: [],
-    number: 7,
-    message: '  first\nsecond  '
+    number: 5,
+    message: ''
   })
   await wait(async () => (await connection.request('get_state')).isSettled)
   invoked = false
   await connection.send({ type: 'prompt', id: 'cancel-replay', message: 'REPLAY_HTML_ASK' })
-  await wait(() => groupFrames().length === 4)
-  await connection.send({ type: 'extension_ui_response', id: groupFrames()[3].id, cancelled: true })
+  const cancelled = await nextDialog()
+  const presentation = ompRpcDialogPresentation(cancelled)
+  await connection.send({
+    type: 'extension_ui_response',
+    id: cancelled.id,
+    ...presentation.reply(null)
+  })
   await wait(() => toolResults().length === 3)
   assert.equal(toolResults()[2].isError, true)
   assert.match(toolResults()[2].result.content[0].text, /Ask tool was cancelled by the user/)
@@ -276,11 +315,12 @@ try {
     binary: resolve(process.argv[2]),
     transport: 'real OMP RPC v2',
     model: 'isolated local SSE fixture',
-    groupedForm: true,
+    nativeFieldFlow: true,
     hostAnswerValidation: true,
-    emptyChoices: true,
+    nativeCheckboxState: true,
     nativeValidation: true,
-    retryKeepsInput: true,
+    emptyChoices: true,
+    emptyText: true,
     typedValues: true,
     hiddenValue: true,
     multilineWhitespace: true,
