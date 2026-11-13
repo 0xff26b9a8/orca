@@ -34,6 +34,7 @@ import {
 import { resolveOmpSessionsDir } from '../ai-vault/scanners/omp/omp-session-root'
 import { findOmpSessionByCwd } from './omp-session-cwd-lookup'
 import { parsePiModelOptionId } from '../pi/rpc/options/rpc-model-options'
+import { ensureOmpRpcFormBridge } from './rpc-form-bridge'
 import type { StructuredAgentSessionAcquireInput } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 
 export const OMP_RPC_MINIMUM_VERSIONS = ['18.4.5'] as const
@@ -216,13 +217,14 @@ export function ompRpcLaunchPart(
         throw error
       }
     })
+    const formBridge = await ensureOmpRpcFormBridge(join(stateDirectory, 'omp-rpc'))
     return {
       launch: {
         command,
         prefixArgs,
         fullAccess: true,
         previous,
-        extraArgs: [...(record.launchArgs ?? []), '--config', overlay],
+        extraArgs: [...(record.launchArgs ?? []), '--config', overlay, '--extension', formBridge],
         ...(sessionFile ? { sessionFile, lineage } : {})
       },
       env,

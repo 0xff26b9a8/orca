@@ -28,7 +28,17 @@ const askSchema = z.object({
           )
           .max(64),
         multi: z.boolean().optional(),
-        recommended: z.number().optional()
+        recommended: z.number().optional(),
+        allowCustom: z.boolean().optional(),
+        encodedText: z.boolean().optional(),
+        textInput: z
+          .object({
+            allowEmpty: z.boolean().optional(),
+            multiline: z.boolean().optional(),
+            initialValue: z.string().optional(),
+            placeholder: z.string().optional()
+          })
+          .optional()
       })
     )
     .min(1)
@@ -62,7 +72,8 @@ export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentatio
         question: question.question,
         ...(question.header ? { header: question.header } : {}),
         multiSelect: question.multi === true,
-        freeTextQuestionId: question.id,
+        ...(question.allowCustom !== false ? { freeTextQuestionId: question.id } : {}),
+        ...(question.textInput ? { freeTextInput: question.textInput } : {}),
         options: question.options.map((option, index) => ({
           id: `option-${index}`,
           label: option.label,
@@ -98,13 +109,21 @@ export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentatio
           }
           return question.options[index]!.label
         })
-        if (!question.multi && selectedOptions.length === 0 && !answer.other?.trim()) {
+        if (
+          (question.allowCustom === false && answer.other?.trim()) ||
+          (!question.multi &&
+            selectedOptions.length === 0 &&
+            !answer.other?.trim() &&
+            !question.textInput?.allowEmpty)
+        ) {
           throw new Error('OMP Ask requires a selection or text')
         }
         return {
           id: question.id,
           selectedOptions,
-          ...(answer.other !== undefined ? { customInput: answer.other } : {})
+          ...(answer.other !== undefined
+            ? { customInput: question.encodedText ? JSON.stringify(answer.other) : answer.other }
+            : {})
         }
       })
       return { answers }
