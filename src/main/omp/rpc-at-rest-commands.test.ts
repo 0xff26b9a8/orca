@@ -7,7 +7,7 @@ import { openOmpRpcConnection } from './rpc-connection'
 import { resolveOmpRpcInvocation } from './rpc-launch'
 import { createOmpRpcAtRestCommands } from './rpc-at-rest-commands'
 import { FakeConnection } from '../pi/rpc/rpc-session-adapter.test-fixture'
-import { agentSessionRecordFixture } from '../native-chat/agent-session-record-test-fixture'
+import { agentSessionRecordFixture } from '../native-chat/testing/agent-session-record-test-fixture'
 import { isWindowsProcessStartTimeAvailable } from '../windows/windows-process-table'
 import type { StructuredAgentModelCatalogContext } from '../runtime/agent-session/installation/structured-agent-runtime-registration-types'
 

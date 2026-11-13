@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { decodeOmpTranscriptLine } from '../native-chat/transcript-line-decoders-omp'
+import { decodeOmpTranscriptLine } from '../native-chat/transcript-decoding/transcript-line-decoders-omp'
 import { ompTodoEvents, ompTodoInputPlan } from './rpc-todo'
 
 const phases = [

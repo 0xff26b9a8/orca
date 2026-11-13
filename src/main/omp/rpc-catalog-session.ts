@@ -9,7 +9,7 @@ import { runAgentModelCatalogSession } from '../native-chat/agent-model-catalog/
 import {
   assertStructuredAgentResolutionCurrent,
   type StructuredAgentResolutionOperation
-} from '../native-chat/structured-agent-command-resolution'
+} from '../native-chat/agent-launch/structured-agent-command-resolution'
 import { piRpcSessionlessEnvironment } from '../pi/rpc/launch/rpc-launch'
 import type { PiRpcConnection } from '../pi/rpc/rpc-session'
 import type { StructuredAgentModelCatalogContext } from '../runtime/agent-session/installation/structured-agent-runtime-registration-types'

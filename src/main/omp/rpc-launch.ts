@@ -2,8 +2,8 @@ import { homedir } from 'node:os'
 import { isAbsolute, join } from 'node:path'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { checkAgentCliVersion } from '../agent-launch/preflight/agent-cli-version-probe'
-import { AgentCliInstallationError } from '../native-chat/agent-cli-installation-error'
-import { SESSION_FILE_ID_LAYOUTS } from '../native-chat/session-file-id-layouts'
+import { AgentCliInstallationError } from '../native-chat/agent-launch/agent-cli-installation-error'
+import { SESSION_FILE_ID_LAYOUTS } from '../native-chat/transcript-discovery/session-file-id-layouts'
 import { requireLegacyAgentSessionAccountHome } from '../../shared/agent-session/lifecycle/agent-session-account-home'
 import {
   agentSessionProviderHandleChainHead,
@@ -16,7 +16,7 @@ import {
   type StructuredAgentCommand,
   type StructuredAgentCommandSettings,
   type StructuredAgentResolutionOperation
-} from '../native-chat/structured-agent-command-resolution'
+} from '../native-chat/agent-launch/structured-agent-command-resolution'
 import { isWindowsProcessStartTimeAvailable } from '../windows/windows-process-table'
 import type { StructuredAgentLaunchPartResolver } from '../runtime/agent-session/launch/structured-agent-launch-composition'
 import {

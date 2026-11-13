@@ -8,7 +8,7 @@ import {
 import type { ProviderTimelineEvent } from '../../native-chat/agent-session-timeline/provider-timeline-event'
 import { piRpcMessageEventSchema, piRpcToolEventSchema } from './rpc-protocol'
 import type { PiRpcContextUsage } from './rpc-context-usage'
-import { inlineToolResultImages } from '../../native-chat/transcript-record-blocks'
+import { inlineToolResultImages } from '../../native-chat/transcript-decoding/transcript-record-blocks'
 
 const resultSchema = z.object({
   content: z.array(z.looseObject({ type: z.string(), text: z.string().optional() }))

@@ -166,7 +166,10 @@ const storedThreadGoal = z.discriminatedUnion('state', [
 
 export const storedItemBody = z.discriminatedUnion('kind', [
   storedMessageBody,
-  agentStartBody.extend({ worker: sender.nullable().optional() }),
+  agentStartBody.extend({
+    worker: sender.nullable().optional(),
+    followUp: z.object({ of: z.string(), reopened: z.boolean() }).optional()
+  }),
   agentHandoffBody.extend({ agent: sender.nullable().optional() }),
   toolCallBody,
   diffBody,

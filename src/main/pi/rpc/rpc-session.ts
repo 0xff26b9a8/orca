@@ -9,6 +9,7 @@ import { JsonlRpcAgentConnection } from '../../jsonl-rpc/agent-connection'
 import type { ProviderProcessLaunch } from '../../provider-process/provider-process-launch'
 import { piExitFailure } from './rpc-exit-classification'
 import { PiRpcTurns } from './rpc-turns'
+import { PI_RPC_PEER_OPTIONS } from './prompts/rpc-prompt'
 import { PiRpcDialogCallbacks } from './rpc-dialog-callbacks'
 import {
   PiRpcOptionObservations,
@@ -59,6 +60,10 @@ export class PiRpcSession {
   private releaseAfterExit?: () => void
   private readonly reading = new ReaderPauseHolds<'lane' | 'journal'>(() => this.connection)
   private unbindReadingControl?: () => void
+
+  get shrinksImages(): boolean {
+    return this.resolvedLaunch.shrinksImages === true
+  }
 
   constructor(
     readonly input: StructuredAgentSessionAcquireInput,
@@ -124,6 +129,7 @@ export class PiRpcSession {
     this.connection = (
       deps.openConnection ?? ((spec, handlers) => new JsonlRpcAgentConnection(spec, handlers))
     )(launch, {
+      peer: PI_RPC_PEER_OPTIONS,
       onRecord: (frame) => {
         if (deps.dialect?.receive?.(frame, this)) {
           return

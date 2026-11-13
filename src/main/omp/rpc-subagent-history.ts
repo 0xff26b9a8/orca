@@ -6,7 +6,7 @@ import { agentJournalItemKey } from '../../shared/agent-session/journal/agent-se
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
 import type { AgentJournalItemIdentity } from '../../shared/agent-session/journal/agent-session-journal-identity'
 import { legacyItemBody } from '../native-chat/agent-session-journal/history-import/journal-legacy-import'
-import { decodeOmpTranscriptLine } from '../native-chat/transcript-line-decoders-omp'
+import { decodeOmpTranscriptLine } from '../native-chat/transcript-decoding/transcript-line-decoders-omp'
 import {
   createHistoryCatchUpBatch,
   runHistoryCatchUp

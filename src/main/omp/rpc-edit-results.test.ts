@@ -1,6 +1,6 @@
 import { afterEach, expect, it } from 'vitest'
 import { editFilesFromToolPair } from '../../shared/native-chat/tools/native-chat-edit-normalize'
-import { decodeOmpTranscriptLine } from '../native-chat/transcript-line-decoders-omp'
+import { decodeOmpTranscriptLine } from '../native-chat/transcript-decoding/transcript-line-decoders-omp'
 import { ompResolvedEdits } from './rpc-edit-results'
 import { closeOmpRpcAdapterFixtures, setupOmpRpcAdapter } from './rpc-session-adapter.test-fixture'
 
