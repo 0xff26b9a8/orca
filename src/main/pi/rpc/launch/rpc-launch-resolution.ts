@@ -76,6 +76,7 @@ export function resolvePiRpcCommand(
 
 export function checkPiRpcVersion(
   launch: {
+    operation?: StructuredAgentResolutionOperation
     command: string
     prefixArgs?: readonly string[]
     cwd: string
@@ -84,7 +85,13 @@ export function checkPiRpcVersion(
   read?: AgentCliVersionReader
 ): Promise<AgentCliVersionCheck> {
   return checkAgentCliVersion(
-    { program: launch.command, prefixArgs: launch.prefixArgs, cwd: launch.cwd, env: launch.env },
+    {
+      program: launch.command,
+      prefixArgs: launch.prefixArgs,
+      cwd: launch.cwd,
+      env: launch.env,
+      operation: launch.operation
+    },
     PI_RPC_MINIMUM_VERSIONS,
     read
   )
@@ -95,6 +102,7 @@ const headerSchema = z.object({
   cwd: z.string().min(1),
   id: z.string().optional()
 })
+const titleSlotSchema = z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
 
 export async function readPiSessionHeader(
   file: string,
@@ -118,11 +126,7 @@ export async function readPiSessionHeader(
       throw new Error('Pi session header is incomplete or oversized')
     }
     let record: unknown = JSON.parse(data.slice(0, lf))
-    if (
-      options?.titleSlot &&
-      z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() }).safeParse(record)
-        .success
-    ) {
+    if (options?.titleSlot && titleSlotSchema.safeParse(record).success) {
       const start = lf + 1
       lf = data.indexOf('\n', start)
       if (lf === -1) {
