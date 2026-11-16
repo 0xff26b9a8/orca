@@ -1,4 +1,4 @@
-import { waitForPromiseWithSignal } from '../../../../shared/abort-signal-reason'
+import { waitForPromiseWithSignal } from '../../../../shared/concurrency/abort-signal-reason'
 import { JsonlRpcResponseError } from '../../../jsonl-rpc/peer-reply'
 import type { StructuredAgentSessionEventSink } from '../../../native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink'
 import type { StructuredAgentSessionLogger } from '../../../native-chat/agent-session-wire/host/structured-agent-session-logger'
@@ -13,7 +13,6 @@ import {
 } from './rpc-history-import'
 import {
   readPiHistoryJournalView,
-  samePiHistoryJournalView,
   usablePiHistoryClaim,
   type PiHistoryClaim
 } from './rpc-history-journal-view'
@@ -71,9 +70,8 @@ export async function catchUpPiSession(input: {
     timeoutMs: input.timeoutMs ?? PI_HISTORY_CATCH_UP_TIMEOUT_MS,
     logger: input.logger,
     readView: (history) => readPiHistoryJournalView(history, input.lineage, input.agent),
-    sameView: samePiHistoryJournalView,
-    prepare: async ({ view: readView, journal, signal, deadline, check, warn }) => {
-      const view = readView()
+    prepare: async ({ view: readView, history, signal, deadline, check, warn }) => {
+      const view = await readView()
       const read = async (since: string | null) => {
         check()
         const answer = await waitForPromiseWithSignal(
@@ -110,7 +108,8 @@ export async function catchUpPiSession(input: {
       return createPiHistoryImportPlan({
         agent: input.agent,
         sessionFile: input.sessionFile,
-        journal,
+        epoch: history.cursor().epoch,
+        reads: history.reads,
         path: branch.path.filter((entry) => !view.accounted.has(entry.id)),
         rewound: branch.rewound,
         divider: view.hasRows,
@@ -122,7 +121,7 @@ export async function catchUpPiSession(input: {
   if (outcome === 'skipped' || !leaf || !history) {
     return carried
   }
-  const cursor = history.cursor()
+  const cursor = await history.reads.cursor()
   return {
     claim:
       leaf.entry === null

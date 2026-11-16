@@ -10,7 +10,8 @@ import {
 } from './store-lifecycle/journal-host-database-test-support'
 import type { JournalHostDatabase } from './database/journal-host-database'
 import { restoreJournal } from './replay/journal-open'
-import { prepareJournalOutcomeWrite } from './outcomes/journal-outcome-write'
+import { openAgentSessionJournal } from './journal-store-factory'
+import { openTestAgentSessionDatabase } from '../../runtime/agent-session/records/agent-session-record-store-test-harness'
 
 const sessionId = 'omp-legacy-goal'
 const epoch = 'epoch-1'
@@ -42,7 +43,7 @@ beforeEach(async () => {
         seq: 1,
         kind: 'epoch',
         reason: 'session_created',
-        providerHandle: { kind: 'opaque', agent: 'omp', value: 'native-session' }
+        providerHandle: { transport: 'rpc', agent: 'omp', nativeId: 'native-session' }
       })
     )
   })
@@ -69,41 +70,38 @@ function insertGoal(value: unknown): void {
   )
 }
 
-it('reopens legacy OMP goals and preserves their native ID across outcome writes', () => {
+it('preserves legacy OMP goal identity through SQL conversion and later writes', async () => {
   insertGoal({ state: 'set', goal })
-  const loaded = restoreJournal(database.db, sessionId)
-  expect(loaded).toMatchObject({ newer: null, damage: null })
-  if (!loaded) {
-    throw new Error('missing legacy chat')
-  }
-  const item = loaded.state.items.get('legacy-goal')
-  expect(item?.body).toMatchObject({ threadGoal: { state: 'set', goal } })
-  if (!item) {
-    throw new Error('missing legacy goal')
-  }
-
-  const transition = database.transaction((db) =>
-    prepareJournalOutcomeWrite(
-      db,
-      loaded.state,
-      [
-        {
-          ...base,
-          seq: 3,
-          kind: 'item',
-          itemId: 'legacy-goal',
-          revision: 2,
-          body: item.body
-        }
-      ],
-      3
+  await database.close()
+  const journal = await openAgentSessionJournal({
+    database: await openTestAgentSessionDatabase(root),
+    identity: {
+      sessionId,
+      workspaceId: 'workspace',
+      hostId: 'local',
+      agent: 'omp',
+      providerHandle: { transport: 'rpc', agent: 'omp', nativeId: 'native-session' }
+    }
+  })
+  try {
+    expect((await journal.reads.threadGoalSource()).goal).toMatchObject({
+      id: 'legacy-native-goal-id',
+      tokensUsed: 120,
+      status: 'active'
+    })
+    await journal.appendItem(
+      { provider: 'orca', clientMessageId: 'later' },
+      { kind: 'message', role: 'user', blocks: [{ type: 'text', text: 'Continue' }] },
+      { fence: 1, turnScope: { kind: 'thread' } }
     )
-  )
-  transition.adopt()
-  const reopened = restoreJournal(database.db, sessionId)
-  expect(reopened).toMatchObject({ newer: null, damage: null })
-  expect(reopened?.state.lastSequence).toBe(3)
-  expect(reopened?.state.items.get('legacy-goal')?.body).toEqual(item?.body)
+    expect((await journal.reads.threadGoalSource()).goal).toMatchObject({
+      id: 'legacy-native-goal-id',
+      tokensUsed: 120,
+      status: 'active'
+    })
+  } finally {
+    await journal.close()
+  }
 })
 
 it('still refuses undeclared future goal fields', () => {

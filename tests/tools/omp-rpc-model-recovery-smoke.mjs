@@ -22,7 +22,7 @@ await build({
     contents: `export {OmpRpcSessionAdapter} from './src/main/omp/rpc-session-adapter';
       export {piRpcSessionlessEnvironment} from './src/main/pi/rpc/launch/rpc-launch';
       export {createDeferredStructuredAgentSessionEventSink} from './src/main/native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink';
-      export {JournalHostDatabase} from './src/main/native-chat/agent-session-journal/database/journal-host-database';
+      export {JournalSqlDatabase} from './src/main/native-chat/agent-session-journal/database/journal-sql-database';
       export {openAgentSessionJournal} from './src/main/native-chat/agent-session-journal/journal-store-factory';`
   },
   bundle: true,
@@ -31,11 +31,21 @@ await build({
   packages: 'external',
   outfile: bundle
 })
+await build({
+  entryPoints: [
+    'src/main/native-chat/agent-session-journal/journal-sql-worker-entry.ts',
+    'src/main/native-chat/agent-session-journal/journal-sql-reader-entry.ts'
+  ],
+  outdir: root,
+  bundle: true,
+  platform: 'node',
+  format: 'cjs'
+})
 const {
   OmpRpcSessionAdapter,
   piRpcSessionlessEnvironment,
   createDeferredStructuredAgentSessionEventSink,
-  JournalHostDatabase,
+  JournalSqlDatabase,
   openAgentSessionJournal
 } = createRequire(import.meta.url)(bundle)
 const id = randomUUID()
@@ -100,7 +110,13 @@ for (const replacement of [false, true]) {
   })
   const controller = new AbortController()
   let startupFailure
-  const database = JournalHostDatabase.open(join(root, `journal-${replacement}`))
+  const database = await JournalSqlDatabase.open(join(root, `journal-${replacement}`), {
+    writerPath: join(root, 'journal-sql-worker-entry.js'),
+    readerPath: join(root, 'journal-sql-reader-entry.js'),
+    onMaintenanceError: (error) => {
+      throw error
+    }
+  })
   const journal = await openAgentSessionJournal({
     database,
     identity: {
@@ -166,16 +182,18 @@ for (const replacement of [false, true]) {
     assert.equal(opened.reportedOptions.model, 'openai/gpt-4o')
     assert.equal(opened.link.handle.nativeId, source)
     assert.ok((await readFile(source, 'utf8')).includes('Keep this conversation.'))
+    const rows = []
+    await journal.reads.visitItems({ kinds: ['message'] }, (_id, _sequence, _body, _linkage, row) =>
+      rows.push(row)
+    )
     assert.ok(
-      journal
-        .snapshot()
-        .items.some(
-          (row) =>
-            row.body.kind === 'message' &&
-            row.body.blocks.some(
-              (block) => block.type === 'text' && block.text === 'Keep this conversation.'
-            )
-        )
+      rows.some(
+        (row) =>
+          row.body.kind === 'message' &&
+          row.body.blocks.some(
+            (block) => block.type === 'text' && block.text === 'Keep this conversation.'
+          )
+      )
     )
     console.log(
       JSON.stringify({

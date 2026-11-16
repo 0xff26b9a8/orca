@@ -1,5 +1,5 @@
 import { OMP_RPC_RUNTIME_METADATA } from '../../../omp/rpc-runtime-metadata'
-import { agentSessionAccountHome } from '../../../../shared/agent-session/lifecycle/agent-session-account-home'
+import { agentSessionAccountHome } from '../../../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
 import { applyStructuredCodexWorkspaceTrust } from '../../../agent-launch/trust/agent-workspace-trust-spawn'
 import { ACP_LAUNCH_SPECS } from '../../../acp/launch/acp-launch-registry'
 import type { AcpLaunchSpec } from '../../../acp/launch/acp-launch-contract'
@@ -53,7 +53,8 @@ function acpChatProgram(spec: AcpLaunchSpec): StructuredAgentChatProgram {
       ? {
           hostAlternative: async (shellEnv, settings) =>
             (await selectAcpHostAccountHome(spec, shellEnv, getProfileUserDataPath(), settings)) !==
-            null
+            null,
+          ...(managedRuntime ? { onlyHostAlternative: () => managedRuntime.pin() === null } : {})
         }
       : {})
   }

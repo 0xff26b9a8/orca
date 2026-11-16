@@ -1,10 +1,10 @@
 // Agent modules declare definitions; the runtime registry owns shared lookup instead of agent-name branches.
 
 import type { AgentSessionCapabilities } from '../../../../shared/agent-session/agent-session-capabilities'
-import type { AgentSessionStoredAgent } from '../../../../shared/agent-session/lifecycle/agent-session-stored-agent'
+import type { AgentSessionStoredAgent } from '../../../../shared/agent-session/lifecycle/records/agent-session-stored-agent'
 import type { AgentSessionModelOption } from '../../../../shared/agent-session/agent-session-wire'
-import type { AgentSessionAccountHome } from '../../../../shared/agent-session/lifecycle/agent-session-account-home'
-import type { AgentSessionProviderTransport } from '../../../../shared/agent-session/lifecycle/agent-session-provider-handle'
+import type { AgentSessionAccountHome } from '../../../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
+import type { AgentSessionProviderTransport } from '../../../../shared/agent-session/lifecycle/provider-handles/agent-session-provider-handle'
 
 export type StructuredAgentDefinition = AgentSessionStoredAgent & {
   /** Older handle namespaces this adapter can resolve; new handles still use handleTransport. */

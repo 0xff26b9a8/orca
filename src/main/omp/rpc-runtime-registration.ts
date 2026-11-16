@@ -6,7 +6,6 @@ import {
   composeStructuredLaunch,
   structuredAgentLaunchSources
 } from '../runtime/agent-session/launch/structured-agent-launch-composition'
-import { reviseAgentSessionProviderResumePoint } from '../runtime/agent-session/ownership/agent-session-provider-handle-transition'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { ompRpcLaunchPart } from './rpc-launch'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
@@ -37,9 +36,10 @@ export function createOmpRpcAdapter(
       }
     },
     persistResumePoint: async ({ sessionId, fence, handle }) => {
-      await context.store.transitionHandoff(sessionId, (record) =>
-        reviseAgentSessionProviderResumePoint({ record, fence, handle, now: Date.now() })
-      )
+      await context.store.updateRecord(sessionId, {
+        kind: 'resume-point',
+        args: { fence, handle, now: Date.now() }
+      })
     },
     ...(context.deps.readProcessStartTime
       ? { readProcessStartTime: context.deps.readProcessStartTime }

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
+import { waitForPromiseWithSignal } from '../../shared/concurrency/abort-signal-reason'
 import { decodeOmpRewindTarget, encodeOmpRewindTarget } from '../../shared/omp-rewind-target'
 import { parseAgentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
@@ -73,22 +73,17 @@ export class OmpRpcRewind {
     const providerTurnId = encodeOmpRewindTarget({ sessionFile, timestamp: user.data.timestamp })
     void session.lane
       .drained()
-      .then(() => {
-        const admission = session.input.events?.tryReviseResolvedItem?.(
+      .then(async () => {
+        const sink = session.input.events
+        await sink?.written?.()
+        const named = await sink?.journalHistory?.()?.reads.namedTurn(turn)
+        const identity = named?.scope && parseAgentJournalItemKey(named.scope.turnItemId)
+        if (!identity) {
+          return
+        }
+        const admission = sink?.tryReviseResolvedItemAndPublish?.(
           64 * 1024,
-          (journal) => {
-            let itemId: string | undefined
-            journal.visitItems((id, _sequence, body) => {
-              if (body.kind === 'turn' && body.turnId === turn) {
-                itemId = id
-              }
-            })
-            const body = itemId ? journal.itemBody(itemId) : null
-            const identity = itemId ? parseAgentJournalItemKey(itemId) : null
-            return identity && body?.kind === 'turn' && !body.providerTurnId
-              ? { identity, body: { ...body, providerTurnId } }
-              : null
-          },
+          { kind: 'turn-claim', identity, providerTurnId, onlyIfMissing: true },
           { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
         )
         if (!admission?.accepted) {

@@ -120,7 +120,7 @@ await build({
     contents: `
       export {openOmpRpcConnection} from './src/main/omp/rpc-connection';
       export {ompRpcDialogPresentation} from './src/main/omp/rpc-dialogs';
-      export {structuredQuestionAnswers} from './src/shared/structured-agent-question-card';
+      export {structuredQuestionAnswers} from './src/shared/native-chat/input/questions/structured-agent-question-card';
       export {isValidAgentSessionQuestionAnswers} from './src/shared/agent-session/agent-session-question-answer';
       export {agentSessionPromptQuestions} from './src/shared/agent-session/agent-session-question-answer';
     `

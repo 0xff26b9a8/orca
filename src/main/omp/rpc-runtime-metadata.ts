@@ -1,6 +1,6 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { agentSessionAccountHome } from '../../shared/agent-session/lifecycle/agent-session-account-home'
+import { agentSessionAccountHome } from '../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
 import type { StructuredAgentRuntimeMetadata } from '../runtime/agent-session/installation/structured-agent-runtime-registration-types'
 import { supportsSupervisedProviderChildLocation } from '../provider-process/supervised-provider-child-location'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'

@@ -129,6 +129,7 @@ export class OmpRpcSubagentMessages {
         case 'provider.frame':
         case 'request.open':
         case 'request.withdrawn':
+        case 'request.subject':
         case 'session.ended':
         case 'turn.end':
         case 'turn.open':

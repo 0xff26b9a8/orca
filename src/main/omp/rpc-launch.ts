@@ -4,11 +4,11 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { checkAgentCliVersion } from '../agent-launch/preflight/agent-cli-version-probe'
 import { AgentCliInstallationError } from '../native-chat/agent-launch/agent-cli-installation-error'
 import { SESSION_FILE_ID_LAYOUTS } from '../native-chat/transcript-discovery/session-file-id-layouts'
-import { requireLegacyAgentSessionAccountHome } from '../../shared/agent-session/lifecycle/agent-session-account-home'
+import { requireLegacyAgentSessionAccountHome } from '../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
 import {
   agentSessionProviderHandleChainHead,
   type AgentSessionProviderHandleLink
-} from '../../shared/agent-session/lifecycle/agent-session-provider-handle'
+} from '../../shared/agent-session/lifecycle/provider-handles/agent-session-provider-handle'
 import {
   assertStructuredAgentResolutionCurrent,
   resolveAgainAfterRefreshOnMissingProgram,

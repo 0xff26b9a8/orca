@@ -1,28 +1,29 @@
+import { readTestHostJournal } from '../native-chat/agent-session-journal/journal-observation.test-support'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, vi } from 'vitest'
 import { isSubagentBlock } from '../../shared/native-chat/native-chat-types'
-import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session/lifecycle/agent-session-mutation-envelope'
+import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session/lifecycle/operations/agent-session-mutation-envelope'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import { structuredSessionBackgroundTasksView } from '../../shared/structured-session-background-tasks-view'
+import { structuredSessionBackgroundTasksView } from '../../shared/agent-session/view/structured-session-background-tasks-view'
 import { acpChildWorkStatusSink } from '../acp/session/testing/acp-structured-child-work.test-support'
 import { FakeConnection } from '../pi/rpc/rpc-session-adapter.test-fixture'
-import { openTestAgentSessionRecordStore } from '../runtime/agent-session/records/agent-session-record-store-test-harness'
 import {
-  closeTestJournalHostDatabase,
-  openTestJournalHostDatabase
-} from '../native-chat/agent-session-journal/store-lifecycle/journal-host-database-test-support'
+  openTestAgentSessionRecordStore,
+  openTestAgentSessionDatabase
+} from '../runtime/agent-session/records/agent-session-record-store-test-harness'
+import { closeTestJournalHostDatabase } from '../native-chat/agent-session-journal/store-lifecycle/journal-host-database-test-support'
 import { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/host/structured-agent-session-host'
 import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/providers/structured-agent-registry'
-import { recordingStructuredAgentSessionLogger } from '../native-chat/agent-session-wire/host/testing/structured-agent-session-logger-test-support'
+import { recordingStructuredAgentSessionLogger } from '../native-chat/agent-session-wire/host/testing/structured-agent-session-logger.test-fixture'
 import {
   HOST_TEST_SESSION as SESSION,
   HOST_TEST_NOW,
   hostTestAttachParams,
   hostTestOperationId,
   resetHostTestOperationIds
-} from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-data'
+} from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-data.test-fixture'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
 
@@ -58,7 +59,7 @@ it('publishes native children and background commands to the shared composer str
     agents: new StructuredAgentRegistry([{ definition: OMP_RPC_AGENT, adapter }]),
     store,
     adapter,
-    journalDatabase: openTestJournalHostDatabase(root),
+    journalDatabase: await openTestAgentSessionDatabase(root),
     claimKeyId: 'omp-subagent-test',
     mintSpawnToken: () => 'spawn',
     now: () => HOST_TEST_NOW,
@@ -268,7 +269,7 @@ it('publishes native children and background commands to the shared composer str
     await vi.waitFor(async () => expect((await strip()).show).toBe(false))
     await vi.waitFor(async () => {
       await host.flushStreamedEvents(SESSION)
-      const snapshot = await host.journalSnapshot(SESSION)
+      const snapshot = await readTestHostJournal(host, SESSION)
       const children = snapshot.items.flatMap((item) =>
         item.body.kind === 'message' ? item.body.blocks.filter(isSubagentBlock) : []
       )

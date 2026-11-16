@@ -9,7 +9,7 @@ import { EMPTY_STRUCTURED_AGENT_SESSION } from '../../../../../../shared/agent-s
 import type { AgentJournalRenderItem } from '../../../../../../shared/agent-session/journal/agent-session-journal-types'
 import { agentJournalSubmissionKey } from '../../../../../../shared/agent-session/journal/agent-session-journal-item-key'
 import { encodeOmpRewindTarget } from '../../../../../../shared/omp-rewind-target'
-import { AGENT_SESSION_REWIND_RESET_TIMEOUT_MS } from '../../../../../../shared/agent-session/lifecycle/agent-session-rewind-request'
+import { AGENT_SESSION_REWIND_RESET_TIMEOUT_MS } from '../../../../../../shared/agent-session/lifecycle/rewind/agent-session-rewind-request'
 import { useNativeChatRewind } from './use-native-chat-rewind'
 
 import type { AgentSessionWriteFailure } from '../../../../../../shared/agent-session/failures/agent-session-write-failure'

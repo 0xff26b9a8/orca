@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BoundedMap } from '../../shared/bounded-map'
+import { BoundedMap } from '../../shared/collections/bounded-map'
 import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
 
 const id = z.string().min(1).max(512)

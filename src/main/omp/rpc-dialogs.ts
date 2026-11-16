@@ -154,7 +154,7 @@ export function createOmpRpcDialogs(
 ): Pick<PiRpcDialogCallbacks, 'receive' | 'respond' | 'cancelAll' | 'close' | 'backgroundWork'> {
   let notice = 0
   const groups = new OmpRpcAskGroups(ompRpcDialogPresentation, send)
-  const callbacks = new PiRpcDialogCallbacks(lane, groups.reply, fail, null, {
+  const callbacks = new PiRpcDialogCallbacks(lane, groups.reply, fail, null, undefined, {
     present: ompRpcDialogPresentation,
     receive: (frame, callbacks) => {
       if (frame.method === 'cancel' && typeof frame.targetId === 'string') {

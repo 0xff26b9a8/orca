@@ -8,8 +8,10 @@ import type { AgentJournalItemIdentity } from '../../shared/agent-session/journa
 import { legacyItemBody } from '../native-chat/agent-session-journal/history-import/journal-legacy-import'
 import { decodeOmpTranscriptLine } from '../native-chat/transcript-decoding/transcript-line-decoders-omp'
 import {
+  captureHistoryCatchUpView,
   createHistoryCatchUpBatch,
-  runHistoryCatchUp
+  runHistoryCatchUp,
+  type HistoryCatchUpJournalView
 } from '../native-chat/agent-session-wire/acquisition/structured-agent-session-history-catch-up'
 import type { StructuredAgentSessionEventSink } from '../native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink'
 import { journalLifecycleItemMutation } from '../native-chat/agent-session-journal/writing/journal-lifecycle-mutation'
@@ -23,7 +25,7 @@ const sessionHeader = z.object({
 
 type ChildRecord = { id: string; line: string; message: ReturnType<typeof decodeOmpTranscriptLine> }
 type ChildFile = { id: string; path: string; records: ChildRecord[] }
-type HistoryView = { existing: string; files: string }
+type HistoryView = HistoryCatchUpJournalView & { existing: ReadonlySet<string> }
 
 export async function readOmpSubagentHistoryFiles(parentSession: string): Promise<ChildFile[]> {
   const directory = join(dirname(parentSession), basename(parentSession, extname(parentSession)))
@@ -84,28 +86,13 @@ export async function readOmpSubagentHistoryFiles(parentSession: string): Promis
   return files
 }
 
-function existingChildIds(sink: StructuredAgentSessionEventSink): Set<string> {
-  const ids = new Set<string>()
-  sink.journalItems?.()?.visitItemsWithLinkage((_id, _sequence, _body, linkage) => {
-    if (linkage.agentId) {
-      ids.add(linkage.agentId)
-    }
-  })
-  return ids
-}
-
 export async function importOmpSubagentHistory(input: {
   parentSession: string
   sink: StructuredAgentSessionEventSink | undefined
   signal?: AbortSignal
   logger?: (message: string, error?: unknown) => void
 }): Promise<void> {
-  if (
-    !input.sink ||
-    !input.sink.journalHistory ||
-    !input.sink.journalItems ||
-    !input.sink.tryAppendTransition
-  ) {
+  if (!input.sink || !input.sink.journalHistory || !input.sink.tryAppendTransition) {
     return
   }
   const files = await readOmpSubagentHistoryFiles(input.parentSession)
@@ -123,21 +110,56 @@ export async function importOmpSubagentHistory(input: {
     signal: input.signal,
     timeoutMs: 30_000,
     logger: { warn: input.logger ?? (() => {}), error: input.logger ?? (() => {}) },
-    readView: (history) => ({
-      existing: JSON.stringify([...existingChildIds(input.sink!)].sort()),
-      files: `${history.epoch}:${digest}`
-    }),
-    sameView: (planned, current) =>
-      planned.existing === current.existing && planned.files === current.files,
-    prepare: async ({ journal, check }) => {
+    readView: (history) =>
+      captureHistoryCatchUpView(history, async () => {
+        const existing = new Set<string>()
+        await history.reads.visitItems(
+          {
+            kinds: [
+              'message',
+              'tool-call',
+              'diff',
+              'approval',
+              'question',
+              'status',
+              'turn',
+              'agent-start',
+              'agent-handoff'
+            ]
+          },
+          (_id, _sequence, _body, linkage) => {
+            if (linkage.agentId) {
+              existing.add(linkage.agentId)
+            }
+          }
+        )
+        return { existing }
+      }),
+    prepare: async ({ history, view, check }) => {
       const batch = createHistoryCatchUpBatch()
-      const existing = existingChildIds(input.sink!)
+      const { existing } = await view()
       const imported: string[] = []
       for (const file of files) {
         check()
         if (existing.has(file.id)) {
           continue
         }
+        const saved = new Set(
+          (
+            await history.reads.historyItems(
+              file.records.map((record) =>
+                agentJournalItemKey({
+                  provider: 'legacy',
+                  agent: 'omp',
+                  sessionId: file.path,
+                  recordId: record.id
+                })
+              )
+            )
+          )
+            .filter((row) => row.item !== null)
+            .map((row) => row.key)
+        )
         for (const record of file.records) {
           check()
           if (!record.message) {
@@ -150,7 +172,7 @@ export async function importOmpSubagentHistory(input: {
             recordId: record.id
           }
           const key = agentJournalItemKey(identity)
-          if (journal.item(journal.canonicalItemId(key)) !== null) {
+          if (saved.has(key)) {
             continue
           }
           batch.push(

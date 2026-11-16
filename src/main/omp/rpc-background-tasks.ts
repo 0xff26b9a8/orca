@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BoundedMap } from '../../shared/bounded-map'
+import { BoundedMap } from '../../shared/collections/bounded-map'
 import { isRecord } from '../../shared/agent-status/child-work/agent-status-child-work-value-guards'
 import { ompNativeToolResults } from './rpc-tool-results'
 import { OmpRpcBackgroundServices } from './rpc-background-services'

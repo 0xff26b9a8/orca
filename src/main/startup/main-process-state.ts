@@ -1,5 +1,5 @@
 import type { BackendSupervisor } from '../backend-desktop/backend-supervisor'
-import type { AutomationUsageClient } from '../../shared/backend-service-contract'
+import type { AutomationUsageClient } from '../../shared/backend/backend-service-contract'
 import { type BrowserWindow, type Tray, app } from 'electron'
 import type { Store } from '../persistence/loading-store/store'
 import type { StatsCollector } from '../stats/collector'
@@ -117,6 +117,7 @@ export const mainProcessState = {
   crashReports: null as CrashReportStore | null,
   unsubscribeAgentAwakeStatusChanges: null as (() => void) | null,
   unsubscribeSystemResumeBroadcast: null as (() => void) | null,
+  unsubscribeWakeSignalClock: null as (() => void) | null,
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: widens the null slot to the stop function assigned by main-process-observers.
   stopDesktopPresenceReporter: null as (() => void) | null,
   watcherShutdownPromise: null as Promise<void> | null,

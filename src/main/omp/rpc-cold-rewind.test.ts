@@ -1,26 +1,27 @@
+import { readTestHostJournal } from '../native-chat/agent-session-journal/journal-observation.test-support'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, vi } from 'vitest'
-import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session/lifecycle/agent-session-mutation-envelope'
-import { agentSessionProviderHandleChainHead } from '../../shared/agent-session/lifecycle/agent-session-provider-handle'
+import { computeAgentSessionPayloadFingerprint } from '../../shared/agent-session/lifecycle/operations/agent-session-mutation-envelope'
+import { agentSessionProviderHandleChainHead } from '../../shared/agent-session/lifecycle/provider-handles/agent-session-provider-handle'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { FakeConnection, file, state } from '../pi/rpc/rpc-session-adapter.test-fixture'
-import { openTestAgentSessionRecordStore } from '../runtime/agent-session/records/agent-session-record-store-test-harness'
 import {
-  closeTestJournalHostDatabase,
-  openTestJournalHostDatabase
-} from '../native-chat/agent-session-journal/store-lifecycle/journal-host-database-test-support'
+  openTestAgentSessionRecordStore,
+  openTestAgentSessionDatabase
+} from '../runtime/agent-session/records/agent-session-record-store-test-harness'
+import { closeTestJournalHostDatabase } from '../native-chat/agent-session-journal/store-lifecycle/journal-host-database-test-support'
 import { StructuredAgentSessionHost } from '../native-chat/agent-session-wire/host/structured-agent-session-host'
 import { StructuredAgentRegistry } from '../native-chat/agent-session-wire/providers/structured-agent-registry'
-import { recordingStructuredAgentSessionLogger } from '../native-chat/agent-session-wire/host/testing/structured-agent-session-logger-test-support'
+import { recordingStructuredAgentSessionLogger } from '../native-chat/agent-session-wire/host/testing/structured-agent-session-logger.test-fixture'
 import {
   HOST_TEST_NOW,
   HOST_TEST_SESSION as SESSION,
   hostTestAttachParams,
   hostTestOperationId,
   resetHostTestOperationIds
-} from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-data'
+} from '../native-chat/agent-session-wire/host/testing/structured-agent-session-host-test-data.test-fixture'
 import { OMP_RPC_AGENT } from './rpc-agent-definition'
 import { OmpRpcSessionAdapter } from './rpc-session-adapter'
 
@@ -40,7 +41,7 @@ it('rewinds a saved OMP prompt after closing and reopening the host', async () =
     message: Record<string, unknown>
   }[] = []
   const caller = { callerKey: 'client' }
-  const boot = () => {
+  const boot = async () => {
     adapter = new OmpRpcSessionAdapter({
       resolveLaunch: async () => {
         const previous = agentSessionProviderHandleChainHead(
@@ -88,7 +89,7 @@ it('rewinds a saved OMP prompt after closing and reopening the host', async () =
       agents: new StructuredAgentRegistry([{ definition: OMP_RPC_AGENT, adapter }]),
       store,
       adapter,
-      journalDatabase: openTestJournalHostDatabase(root),
+      journalDatabase: await openTestAgentSessionDatabase(root),
       claimKeyId: 'rewind-test',
       logger: log.logger,
       now: () => HOST_TEST_NOW,
@@ -121,7 +122,7 @@ it('rewinds a saved OMP prompt after closing and reopening the host', async () =
       expect(host.readStatusSummary(SESSION)?.hostExecutionPhase).toBe('ready')
     )
   }
-  boot()
+  await boot()
   try {
     await attach()
     for (const timestamp of [100, 200]) {
@@ -147,7 +148,7 @@ it('rewinds a saved OMP prompt after closing and reopening the host', async () =
       await vi.waitFor(() => expect(host.readStatusSummary(SESSION)?.status).not.toBe('working'))
       await host.flushStreamedEvents(SESSION)
     }
-    const snapshot = await host.journalSnapshot(SESSION)
+    const snapshot = await readTestHostJournal(host, SESSION)
     const target = snapshot.items.find(
       (item) =>
         item.body.kind === 'message' &&
@@ -159,11 +160,11 @@ it('rewinds a saved OMP prompt after closing and reopening the host', async () =
     await adapter.drainObservedExits()
     await closeTestJournalHostDatabase(root)
     store = await openTestAgentSessionRecordStore(root)
-    boot()
+    await boot()
     await attach()
     const fields = {
       itemId: target.itemId,
-      expectedEpoch: (await host.journalSnapshot(SESSION)).cursor.epoch
+      expectedEpoch: (await readTestHostJournal(host, SESSION)).cursor.epoch
     }
     const result = await host.rewind(caller, {
       ...fields,
@@ -172,7 +173,7 @@ it('rewinds a saved OMP prompt after closing and reopening the host', async () =
     expect(result).toMatchObject({ ok: true })
     expect(leafId).toBe('u100')
     expect(
-      (await host.journalSnapshot(SESSION)).items.some((item) => item.itemId === target.itemId)
+      (await readTestHostJournal(host, SESSION)).items.some((item) => item.itemId === target.itemId)
     ).toBe(false)
   } finally {
     await host.flushAllStreamedEvents()

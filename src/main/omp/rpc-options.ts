@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import type { AgentSessionOptionsResult } from '../../shared/agent-session/options/agent-session-options-result'
+import type { AgentSessionOptionsResult } from '../../shared/agent-session/options/protocol/agent-session-options-result'
 import type { PiRpcRequester } from '../pi/rpc/options/rpc-model-options'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
-import { waitForPromiseWithSignal } from '../../shared/abort-signal-reason'
+import { waitForPromiseWithSignal } from '../../shared/concurrency/abort-signal-reason'
 
 const stateSchema = z.object({
   model: z

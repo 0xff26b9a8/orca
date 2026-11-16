@@ -5,9 +5,9 @@ import { getVerifiedNativeChatCommands } from '../../../../../../shared/native-c
 import type {
   NativeChatSessionSkill,
   SlashCommandSuggestion
-} from '../../../../../../shared/native-chat/input/native-chat-slash-commands'
-import { nativeChatSessionSkills } from '../../../../../../shared/native-chat/input/native-chat-skill-visibility'
-import { structuredSessionSlashCommands } from '../../../../../../shared/agent-session/view/structured-agent-session-composer'
+} from '../../../../../../shared/native-chat/input/commands/native-chat-slash-commands'
+import { nativeChatSessionSkills } from '../../../../../../shared/native-chat/input/commands/native-chat-skill-visibility'
+import { structuredSessionSlashCommands } from '../../../../../../shared/agent-session/view/structured-agent-session-slash-menu'
 import { withNativeChatResumeCommand } from '@/components/native-chat/composer/pickers/use-native-chat-resume-command'
 import { withNativeChatSideChatRows } from '@/components/native-chat/composer/pickers/use-native-chat-side-chat-command'
 import type { NativeChatStructuredComposerTransport } from '@/components/native-chat/composer/submit/native-chat-structured-composer-transport'
@@ -17,7 +17,7 @@ export type NativeChatComposerCatalog = {
   sessionSkills: readonly NativeChatSessionSkill[] | undefined
 }
 
-/** Structured chats use host and session-loaded commands/skills plus Orca /resume and /btw; PTY chats retain curated catalogs. */
+/** Structured chats use host and session-loaded commands/skills plus Orca /resume, /btw and /mcp; PTY chats retain curated catalogs. */
 export function useNativeChatComposerCatalog(
   agent: AgentType,
   structuredTransport?: NativeChatStructuredComposerTransport
@@ -31,6 +31,7 @@ export function useNativeChatComposerCatalog(
   const interactionModeSupported =
     structuredTransport?.optionSnapshot.some((entry) => entry.id === 'interactionMode') === true
   const accountUsage = structuredTransport?.accountUsage !== undefined
+  const mcpPanel = structuredTransport?.mcpPanel !== undefined
   const fork = structuredTransport?.fork !== undefined
   const sideChat = structuredTransport?.sideChat !== undefined
   const sideChatNotReady = structuredTransport?.sideChat?.notReadyReason ?? null
@@ -43,7 +44,8 @@ export function useNativeChatComposerCatalog(
       conversationCommands,
       reported,
       compactInstructions,
-      interactionModeSupported
+      interactionModeSupported,
+      mcpPanel
     )
     const commands = withNativeChatResumeCommand(
       hostSetsGoals && !sessionCommands.some(({ name }) => name === 'goal')
@@ -74,7 +76,8 @@ export function useNativeChatComposerCatalog(
     structured,
     interactionModeSupported,
     hostSetsGoals,
-    t
+    t,
+    mcpPanel
   ])
   const sessionSkills = useMemo(() => nativeChatSessionSkills(agent, reported), [agent, reported])
   return { agentCommands, sessionSkills }

@@ -28,14 +28,14 @@ it('updates Goal usage without appending the same active Goal notice after every
     (row) => row.body.kind === 'status' && row.body.threadGoal
   )
   expect(goals).toHaveLength(1)
-  expect(h.rig.journal.threadGoal()).toMatchObject({
+  expect((await h.rig.journal.reads.threadGoalSource()).goal).toMatchObject({
     tokensUsed: 1200,
     timeUsedSeconds: 12,
     updatedAt: 13
   })
-  expect(h.rig.journal.threadGoal()).not.toHaveProperty('id')
+  expect((await h.rig.journal.reads.threadGoalSource()).goal).not.toHaveProperty('id')
   const reopened = await h.rig.reopenJournal()
-  expect(reopened.threadGoal()).toMatchObject({
+  expect((await reopened.reads.threadGoalSource()).goal).toMatchObject({
     objective: goal.objective,
     tokensUsed: 1200,
     timeUsedSeconds: 12,
@@ -56,13 +56,18 @@ it('retains pause, resume, completion and clear while revising queued usage in p
     })
   }
   const rows = (await h.rig.rows()).filter((row) => row.body.kind === 'status')
-  expect(rows.map((row) => row.body.kind === 'status' && row.body.text)).toEqual([
-    'Goal: Finish the tickets (active)',
-    'Goal: Finish the tickets (paused)',
-    'Goal: Finish the tickets (active)',
-    'Goal: Finish the tickets (complete)'
-  ])
-  expect(h.rig.journal.threadGoal()).toMatchObject({ status: 'complete', tokensUsed: 500 })
+  expect(
+    rows.map(
+      (row) =>
+        row.body.kind === 'status' &&
+        row.body.threadGoal?.state === 'set' &&
+        row.body.threadGoal.goal.status
+    )
+  ).toEqual(['active', 'paused', 'active', 'complete'])
+  expect((await h.rig.journal.reads.threadGoalSource()).goal).toMatchObject({
+    status: 'complete',
+    tokensUsed: 500
+  })
   expect(
     rows.every(
       (row) =>
@@ -75,5 +80,5 @@ it('retains pause, resume, completion and clear while revising queued usage in p
   h.connection.receive({ type: 'goal_updated', goal: null })
   const cleared = (await h.rig.rows()).filter((row) => row.body.kind === 'status')
   expect(cleared).toHaveLength(5)
-  expect(h.rig.journal.threadGoal()).toBeNull()
+  expect((await h.rig.journal.reads.threadGoalSource()).goal).toBeNull()
 })

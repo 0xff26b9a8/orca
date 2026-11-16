@@ -26,7 +26,7 @@ import type { TabBarItemActions } from './use-tab-bar-item-actions'
 import { renderTabBarItems } from './tab-bar-item-surface'
 import { TabBarStaticCreateMenu } from './tab-bar-static-create-menu'
 import ClientHostedBrowserTabRows from './ClientHostedBrowserTabRows'
-import type { ClientHostedBrowserRow } from '../../../../shared/client-hosted-browser-rows'
+import type { ClientHostedBrowserRow } from '../../../../shared/browser/client-hosting/client-hosted-browser-rows'
 import { advanceAgentSessionsTourPastNewTab } from '@/components/contextual-tours/agent-sessions-tour-new-tab'
 
 const EMPTY_CLIENT_HOSTED_ROWS: readonly ClientHostedBrowserRow[] = []
@@ -71,12 +71,7 @@ export function renderTabBarSurface(
     workspaceHasSimulatorTab,
     showMobileEmulatorIntroCallout,
     windowsTerminalCapabilities,
-    defaultWindowsPowerShellImplementation,
-    newTerminalShortcut,
-    newBrowserShortcut,
-    newSimulatorShortcut,
-    newFileShortcut,
-    openMarkdownShortcut
+    defaultWindowsPowerShellImplementation
   } = runtime
   const {
     agentMenu,
@@ -262,7 +257,7 @@ export function renderTabBarSurface(
                 onSelectMenuOption={handleSelectCreateMenuOption}
                 onDidOpenEntry={() => setNewTabMenuOpen(false)}
               />
-              {showStaticCreateMenuItems ? <DropdownMenuSeparator /> : null}
+              {showStaticCreateMenuItems ? <DropdownMenuSeparator className="my-0 mb-1.5" /> : null}
             </>
           ) : null}
           {showStaticCreateMenuItems ? (
@@ -278,11 +273,6 @@ export function renderTabBarSurface(
               windowsShellEntries={windowsShellEntries}
               defaultWindowsPowerShellImplementation={defaultWindowsPowerShellImplementation}
               pwshAvailable={windowsTerminalCapabilities.pwshAvailable}
-              newTerminalShortcut={newTerminalShortcut}
-              newBrowserShortcut={newBrowserShortcut}
-              newSimulatorShortcut={newSimulatorShortcut}
-              newFileShortcut={newFileShortcut}
-              openMarkdownShortcut={openMarkdownShortcut}
               queueNewActiveTerminalFocusAfterNewTabMenuClose={
                 queueNewActiveTerminalFocusAfterNewTabMenuClose
               }

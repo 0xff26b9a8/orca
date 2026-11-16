@@ -170,6 +170,7 @@ it.each(['refused', 'failed'])(
         acknowledge
       })
     ).resolves.toEqual({ cancelled: false })
+    await h.rig.rows()
     expect(h.childWork.mock.calls.flatMap(([entries]) => entries)).toContainEqual({
       type: 'ended',
       observedAt: expect.any(Number),
