@@ -119,7 +119,8 @@ await build({
     resolveDir: process.cwd(),
     contents: `
       export {openOmpRpcConnection} from './src/main/omp/rpc-connection';
-      export {ompRpcDialogPresentation} from './src/main/omp/rpc-dialogs';
+      export {piRpcDialogPresentation} from './src/main/pi/rpc/rpc-extension-dialogs';
+      export {createOmpRpcDialogs} from './src/main/omp/rpc-dialogs';
       export {structuredQuestionAnswers} from './src/shared/native-chat/input/questions/structured-agent-question-card';
       export {isValidAgentSessionQuestionAnswers} from './src/shared/agent-session/agent-session-question-answer';
       export {agentSessionPromptQuestions} from './src/shared/agent-session/agent-session-question-answer';
@@ -133,7 +134,8 @@ await build({
 })
 const {
   openOmpRpcConnection,
-  ompRpcDialogPresentation,
+  piRpcDialogPresentation,
+  createOmpRpcDialogs,
   structuredQuestionAnswers,
   isValidAgentSessionQuestionAnswers,
   agentSessionPromptQuestions
@@ -162,6 +164,7 @@ for (const key of Object.keys(env)) {
 }
 const config = join(root, 'rpc.yml')
 await writeFile(config, 'ask:\n  timeout: 0\n')
+let hostDialogs
 const connection = openOmpRpcConnection(
   {
     command: resolve(process.argv[2]),
@@ -181,7 +184,14 @@ const connection = openOmpRpcConnection(
     cwd,
     env
   },
-  { onRecord: (frame) => frames.push(frame) }
+  {
+    onRecord: (frame) => {
+      frames.push(frame)
+      if (frame.type === 'extension_ui_request') {
+        hostDialogs?.receive(frame)
+      }
+    }
+  }
 )
 const wait = async (predicate) => {
   const until = Date.now() + 25000
@@ -211,7 +221,7 @@ const nextDialog = async () => {
   return frame
 }
 const answer = async (frame, selection) => {
-  const presentation = ompRpcDialogPresentation(frame)
+  const presentation = piRpcDialogPresentation(frame)
   assert.equal(presentation?.body.kind, 'question')
   const questions = agentSessionPromptQuestions(presentation.body)
   const answers = structuredQuestionAnswers(questions, [selection])
@@ -302,7 +312,7 @@ try {
   invoked = false
   await connection.send({ type: 'prompt', id: 'cancel-replay', message: 'REPLAY_HTML_ASK' })
   const cancelled = await nextDialog()
-  const presentation = ompRpcDialogPresentation(cancelled)
+  const presentation = piRpcDialogPresentation(cancelled)
   await connection.send({
     type: 'extension_ui_response',
     id: cancelled.id,
@@ -311,6 +321,41 @@ try {
   await wait(() => toolResults().length === 3)
   assert.equal(toolResults()[2].isError, true)
   assert.match(toolResults()[2].result.content[0].text, /Ask tool was cancelled by the user/)
+  await wait(async () => (await connection.request('get_state')).isSettled)
+  const cards = [],
+    failures = []
+  hostDialogs = createOmpRpcDialogs(
+    {
+      apply: (events) => {
+        for (const event of events) {
+          if (event.type === 'request.open') {
+            cards.push({ id: event.request, body: event.body })
+          }
+        }
+      },
+      isRequestRow: (item, id) => item === id
+    },
+    (frame) => connection.send(frame),
+    (error) => failures.push(error)
+  )
+  call.arguments.html =
+    '<form><label><input type="checkbox" name="approve" value="approved">Approve isolated test action</label></form>'
+  invoked = false
+  await connection.send({ type: 'prompt', id: 'checkbox-card', message: 'REPLAY_HTML_ASK' })
+  await wait(() => cards.length > 0)
+  const card = cards[0]
+  const questions = agentSessionPromptQuestions(card.body)
+  assert.deepEqual(
+    questions[0].options.map((option) => option.label),
+    ['Approve isolated test action']
+  )
+  const answers = structuredQuestionAnswers(questions, [{ indices: [0], other: '' }])
+  assert.equal(isValidAgentSessionQuestionAnswers(questions, answers), true)
+  await hostDialogs.respond(card.id, { kind: 'answers', answers }, async () => {})
+  await wait(() => toolResults().length === 4)
+  assert.deepEqual(resultData(toolResults()[3]), { approve: 'approved' })
+  assert.equal(cards.length, 1, 'One checkbox submission must not publish toggle or Done cards')
+  assert.deepEqual(failures, [])
   const result = {
     binary: resolve(process.argv[2]),
     transport: 'real OMP RPC v2',
@@ -318,6 +363,7 @@ try {
     nativeFieldFlow: true,
     hostAnswerValidation: true,
     nativeCheckboxState: true,
+    singleCheckboxSubmission: true,
     nativeValidation: true,
     emptyChoices: true,
     emptyText: true,
@@ -329,6 +375,7 @@ try {
   await writeFile(join(root, 'result.json'), JSON.stringify(result, null, 2))
   console.log(JSON.stringify(result, null, 2))
 } finally {
+  hostDialogs?.close()
   await connection.close()
   server.closeAllConnections()
   await new Promise((r) => server.close(r))

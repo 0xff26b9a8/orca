@@ -8,6 +8,7 @@ import type { JsonlRpcTimelineLane } from '../jsonl-rpc/timeline-lane'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import { ompRpcNoticeTone } from './rpc-notifications'
 import { OmpRpcAskGroups } from './rpc-ask-groups'
+import { OmpRpcCheckboxDialogs, ompRpcCheckboxDialogPresentation } from './rpc-checkbox-dialogs'
 
 const askSchema = z.object({
   id: z.string(),
@@ -79,7 +80,7 @@ export function ompRpcDialogPresentation(value: unknown): PiRpcDialogPresentatio
   }
   const ask = askSchema.safeParse(value)
   if (!ask.success) {
-    return ompRpcPrimitiveDialogPresentation(value)
+    return ompRpcCheckboxDialogPresentation(value) ?? ompRpcPrimitiveDialogPresentation(value)
   }
   const { id, questions } = ask.data
   if (new Set(questions.map((question) => question.id)).size !== questions.length) {
@@ -154,11 +155,17 @@ export function createOmpRpcDialogs(
 ): Pick<PiRpcDialogCallbacks, 'receive' | 'respond' | 'cancelAll' | 'close' | 'backgroundWork'> {
   let notice = 0
   const groups = new OmpRpcAskGroups(ompRpcDialogPresentation, send)
-  const callbacks = new PiRpcDialogCallbacks(lane, groups.reply, fail, null, undefined, {
+  const checkboxes = new OmpRpcCheckboxDialogs(groups.reply)
+  const callbacks = new PiRpcDialogCallbacks(lane, checkboxes.reply, fail, null, undefined, {
     present: ompRpcDialogPresentation,
     receive: (frame, callbacks) => {
       if (frame.method === 'cancel' && typeof frame.targetId === 'string') {
-        groups.withdraw(frame.targetId, callbacks)
+        if (!checkboxes.withdraw(frame.targetId, callbacks)) {
+          groups.withdraw(frame.targetId, callbacks)
+        }
+        return true
+      }
+      if (checkboxes.receive(frame, callbacks)) {
         return true
       }
       if (groups.receive(frame, callbacks)) {
@@ -230,12 +237,14 @@ export function createOmpRpcDialogs(
     close: () => {
       callbacks.close()
       groups.clear()
+      checkboxes.clear()
     },
     receive: (frame) => callbacks.receive(frame),
     respond: async (...args) => {
       await callbacks.respond(...args)
       if (args[3] === false) {
         groups.forgetRow(args[0], (item, id) => lane.isRequestRow(item, id))
+        checkboxes.forgetRow(args[0], (item, id) => lane.isRequestRow(item, id))
       }
       try {
         groups.advance(callbacks)
@@ -247,6 +256,7 @@ export function createOmpRpcDialogs(
     cancelAll: () => {
       callbacks.cancelAll()
       groups.clear()
+      checkboxes.clear()
     }
   }
 }
