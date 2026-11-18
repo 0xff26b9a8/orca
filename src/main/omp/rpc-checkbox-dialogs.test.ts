@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { agentSessionPromptQuestions } from '../../shared/agent-session/agent-session-question-answer'
+import { agentSessionPromptQuestions } from '../../shared/agent-session/requests/prompts/agent-session-question-answer'
 import { AgentSessionPromptUnavailableError } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter-errors'
 import {
   closeOmpRpcAdapterFixtures,

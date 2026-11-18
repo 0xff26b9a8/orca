@@ -122,8 +122,8 @@ await build({
       export {piRpcDialogPresentation} from './src/main/pi/rpc/rpc-extension-dialogs';
       export {createOmpRpcDialogs} from './src/main/omp/rpc-dialogs';
       export {structuredQuestionAnswers} from './src/shared/native-chat/input/questions/structured-agent-question-card';
-      export {isValidAgentSessionQuestionAnswers} from './src/shared/agent-session/agent-session-question-answer';
-      export {agentSessionPromptQuestions} from './src/shared/agent-session/agent-session-question-answer';
+      export {isValidAgentSessionQuestionAnswers} from './src/shared/agent-session/requests/prompts/agent-session-question-answer';
+      export {agentSessionPromptQuestions} from './src/shared/agent-session/requests/prompts/agent-session-question-answer';
     `
   },
   bundle: true,

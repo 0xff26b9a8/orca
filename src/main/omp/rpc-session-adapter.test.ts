@@ -5,7 +5,7 @@ import { projectStructuredItemsToNativeChat } from '../../shared/agent-session/v
 import {
   nativeChatNoticeBlock,
   nativeChatNoticeLook
-} from '../../shared/native-chat/native-chat-notice'
+} from '../../shared/native-chat/transcript/notices/native-chat-notice'
 import {
   closeOmpRpcAdapterFixtures,
   setupOmpRpcAdapter as setup

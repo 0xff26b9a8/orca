@@ -142,6 +142,9 @@ export function openOmpRpcConnection(
     get pid() {
       return raw.pid
     },
+    get spawned() {
+      return raw.spawned
+    },
     get closed() {
       return raw.closed
     },
@@ -150,6 +153,9 @@ export function openOmpRpcConnection(
     },
     get processless() {
       return raw.processless
+    },
+    get outcomeLost() {
+      return raw.outcomeLost
     },
     get spawnAbsence() {
       return raw.spawnAbsence

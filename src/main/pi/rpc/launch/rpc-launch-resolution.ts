@@ -1,6 +1,4 @@
-import { open, realpath } from 'node:fs/promises'
-import { isAbsolute, normalize } from 'node:path'
-import { z } from 'zod'
+import { isAbsolute } from 'node:path'
 import { agentSessionRefusalError } from '../../../../shared/agent-session/failures/agent-session-wire-refusals'
 import {
   agentSessionProviderHandleChainHead,
@@ -37,7 +35,11 @@ import {
   ensurePiBackgroundWorkBridge,
   type PiBackgroundWorkLaunch
 } from '../background-work/rpc-background-work-bridge'
+import { piTitlebarExtensionService } from '../../managed-extensions/titlebar-extension-service'
 import type { StructuredAgentSessionLogger } from '../../../native-chat/agent-session-wire/host/structured-agent-session-logger'
+import { readPiSessionHeader, samePiDirectory } from './rpc-session-header'
+
+export { readPiSessionHeader, samePiDirectory } from './rpc-session-header'
 
 export type PiRpcResolvedLaunch = PiRpcLaunchOptions & {
   previous: AgentSessionProviderHandleLink | null
@@ -52,6 +54,7 @@ export type PiRpcLaunchPartDeps = {
   probeVersion?: AgentCliVersionReader
   resolveFullAccess?: () => boolean
   ensureBackgroundWorkBridge?: () => Promise<PiBackgroundWorkLaunch | null>
+  managedExtensionsEnabled?: () => boolean
   logger?: StructuredAgentSessionLogger
 }
 
@@ -95,56 +98,6 @@ export function checkPiRpcVersion(
     PI_RPC_MINIMUM_VERSIONS,
     read
   )
-}
-
-const headerSchema = z.object({
-  type: z.literal('session'),
-  cwd: z.string().min(1),
-  id: z.string().optional()
-})
-const titleSlotSchema = z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
-
-export async function readPiSessionHeader(
-  file: string,
-  options?: { titleSlot?: boolean }
-): Promise<{ cwd: string; id?: string } | null> {
-  let descriptor
-  try {
-    descriptor = await open(file, 'r')
-  } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      return null
-    }
-    throw error
-  }
-  try {
-    const buffer = Buffer.alloc(64 * 1024)
-    const { bytesRead } = await descriptor.read(buffer, 0, buffer.length, 0)
-    const data = buffer.subarray(0, bytesRead).toString('utf8')
-    let lf = data.indexOf('\n')
-    if (lf === -1) {
-      throw new Error('Pi session header is incomplete or oversized')
-    }
-    let record: unknown = JSON.parse(data.slice(0, lf))
-    if (options?.titleSlot && titleSlotSchema.safeParse(record).success) {
-      const start = lf + 1
-      lf = data.indexOf('\n', start)
-      if (lf === -1) {
-        throw new Error('OMP session header is incomplete or oversized')
-      }
-      record = JSON.parse(data.slice(start, lf))
-    }
-    return headerSchema.parse(record)
-  } finally {
-    await descriptor.close()
-  }
-}
-
-export async function samePiDirectory(left: string, right: string): Promise<boolean> {
-  const canonical = async (value: string): Promise<string> =>
-    realpath(value).catch(() => normalize(value))
-  const [a, b] = await Promise.all([canonical(left), canonical(right)])
-  return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b
 }
 
 /** Resolve chat/catalog launches identically; refresh the environment once if Pi is missing. */
@@ -233,6 +186,10 @@ export function piRpcLaunchPart(
     )
     if (launchVersion.status === 'tooOld') {
       throw AgentCliInstallationError.tooOld('pi', launchVersion)
+    }
+    // Chat loads extensions from its agent dir, so subagent rows need the current status extension there.
+    if (deps.managedExtensionsEnabled?.()) {
+      piTitlebarExtensionService.installManagedExtensions(accountHome.path, 'pi')
     }
     const backgroundWork = await (
       deps.ensureBackgroundWorkBridge ??

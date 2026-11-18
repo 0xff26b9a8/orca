@@ -34,7 +34,10 @@ export type PiRpcConnection = Pick<
   | 'spawnAbsence'
   | 'lastCloseResult'
   | 'onExit'
-> & { thinkingLevels?: () => Promise<string[]> }
+> &
+  Partial<Pick<JsonlRpcAgentConnection, 'spawned' | 'outcomeLost'>> & {
+    thinkingLevels?: () => Promise<string[]>
+  }
 export type PiRpcSessionDeps = PiHistoryCaptureDeps & {
   onChildWorkEvidence?: (
     sessionId: string,
