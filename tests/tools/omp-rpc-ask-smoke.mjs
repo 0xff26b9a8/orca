@@ -356,6 +356,53 @@ try {
   assert.deepEqual(resultData(toolResults()[3]), { approve: 'approved' })
   assert.equal(cards.length, 1, 'One checkbox submission must not publish toggle or Done cards')
   assert.deepEqual(failures, [])
+  call.arguments.html = `<form><fieldset><legend>Configuration (multiple choices)</legend>
+    <p>Choose the configuration rules that apply.</p>
+    <label><input type="checkbox" name="config" value="templates" checked>Templates only</label>
+    <label><input type="checkbox" name="config" value="diff" checked>Promote via diff</label>
+    <label><input type="checkbox" name="config" value="repo" checked>Home repo</label>
+    </fieldset><label>Next question<input name="next"></label></form>`
+  for (const [index, example] of [
+    { indices: [0], other: 'Runtime workers', expected: ['templates', 'Runtime workers'] },
+    { indices: [], other: 'Runtime workers', expected: ['Runtime workers'] }
+  ].entries()) {
+    await wait(async () => (await connection.request('get_state')).isSettled)
+    cards.length = 0
+    invoked = false
+    await connection.send({
+      type: 'prompt',
+      id: `checkbox-other-${index}`,
+      message: 'REPLAY_HTML_ASK'
+    })
+    await wait(() => cards.length > 0)
+    const card = cards[0]
+    const questions = agentSessionPromptQuestions(card.body)
+    const answers = structuredQuestionAnswers(questions, [example])
+    assert.equal(isValidAgentSessionQuestionAnswers(questions, answers), true)
+    await hostDialogs.respond(card.id, { kind: 'answers', answers }, async () => {})
+    await wait(() => cards.length > 1)
+    const next = cards[1]
+    assert.equal(
+      next.body.question,
+      'Next question',
+      'Other input and Done must stay inside Adapter'
+    )
+    const nextAnswers = structuredQuestionAnswers(agentSessionPromptQuestions(next.body), [
+      { indices: [], other: 'Next answer' }
+    ])
+    await hostDialogs.respond(next.id, { kind: 'answers', answers: nextAnswers }, async () => {})
+    await wait(() => toolResults().length === 5 + index)
+    assert.deepEqual(resultData(toolResults()[4 + index]), {
+      config: example.expected,
+      next: 'Next answer'
+    })
+    assert.equal(
+      cards.length,
+      2,
+      'One checkbox card and one following text field must be published'
+    )
+    assert.deepEqual(failures, [])
+  }
   const result = {
     binary: resolve(process.argv[2]),
     transport: 'real OMP RPC v2',
@@ -364,6 +411,9 @@ try {
     hostAnswerValidation: true,
     nativeCheckboxState: true,
     singleCheckboxSubmission: true,
+    checkboxOtherWithSelections: true,
+    checkboxOtherAlone: true,
+    checkboxOtherAdvancesToNextField: true,
     nativeValidation: true,
     emptyChoices: true,
     emptyText: true,

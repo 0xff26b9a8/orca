@@ -1,5 +1,4 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { agentSessionPromptQuestions } from '../../shared/agent-session/requests/prompts/agent-session-question-answer'
 import { AgentSessionPromptUnavailableError } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter-errors'
 import {
   closeOmpRpcAdapterFixtures,
@@ -48,8 +47,7 @@ it('submits one checkbox card as native toggles followed by Done without redispl
       options: [
         { id: 'option-0', label: 'Forms' },
         { id: 'option-1', label: 'Background tasks' },
-        { id: 'option-2', label: 'Subagents' },
-        { id: 'option-3', label: 'Other (type your own)' }
+        { id: 'option-2', label: 'Subagents' }
       ]
     }
   ])
@@ -215,66 +213,5 @@ it('keeps unrelated dialogs separate and withdraws a checkbox by its latest nati
     type: 'extension_ui_response',
     id: 'unrelated',
     value: 'Keep this dialog'
-  })
-})
-
-it('opens the native editor for custom input after reconciling the checked options', async () => {
-  const h = await openCheckbox()
-  const answer = h.submit(['option-1', 'option-3'])
-  await vi.waitFor(() =>
-    expect(h.connection.sent).toContainEqual({
-      type: 'extension_ui_response',
-      id: 'checkbox-1',
-      value: 'Forms'
-    })
-  )
-  h.connection.receive({ ...checkbox, id: 'custom-toggle', checkedIndices: [] })
-  await vi.waitFor(() =>
-    expect(h.connection.sent).toContainEqual({
-      type: 'extension_ui_response',
-      id: 'custom-toggle',
-      value: 'Background tasks'
-    })
-  )
-  h.connection.receive({ ...checkbox, id: 'custom-done', checkedIndices: [1] })
-  await answer
-  expect(h.connection.sent).toContainEqual({
-    type: 'extension_ui_response',
-    id: 'custom-done',
-    value: 'Other (type your own)'
-  })
-  h.connection.receive({
-    type: 'extension_ui_request',
-    method: 'editor',
-    id: 'custom-editor',
-    title: 'Specify another feature'
-  })
-  const row = (await h.rig.rows()).find(
-    (row) => row.body.kind === 'question' && row.body.question === 'Specify another feature'
-  )
-  if (!row || row.body.kind !== 'question') {
-    throw new Error('Missing native editor')
-  }
-  await h.adapter.answerPrompt({
-    sessionId: 'omp-test',
-    fence: 1,
-    kind: 'question',
-    itemId: row.itemId,
-    commit: async () => {},
-    response: {
-      kind: 'answers',
-      answers: [
-        {
-          questionId: agentSessionPromptQuestions(row.body)[0]!.id,
-          optionIds: [],
-          other: 'Native input'
-        }
-      ]
-    }
-  })
-  expect(h.connection.sent).toContainEqual({
-    type: 'extension_ui_response',
-    id: 'custom-editor',
-    value: 'Native input'
   })
 })
