@@ -859,6 +859,8 @@
 4 src/main/observability/index.ts
 4 src/main/observability/local-file-sink.ts
 2 src/main/omp/omp-transcript-import.ts
+4 src/main/omp/rpc-launch.ts # Existing launch preparation: native capability, command resolution and legacy session-root lookup.
+1 src/main/omp/rpc-runtime-registration.ts # Adapter construction creates the launch resolver; its synchronous work runs only during launch.
 1 src/main/opencode-usage/opencode-usage-provider.ts
 1 src/main/opencode-usage/store.ts
 1 src/main/opencode/accounts/opencode-go-api-key-store.ts
