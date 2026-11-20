@@ -1,3 +1,5 @@
+import type { AgentSessionFailureFact } from '../../../shared/agent-session/failures/agent-session-failure'
+import { agentSessionFailureWords } from '../../../shared/agent-session/failures/agent-session-failure-words'
 import { z } from 'zod'
 import type { AgentJournalToolCallItem } from '../../../shared/agent-session/journal/agent-session-journal-types'
 import {
@@ -23,6 +25,22 @@ export function piRpcSkippedEventNotice(turn: string): ProviderTimelineEvent {
       kind: 'status',
       tone: 'warning',
       text: 'Pi sent an update too large to show, so part of this turn is missing here.'
+    }
+  }
+}
+
+export function piRpcFailureStatus(
+  turn: string,
+  fact: AgentSessionFailureFact,
+  agentName = 'Pi'
+): ProviderTimelineEvent {
+  return {
+    type: 'item.close',
+    item: `error:${turn}`,
+    body: {
+      kind: 'status',
+      tone: 'error',
+      ...agentSessionFailureWords(fact, { agentName, surface: 'row' })
     }
   }
 }

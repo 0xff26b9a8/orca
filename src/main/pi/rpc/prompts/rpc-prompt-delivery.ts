@@ -1,4 +1,3 @@
-import type { ProviderTimelineEvent } from '../../../native-chat/agent-session-timeline/provider-timeline-event'
 import {
   agentSessionFailureFact,
   providerDiagnostic,
@@ -26,7 +25,7 @@ type DeliveryDeps = {
   send: (frame: JsonlRpcRecord) => Promise<void>
   accepted: (id: string, at: number) => void
   commandOnly: () => void
-  rejectedAfterAcceptance: (error: string) => void
+  rejectedAfterAcceptance: (fact: SubmissionRejectionFact) => void
   settled: (id: string, outcome: AgentSessionDispatchOutcome) => void
   failed: (error: Error) => void
   beforeWrite?: () => void
@@ -62,7 +61,10 @@ function piHttpErrorStatus(error: string): number | undefined {
   return status === undefined ? undefined : Number(status)
 }
 
-export function piRpcFailureFact(error: string) {
+export function piRpcFailureFact<K extends 'providerRejected' | 'providerResponseFailed'>(
+  error: string,
+  fallback: K
+) {
   const signInRequired =
     error.startsWith(MISSING_KEY_PREFIX) ||
     (error.startsWith('Authentication failed for ') && error.includes("Run '/login ")) ||
@@ -71,7 +73,7 @@ export function piRpcFailureFact(error: string) {
         hasExpiredRefreshToken(error) ||
         (/\b401\b/.test(error) && !TEMPORARY_OAUTH_FAILURE.test(error))
       : piHttpErrorStatus(error) === 401)
-  return agentSessionFailureFact(signInRequired ? 'notSignedIn' : 'providerRejected', {
+  return agentSessionFailureFact(signInRequired ? 'notSignedIn' : fallback, {
     detail: providerDiagnostic(error, signInRequired ? 'log' : 'person')
   })
 }
@@ -166,7 +168,7 @@ export class PiRpcPromptDelivery {
     }
     if (!reply.success) {
       const error = reply.error ?? `${this.deps.agentName ?? 'Pi'} rejected the prompt`
-      const fact = piRpcFailureFact(error)
+      const fact = piRpcFailureFact(error, 'providerRejected')
       if (
         !this.deps.correlated &&
         !submission.accepted &&
@@ -206,7 +208,7 @@ export class PiRpcPromptDelivery {
           : fact
       this.deps.settled(submission.id, piRejection(settledFact, this.deps.agentName ?? 'Pi'))
       if (submission.accepted) {
-        this.deps.rejectedAfterAcceptance(error)
+        this.deps.rejectedAfterAcceptance(fact)
       } else {
         this.deps.refused?.()
       }
@@ -232,7 +234,10 @@ export class PiRpcPromptDelivery {
         this.deps.settled(
           submission.id,
           piRejection(
-            { ...piRpcFailureFact(submission.signInRefusal), neverReachedAgent: true },
+            {
+              ...piRpcFailureFact(submission.signInRefusal, 'providerRejected'),
+              neverReachedAgent: true
+            },
             this.deps.agentName ?? 'Pi'
           )
         )
@@ -284,22 +289,6 @@ export class PiRpcPromptDelivery {
   private finishIfConsumed(submission: Submission): void {
     if (!this.waiting.includes(submission) && !this.acknowledgements.includes(submission)) {
       this.pending.delete(submission)
-    }
-  }
-}
-
-export function piRpcFailureStatus(
-  turn: string,
-  error: string,
-  agentName = 'Pi'
-): ProviderTimelineEvent {
-  return {
-    type: 'item.close',
-    item: `error:${turn}`,
-    body: {
-      kind: 'status',
-      tone: 'error',
-      ...agentSessionFailureWords(piRpcFailureFact(error), { agentName, surface: 'row' })
     }
   }
 }
