@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { JsonlRpcResponseError } from './peer-errors'
+export { JsonlRpcResponseError } from './peer-errors'
 
 const responseSchema = z.looseObject({
   type: z.literal('response'),
@@ -8,16 +10,6 @@ const responseSchema = z.looseObject({
   data: z.unknown().optional(),
   error: z.string().optional()
 })
-
-export class JsonlRpcResponseError extends Error {
-  constructor(
-    readonly command: string,
-    message: string
-  ) {
-    super(message)
-    this.name = 'JsonlRpcResponseError'
-  }
-}
 
 export type JsonlRpcPendingRequest = {
   command: string

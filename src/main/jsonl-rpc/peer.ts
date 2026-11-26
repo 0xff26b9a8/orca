@@ -18,14 +18,11 @@ import { settleJsonlRpcReply, type JsonlRpcPendingRequest } from './peer-reply'
 const recordSchema = z.looseObject({ type: z.string() })
 
 export type JsonlRpcRecord = z.infer<typeof recordSchema>
-export class JsonlRpcStreamClosedError extends Error {
-  constructor() {
-    super('Agent JSON-lines RPC stream closed')
-    this.name = 'JsonlRpcStreamClosedError'
-  }
-}
-export { JsonlRpcResponseError } from './peer-reply'
+export { JsonlRpcStreamClosedError, JsonlRpcResponseError } from './peer-errors'
+import { JsonlRpcStreamClosedError } from './peer-errors'
 export type JsonlRpcPeerHandlers = {
+  decodeRecord?: (record: unknown) => unknown[]
+  encodeRecord?: (record: JsonlRpcRecord) => string
   /** Includes id-less deferred prompt acknowledgements; dialect failures are fatal to preserve lifecycle evidence. */
   onRecord?: (record: JsonlRpcRecord) => void
   /** An event over the line limit was dropped, leaving only its bounded prefix; the stream stays open. */
@@ -192,7 +189,10 @@ export class JsonlRpcPeer {
       return Promise.reject(this.terminalError)
     }
     try {
-      return this.writer.write(encodeNdjson(record, this.limits.maxLineBytes), signal)
+      return this.writer.write(
+        this.handlers.encodeRecord?.(record) ?? encodeNdjson(record, this.limits.maxLineBytes),
+        signal
+      )
     } catch (error) {
       return Promise.reject(error)
     }
@@ -267,6 +267,12 @@ export class JsonlRpcPeer {
   }
 
   private dispatch(value: unknown): void {
+    for (const record of this.handlers.decodeRecord?.(value) ?? [value]) {
+      this.dispatchRecord(record)
+    }
+  }
+
+  private dispatchRecord(value: unknown): void {
     if (this.closed) {
       return
     }

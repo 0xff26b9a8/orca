@@ -1,3 +1,5 @@
+import type { AgentSessionFailureFact } from '../../../shared/agent-session/failures/agent-session-failure'
+import { agentSessionFailureWords } from '../../../shared/agent-session/failures/agent-session-failure-words'
 import { z } from 'zod'
 import type {
   AgentJournalDiffItem,
@@ -13,9 +15,10 @@ import type { ProviderTimelineEvent } from '../../native-chat/agent-session-time
 import { replacementPatch } from '../../native-chat/agent-session-timeline/provider-timeline-replacement-patch'
 import { piRpcMessageEventSchema, piRpcToolEventSchema } from './rpc-protocol'
 import type { PiRpcContextUsage } from './rpc-context-usage'
+import { inlineToolResultImages } from '../../native-chat/transcript-decoding/transcript-record-blocks'
 
 const resultSchema = z.object({
-  content: z.array(z.object({ type: z.string(), text: z.string().optional() }))
+  content: z.array(z.looseObject({ type: z.string(), text: z.string().optional() }))
 })
 const fileInputSchema = z.object({ path: z.string().min(1), content: z.string().optional() })
 const editResultSchema = z.object({ details: z.object({ patch: z.string().min(1) }) })
@@ -64,6 +67,22 @@ export function piRpcSkippedEventNotice(turn: string): ProviderTimelineEvent {
       kind: 'status',
       tone: 'warning',
       text: 'Pi sent an update too large to show, so part of this turn is missing here.'
+    }
+  }
+}
+
+export function piRpcFailureStatus(
+  turn: string,
+  fact: AgentSessionFailureFact,
+  agentName = 'Pi'
+): ProviderTimelineEvent {
+  return {
+    type: 'item.close',
+    item: `error:${turn}`,
+    body: {
+      kind: 'status',
+      tone: 'error',
+      ...agentSessionFailureWords(fact, { agentName, surface: 'row' })
     }
   }
 }
@@ -212,6 +231,8 @@ export class PiRpcMessages {
                 : journalToolPayload(output, state === 'running')
           })
     }
+    const images =
+      state === 'running' ? [] : inlineToolResultImages(content.success ? content.data.content : [])
     if (state === 'running') {
       this.tools.set(event.toolCallId, body)
       this.whole.set(event.toolCallId, { input, output })
@@ -224,7 +245,16 @@ export class PiRpcMessages {
         type: state === 'running' ? (previous ? 'item.update' : 'item.open') : 'item.close',
         item: `tool:${event.toolCallId}`,
         body: (state === 'completed' && fileChange(event.toolName, input, result)) || body
-      }
+      },
+      ...(images.length > 0
+        ? [
+            {
+              type: 'item.close' as const,
+              item: `tool-images:${event.toolCallId}`,
+              body: { kind: 'message' as const, role: 'tool' as const, blocks: images }
+            }
+          ]
+        : [])
     ]
   }
 

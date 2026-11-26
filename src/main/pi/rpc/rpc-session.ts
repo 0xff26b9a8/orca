@@ -14,22 +14,32 @@ import { PiRpcTurns } from './rpc-turns'
 import { PiRpcJoinedTurns } from './rpc-joined-turns'
 import { PI_RPC_PEER_OPTIONS } from './prompts/rpc-prompt'
 import { PiRpcDialogCallbacks } from './rpc-dialog-callbacks'
-import { PiRpcOptionObservations, type PiRpcOptionWrite } from './options/rpc-options'
+import {
+  PiRpcOptionObservations,
+  readPiRpcSessionOptions,
+  type PiRpcOptionWrite
+} from './options/rpc-options'
+import type { AgentSessionOptionsResult } from '../../../shared/agent-session/options/protocol/agent-session-options-result'
 import type { PiRpcResolvedLaunch } from './launch/rpc-launch-resolution'
 import type { StructuredAgentSessionProviderOpenResult } from '../../native-chat/agent-session-wire/startup/structured-agent-session-provider-open-contract'
 import type { AgentSessionProviderHandleLink } from '../../../shared/agent-session/lifecycle/provider-handles/agent-session-provider-handle'
 import { PiRpcSessionStartup } from './rpc-session-startup'
 import { PiHistoryCapture } from './history/rpc-history-capture'
-import { closeFailedPiSession } from './rpc-failure-cleanup'
+import { tuiAgentDisplayName } from '../../../shared/agent-launch/catalog/tui-agent-display-names'
+import { closeFailedPiSession, drainPiExitTimeline } from './rpc-failure-cleanup'
 
 export type { PiRpcConnection, PiRpcSessionDeps } from './rpc-session-contracts'
 
 export class PiRpcSession {
+  readonly agentName: string
   readonly connection: PiRpcConnection
   readonly lane: JsonlRpcTimelineLane
   readonly turns: PiRpcTurns
   private readonly joinedTurns: PiRpcJoinedTurns
-  readonly dialogs: PiRpcDialogCallbacks
+  readonly dialogs: Pick<
+    PiRpcDialogCallbacks,
+    'receive' | 'respond' | 'cancelAll' | 'close' | 'backgroundWork'
+  >
   readonly selected = new Map<string, string>()
   /** Hold sends from handover through settlement. */
   readonly heldSends = new Set<string>()
@@ -68,6 +78,7 @@ export class PiRpcSession {
     /** A new Pi session starts on its config's model; a resumed or forked one keeps its own. */
     readonly resolvesConfig = false
   ) {
+    this.agentName = tuiAgentDisplayName(deps.dialect?.agent ?? 'pi') ?? 'Pi'
     void this.startupFailure.promise.catch(() => {})
     const sink = input.events && providerTimelineSink(input.events)
     if (!sink) {
@@ -76,15 +87,21 @@ export class PiRpcSession {
     this.lane = new JsonlRpcTimelineLane({
       sink,
       sessionId: input.identity.sessionId,
-      agent: 'pi',
+      agent: deps.dialect?.agent ?? 'pi',
       generation,
       namespace: input.identity.sessionId,
       ...this.reading.control('lane'),
       onFailed: (reason) => this.fail(new Error(reason)),
+      onChildWorkEvidence:
+        input.childWork ??
+        ((evidence) =>
+          deps.onChildWorkEvidence?.(input.identity.sessionId, evidence, input.events)),
       onInputAccepted: (clientMessageId) =>
         this.settle(clientMessageId, this.joinedTurns.accepted(clientMessageId))
     })
     this.turns = new PiRpcTurns({
+      agentName: this.agentName,
+      correlatedPrompts: deps.dialect?.correlatedPrompts,
       lane: this.lane,
       generation,
       send: (frame) => this.connection.send(frame),
@@ -106,7 +123,7 @@ export class PiRpcSession {
         })
     })
     this.joinedTurns = new PiRpcJoinedTurns(this.turns, this.lane)
-    this.dialogs = new PiRpcDialogCallbacks(
+    this.dialogs = (deps.dialect?.dialogs ?? ((...args) => new PiRpcDialogCallbacks(...args)))(
       this.lane,
       (frame) => this.connection.send(frame),
       (error) => this.fail(error),
@@ -117,10 +134,14 @@ export class PiRpcSession {
       deps.openConnection ?? ((spec, handlers) => new JsonlRpcAgentConnection(spec, handlers))
     )(launch, {
       peer: PI_RPC_PEER_OPTIONS,
-      onRecord: (frame) =>
-        frame.type === 'extension_ui_request'
+      onRecord: (frame) => {
+        if (deps.dialect?.receive?.(frame, this)) {
+          return
+        }
+        return frame.type === 'extension_ui_request'
           ? this.dialogs.receive(frame)
-          : this.turns.receive(frame),
+          : this.turns.receive(frame)
+      },
       onOversizedEvent: (type, prefix) => this.turns.skipped(type, prefix),
       onClose: (error) => this.fail(error),
       onDiagnostic: (message) =>
@@ -165,6 +186,10 @@ export class PiRpcSession {
     }
   }
 
+  get sessionFile(): string | undefined {
+    return this.resolvedLaunch.sessionFile ?? this.openedLink?.handle.nativeId
+  }
+
   async open(signal: AbortSignal): Promise<StructuredAgentSessionProviderOpenResult> {
     this.startup.assertLive(signal)
     const result = await withStructuredHistoryInvocation(this, signal, (current) =>
@@ -183,8 +208,16 @@ export class PiRpcSession {
     return result
   }
 
+  async refreshOptions(): Promise<void> {
+    const observe = this.optionObservations.prepare()
+    const options = await readPiRpcSessionOptions(this.connection)
+    if (observe(options)) {
+      this.startup.reportOptions(this.generation, options.current, { models: options.models })
+    }
+  }
+
   /** A read projects this child's held observations and successful controls. */
-  async readOptions() {
+  async readOptions(): Promise<AgentSessionOptionsResult> {
     return this.optionObservations.read()
   }
 
@@ -249,21 +282,7 @@ export class PiRpcSession {
       type: 'session.ended',
       verdict: { state: 'interrupted', completedAt: observedAt }
     })
-    let timer: ReturnType<typeof setTimeout> | undefined
-    await Promise.race([
-      this.lane.drained(),
-      new Promise<void>((resolve) => {
-        timer = setTimeout(() => {
-          this.deps.logger.warn('Pi final timeline did not drain before exit publication', {
-            scope: 'pi-exit-drain',
-            sessionId: this.input.identity.sessionId
-          })
-          resolve()
-        }, 2_000)
-        timer.unref()
-      })
-    ]).finally(() => {
-      clearTimeout(timer)
+    await drainPiExitTimeline(this, this.deps.logger).finally(() => {
       // Final transfer must not treat an already received backlog as startup work.
       this.unbindReadingControl?.()
     })

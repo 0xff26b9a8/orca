@@ -11,6 +11,24 @@ import {
   claudeToolResultText,
   claudeToolResultFailed
 } from '../../../shared/agent-hook-listener/providers/claude/transcripts/claude-tool-content'
+import { buildImageDataUri } from '../../../shared/file-preview/image-data-uri'
+
+export function inlineToolResultImages(content: unknown): NativeChatImageRefBlock[] {
+  if (!Array.isArray(content)) {
+    return []
+  }
+  return content.flatMap((value): NativeChatImageRefBlock[] => {
+    const block = asRecord(value)
+    if (block?.type !== 'image' || typeof block.data !== 'string') {
+      return []
+    }
+    const url = buildImageDataUri(
+      typeof block.mimeType === 'string' ? block.mimeType : undefined,
+      block.data
+    )
+    return url ? [{ type: 'image-ref', url }] : []
+  })
+}
 
 export function toolResultOutput(value: unknown): string {
   if (typeof value === 'string') {

@@ -44,6 +44,9 @@ export class PiRpcSessionStartup {
     launch: PiRpcResolvedLaunch,
     signal: AbortSignal
   ): Promise<StructuredAgentSessionProviderOpenResult> {
+    if (this.deps.dialect?.prepare) {
+      await this.wait(this.deps.dialect.prepare(this.connection), signal)
+    }
     const answer = await this.wait(
       this.connection.request('get_state', {}, { timeoutMs: null }),
       signal
@@ -53,7 +56,7 @@ export class PiRpcSessionStartup {
     if (state.model?.provider === 'unknown') {
       throw this.notSignedIn()
     }
-    const link = piRpcProviderLink(
+    const link = (this.deps.dialect?.providerLink ?? piRpcProviderLink)(
       launch,
       state.sessionFile,
       this.input.fence,
@@ -65,6 +68,7 @@ export class PiRpcSessionStartup {
     const continued = launch.sessionFile !== undefined || launch.forkFile !== undefined
     const history = await this.wait(
       catchUpPiSession({
+        agent: this.deps.dialect?.agent,
         connection: this.connection,
         sessionId: this.input.identity.sessionId,
         sessionFile: state.sessionFile,
@@ -152,7 +156,7 @@ export class PiRpcSessionStartup {
     }
   }
 
-  private async readCommands(): Promise<void> {
+  async readCommands(): Promise<void> {
     try {
       const result = await readPiRpcCommands(this.connection)
       if (this.failedCause() || this.connection.closed) {

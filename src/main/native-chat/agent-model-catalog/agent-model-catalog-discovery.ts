@@ -37,6 +37,7 @@ export type AgentModelCatalogProbe = ((
     publish?: AgentModelCatalogProgress
   }
 ) => Promise<AgentModelCatalogSuccess>) & {
+  sessionless?: boolean
   resolveLegacy?: (
     home: AgentSessionAccountHome,
     operation?: StructuredAgentResolutionOperation,

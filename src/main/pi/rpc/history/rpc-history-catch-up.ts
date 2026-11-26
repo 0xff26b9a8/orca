@@ -42,6 +42,7 @@ export async function readPiEntries(
 
 /** Optional reconciliation never gates the open; a failure keeps the claim the chat already had. */
 export async function catchUpPiSession(input: {
+  agent?: string
   connection: Pick<PiRpcConnection, 'request'>
   sessionId: string
   sessionFile: string
@@ -68,7 +69,7 @@ export async function catchUpPiSession(input: {
     assertCurrent: input.assertCurrent,
     timeoutMs: input.timeoutMs ?? PI_HISTORY_CATCH_UP_TIMEOUT_MS,
     logger: input.logger,
-    readView: (history) => readPiHistoryJournalView(history, input.lineage),
+    readView: (history) => readPiHistoryJournalView(history, input.lineage, input.agent),
     prepare: async ({ view: readView, history, signal, deadline, check, warn }) => {
       const view = await readView()
       const read = async (since: string | null) => {
@@ -105,6 +106,7 @@ export async function catchUpPiSession(input: {
       }
       leaf = { entry: answer.leafId }
       return createPiHistoryImportPlan({
+        agent: input.agent,
         sessionFile: input.sessionFile,
         epoch: history.cursor().epoch,
         reads: history.reads,

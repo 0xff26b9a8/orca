@@ -1,16 +1,24 @@
 import type {
+  JsonlRpcAgentConnection,
+  JsonlRpcAgentConnectionOptions
+} from '../../jsonl-rpc/agent-connection'
+import type { JsonlRpcRecord } from '../../jsonl-rpc/peer'
+import type { JsonlRpcTimelineLane } from '../../jsonl-rpc/timeline-lane'
+import type { PiRpcDialogCallbacks } from './rpc-dialog-callbacks'
+import type { piRpcProviderLink, PiRpcResolvedLaunch } from './launch/rpc-launch-resolution'
+import type { PiRpcSession } from './rpc-session'
+import type { buildPiRpcLaunch } from './launch/rpc-launch'
+import type { PiHistoryCaptureDeps } from './history/rpc-history-capture'
+import type {
+  StructuredAgentSessionAcquireInput,
   StructuredAgentSessionLifecycleEvent,
   AgentSessionDispatchOutcome
 } from '../../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 import type { StructuredAgentSessionLogger } from '../../native-chat/agent-session-wire/host/structured-agent-session-logger'
-import type {
-  JsonlRpcAgentConnection,
-  JsonlRpcAgentConnectionOptions
-} from '../../jsonl-rpc/agent-connection'
 import type { ProviderProcessLaunch } from '../../provider-process/provider-process-launch'
-import type { PiHistoryCaptureDeps } from './history/rpc-history-capture'
 import type { AgentChildWorkEvidence } from '../../../shared/agent-status/child-work/agent-status-child-work-evidence'
 import type { StructuredAgentSessionChildWorkProducer } from '../../native-chat/agent-session-wire/observations/structured-agent-session-subagent-rows'
+import type { AgentSessionExecutionOptions } from '../../../shared/agent-session/options/protocol/agent-session-execution-options'
 
 export type PiRpcConnection = Pick<
   JsonlRpcAgentConnection,
@@ -27,8 +35,43 @@ export type PiRpcConnection = Pick<
   | 'lastCloseResult'
   | 'onExit'
 > &
-  Partial<Pick<JsonlRpcAgentConnection, 'spawned' | 'outcomeLost'>>
+  Partial<Pick<JsonlRpcAgentConnection, 'spawned' | 'outcomeLost'>> & {
+    thinkingLevels?: () => Promise<string[]>
+  }
 export type PiRpcSessionDeps = PiHistoryCaptureDeps & {
+  onChildWorkEvidence?: (
+    sessionId: string,
+    evidence: AgentChildWorkEvidence[],
+    producer?: StructuredAgentSessionChildWorkProducer
+  ) => void
+  dialect?: {
+    agent: string
+    correlatedPrompts?: boolean
+    idleAbort?: boolean
+    providerLink: typeof piRpcProviderLink
+    prepare?: (connection: PiRpcConnection) => Promise<void>
+    dispatchOptions?: {
+      keys: readonly (keyof AgentSessionExecutionOptions)[]
+      alwaysWrite?: readonly (keyof AgentSessionExecutionOptions)[]
+      write: (
+        session: PiRpcSession,
+        key: keyof AgentSessionExecutionOptions,
+        value: string,
+        signal?: AbortSignal
+      ) => Promise<unknown>
+    }
+    dialogs?: (
+      lane: JsonlRpcTimelineLane,
+      send: (frame: JsonlRpcRecord) => Promise<void>,
+      fail: (error: Error) => void,
+      backgroundWorkDirectory: string | null,
+      onChildWork: (evidence: AgentChildWorkEvidence[]) => void
+    ) => Pick<
+      PiRpcDialogCallbacks,
+      'receive' | 'respond' | 'cancelAll' | 'close' | 'backgroundWork'
+    >
+    receive?: (frame: JsonlRpcRecord, session: PiRpcSession) => boolean
+  }
   openConnection?: (
     launch: ProviderProcessLaunch,
     handlers: JsonlRpcAgentConnectionOptions
@@ -40,10 +83,16 @@ export type PiRpcSessionDeps = PiHistoryCaptureDeps & {
     fence: number
     outcome: AgentSessionDispatchOutcome
   }) => void
-  onChildWorkEvidence?: (
-    sessionId: string,
-    evidence: AgentChildWorkEvidence[],
-    producer?: StructuredAgentSessionChildWorkProducer
-  ) => void
   logger: StructuredAgentSessionLogger
+}
+
+export type PiRpcSessionAdapterDeps = PiRpcSessionDeps & {
+  buildLaunch?: (
+    launch: PiRpcResolvedLaunch,
+    input: StructuredAgentSessionAcquireInput
+  ) => ReturnType<typeof buildPiRpcLaunch>
+  resolveLaunch: (input: {
+    [K in 'identity' | 'spawnToken']: StructuredAgentSessionAcquireInput[K]
+  }) => Promise<PiRpcResolvedLaunch>
+  readProcessStartTime?: (pid: number) => Promise<number | null>
 }

@@ -1,5 +1,4 @@
 import type { AgentSessionFailureFact } from '../../../shared/agent-session/failures/agent-session-failure'
-import { agentSessionFailureWords } from '../../../shared/agent-session/failures/agent-session-failure-words'
 import type {
   AgentSessionDispatchOutcome,
   StructuredAgentSessionCommandRun
@@ -10,13 +9,15 @@ import type { JsonlRpcRequestOptions } from '../../jsonl-rpc/peer-oversized-reco
 import type { JsonlRpcTimelineLane } from '../../jsonl-rpc/timeline-lane'
 import { PiRpcCompaction } from './rpc-compaction'
 import { PiRpcContextUsage } from './rpc-context-usage'
-import { PiRpcMessages, piRpcSkippedEventNotice } from './rpc-messages'
+import { PiRpcMessages, piRpcSkippedEventNotice, piRpcFailureStatus } from './rpc-messages'
 import { PiRpcPromptDelivery, piRpcFailureFact } from './prompts/rpc-prompt-delivery'
 import { PiRpcIdleCheck } from './rpc-idle-check'
 import { piRpcRetryActivity } from './rpc-retry-activity'
 import { type PiRpcState, piRpcMessageSchema, piRpcSkippedEvent } from './rpc-protocol'
 
 export type PiRpcTurnDeps = {
+  agentName?: string
+  correlatedPrompts?: boolean
   lane: JsonlRpcTimelineLane
   generation: string
   send: (frame: JsonlRpcRecord) => Promise<void>
@@ -67,10 +68,10 @@ export class PiRpcTurns {
       failed: deps.failed
     })
     this.delivery = new PiRpcPromptDelivery({
+      ...deps,
+      correlated: deps.correlatedPrompts,
       send: (frame) =>
         deps.send({ ...frame, streamingBehavior: this.working ? 'steer' : 'followUp' }),
-      settled: deps.settled,
-      failed: deps.failed,
       accepted: (id, at) => {
         deps.accepting?.(id, this.opening)
         this.open(at)
@@ -87,7 +88,7 @@ export class PiRpcTurns {
       refused: () => {
         if (this.active) {
           this.settling = true
-          this.probe()
+          this.idleCheck.schedule(this.revision)
         }
       }
     })
@@ -192,15 +193,15 @@ export class PiRpcTurns {
         }
         this.refreshUsage()
         if (this.settling) {
-          this.probe()
+          this.idleCheck.schedule(this.revision)
         }
         return
       case 'auto_retry_start':
         this.touch()
-        this.deps.lane.apply([piRpcRetryActivity(frame)])
+        this.deps.lane.apply([piRpcRetryActivity(frame, this.deps.agentName)])
         return
       case 'auto_retry_end':
-        this.deps.lane.apply([piRpcRetryActivity(frame)])
+        this.deps.lane.apply([piRpcRetryActivity(frame, this.deps.agentName)])
         this.failure =
           frame.success === true
             ? undefined
@@ -224,6 +225,15 @@ export class PiRpcTurns {
     }
   }
 
+  reportPromptOutcome(outcome: 'success' | 'failure' | 'cancellation', detail?: string): void {
+    if (!this.ended) {
+      this.stopped ||= outcome === 'cancellation'
+      if (outcome === 'failure') {
+        this.failure = piRpcFailureFact(detail ?? 'Agent prompt failed', 'providerResponseFailed')
+      }
+    }
+  }
+
   stop(): void {
     this.stopped = true
   }
@@ -241,7 +251,7 @@ export class PiRpcTurns {
 
   commandCompleted(): void {
     this.settling = true
-    this.probe()
+    this.idleCheck.schedule(this.revision)
   }
 
   commandRejected(): void {
@@ -272,10 +282,6 @@ export class PiRpcTurns {
     this.deps.lane.apply([{ type: 'turn.open', turn: this.active, at }])
   }
 
-  private probe(): void {
-    this.idleCheck.schedule(this.revision)
-  }
-
   private finish(): void {
     if (!this.active) {
       this.settling = false
@@ -284,15 +290,7 @@ export class PiRpcTurns {
     const outcome = this.stopped ? 'cancellation' : this.failure ? 'failure' : 'success'
     const events: ProviderTimelineEvent[] = []
     if (outcome === 'failure' && this.failure) {
-      events.push({
-        type: 'item.close',
-        item: `error:${this.active}`,
-        body: {
-          kind: 'status',
-          tone: 'error',
-          ...agentSessionFailureWords(this.failure, { agentName: 'Pi', surface: 'row' })
-        }
-      })
+      events.push(piRpcFailureStatus(this.active, this.failure, this.deps.agentName))
     }
     events.push({
       type: 'turn.end',

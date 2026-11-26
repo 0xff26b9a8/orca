@@ -1,3 +1,4 @@
+import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
 import { parseAgentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import type { AgentJournalItemIdentity } from '../../shared/agent-session/journal/agent-session-journal-identity'
 import {
@@ -8,6 +9,8 @@ import type { ProviderTimelineEvent } from '../native-chat/agent-session-timelin
 import { createLegacyProviderTimelineIdentityScheme } from '../native-chat/agent-session-timeline/provider-timeline-identity'
 import type { ProviderTimelineSink } from '../native-chat/agent-session-timeline/provider-timeline-plan'
 import type { StructuredAgentSessionCommandRun } from '../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
+
+type LaneEvent = ProviderTimelineEvent | { type: 'child-work'; evidence: AgentChildWorkEvidence[] }
 
 const MAX_HELD_EVENTS = 256
 const MAX_HELD_BYTES = 4 * 1024 * 1024
@@ -20,6 +23,7 @@ export type JsonlRpcTimelineLaneDeps = {
   namespace: string
   pauseReading: () => void
   resumeReading: () => void
+  onChildWorkEvidence?: (evidence: AgentChildWorkEvidence[]) => void
   onInputAccepted: (clientMessageId: string) => void
   onFailed: (reason: string) => void
 }
@@ -29,7 +33,7 @@ export class JsonlRpcTimelineLane {
   private readonly assembler: ProviderTimelineAssembler
   private readonly identity: ReturnType<typeof createLegacyProviderTimelineIdentityScheme>
   private readonly held: {
-    events: { event: ProviderTimelineEvent; bytes: number }[]
+    events: { event: LaneEvent; bytes: number }[]
     bytes: number
   }[] = []
   private heldEvents = 0
@@ -65,7 +69,11 @@ export class JsonlRpcTimelineLane {
     this.assembler.forgetCommand(turnId)
   }
 
-  apply(events: readonly ProviderTimelineEvent[]): void {
+  childWork(evidence: AgentChildWorkEvidence[]): void {
+    this.apply([{ type: 'child-work', evidence }])
+  }
+
+  apply(events: readonly LaneEvent[]): void {
     if (this.ended || this.sealed) {
       return
     }
@@ -98,7 +106,19 @@ export class JsonlRpcTimelineLane {
     this.retry()
   }
 
-  private consume(event: ProviderTimelineEvent): boolean {
+  private consume(event: LaneEvent): boolean {
+    if (event.type === 'child-work') {
+      const result = this.deps.sink.tryAppendTransition({
+        steps: [],
+        lifecycle: this.sealed,
+        publish: false,
+        onPublished: () => this.deps.onChildWorkEvidence?.(event.evidence)
+      })
+      if (!result.accepted && result.reason !== 'backpressure') {
+        this.fail(result.reason)
+      }
+      return result.accepted
+    }
     const result = this.assembler.apply(event)
     if (!result.admission.accepted) {
       if (result.admission.reason !== 'backpressure') {

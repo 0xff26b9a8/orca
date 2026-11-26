@@ -91,7 +91,8 @@ export type StructuredAgentModelCatalogDeps = Pick<
   | 'resolveEnvironment'
   | 'resolveShellEnvironmentPolicy'
   | 'resolveAgentLaunchEnv'
->
+> &
+  Partial<Pick<StructuredAgentSessionRuntimeDeps, 'logger'>>
 export type StructuredAgentModelCatalogContext = {
   deps: StructuredAgentModelCatalogDeps
   environment: StructuredAgentAdapterContext['environment']

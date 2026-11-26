@@ -4,6 +4,7 @@ import type { AgentSessionCapabilities } from '../../../../shared/agent-session/
 import type { AgentSessionStoredAgent } from '../../../../shared/agent-session/lifecycle/records/agent-session-stored-agent'
 import type { AgentSessionModelOption } from '../../../../shared/agent-session/options/model-catalog/agent-session-model-option'
 import type { AgentSessionAccountHome } from '../../../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
+import type { AgentSessionProviderTransport } from '../../../../shared/agent-session/lifecycle/provider-handles/agent-session-provider-handle'
 
 export type StructuredAgentListedSelection = (
   saved: Readonly<Record<string, string>>,
@@ -11,6 +12,8 @@ export type StructuredAgentListedSelection = (
 ) => Record<string, string> | null
 
 export type StructuredAgentDefinition = AgentSessionStoredAgent & {
+  /** Older handle namespaces this adapter can resolve; new handles still use handleTransport. */
+  legacyHandleTransports?: readonly AgentSessionProviderTransport[]
   capabilities: AgentSessionCapabilities
   /** Absent means Orca never supplies this agent’s managed runtime. */
   managedRuntime?: () => boolean

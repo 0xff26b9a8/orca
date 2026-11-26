@@ -7,9 +7,11 @@ const headerSchema = z.object({
   cwd: z.string().min(1),
   id: z.string().optional()
 })
+const titleSlotSchema = z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
 
 export async function readPiSessionHeader(
-  file: string
+  file: string,
+  options?: { titleSlot?: boolean }
 ): Promise<{ cwd: string; id?: string } | null> {
   let descriptor
   try {
@@ -24,11 +26,20 @@ export async function readPiSessionHeader(
     const buffer = Buffer.alloc(64 * 1024)
     const { bytesRead } = await descriptor.read(buffer, 0, buffer.length, 0)
     const data = buffer.subarray(0, bytesRead).toString('utf8')
-    const lf = data.indexOf('\n')
+    let lf = data.indexOf('\n')
     if (lf === -1) {
       throw new Error('Pi session header is incomplete or oversized')
     }
-    return headerSchema.parse(JSON.parse(data.slice(0, lf)))
+    let record: unknown = JSON.parse(data.slice(0, lf))
+    if (options?.titleSlot && titleSlotSchema.safeParse(record).success) {
+      const start = lf + 1
+      lf = data.indexOf('\n', start)
+      if (lf === -1) {
+        throw new Error('OMP session header is incomplete or oversized')
+      }
+      record = JSON.parse(data.slice(start, lf))
+    }
+    return headerSchema.parse(record)
   } finally {
     await descriptor.close()
   }

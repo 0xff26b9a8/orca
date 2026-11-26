@@ -14,7 +14,8 @@ import { piStartExitError } from './rpc-exit-classification'
 import { compactPiRpcSession } from './rpc-compaction'
 import { buildPiRpcLaunch } from './launch/rpc-launch'
 import type { PiRpcResolvedLaunch } from './launch/rpc-launch-resolution'
-import { PiRpcSession, type PiRpcSessionDeps, type PiRpcConnection } from './rpc-session'
+import { PiRpcSession, type PiRpcConnection } from './rpc-session'
+import type { PiRpcSessionAdapterDeps } from './rpc-session-contracts'
 import { dispatchPiRpcMessage } from './rpc-message-dispatch'
 import { piAcquireFailure } from './rpc-startup-outcome'
 import { openPiStart, watchPiStartExit, capturePiProcessIdentity } from './rpc-startup-open'
@@ -22,26 +23,21 @@ import { AgentSessionStartEndings } from '../../native-chat/agent-session-wire/s
 import { applyPiRpcSessionOption } from './options/rpc-options'
 import { supportsSupervisedProviderChildLocation } from '../../provider-process/supervised-provider-child-location'
 
-export type PiRpcSessionAdapterDeps = PiRpcSessionDeps & {
-  resolveLaunch: (input: {
-    [K in 'identity' | 'spawnToken']: StructuredAgentSessionAcquireInput[K]
-  }) => Promise<PiRpcResolvedLaunch>
-  readProcessStartTime?: (pid: number) => Promise<number | null>
-}
+export type { PiRpcSessionAdapterDeps } from './rpc-session-contracts'
 
 export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
-  private readonly sessions = new Map<string, PiRpcSession>()
+  protected readonly sessions = new Map<string, PiRpcSession>()
   private readonly acquiring = new Set<string>()
   private readonly starts = new ProviderAcquisitionStarts<PiRpcConnection>()
   private readonly retiring = new Set<Promise<void>>()
   private readonly endings = new AgentSessionStartEndings()
-  constructor(private readonly deps: PiRpcSessionAdapterDeps) {}
+  constructor(protected readonly deps: PiRpcSessionAdapterDeps) {}
 
   supportsLocation = supportsSupervisedProviderChildLocation
   supportsCreate: NonNullable<StructuredAgentSessionAdapter['supportsCreate']> = (
     location,
     agent
-  ) => agent === 'pi' && this.supportsLocation(location)
+  ) => agent === (this.deps.dialect?.agent ?? 'pi') && this.supportsLocation(location)
 
   async acquire(input: StructuredAgentSessionAcquireInput): Promise<AgentSessionAcquisition> {
     const id = input.identity.sessionId
@@ -79,7 +75,9 @@ export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
       if (attempt.signal.aborted) {
         throw new provider.AgentSessionPreSpawnError(new Error('Pi closed while starting'))
       }
-      const spec = buildPiRpcLaunch(launch)
+      const spec = this.deps.buildLaunch
+        ? this.deps.buildLaunch(launch, input)
+        : buildPiRpcLaunch(launch)
       const fresh = !launch.sessionFile && !launch.forkFile
       session = new PiRpcSession(input, randomUUID(), spec, this.deps, launch, fresh)
       this.sessions.set(id, session)
@@ -124,7 +122,8 @@ export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
       session,
       input,
       this.deps.logger,
-      () => this.sessions.get(input.sessionId) === session
+      () => this.sessions.get(input.sessionId) === session,
+      this.deps.dialect?.dispatchOptions
     )
   }
 
@@ -137,7 +136,7 @@ export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
     if (input.turnId !== undefined && input.turnId !== turnId) {
       return { cancelled: false }
     }
-    if (!turnId && !session.turns.holdsDispatch) {
+    if (!turnId && !session.turns.holdsDispatch && !this.deps.dialect?.idleAbort) {
       return { cancelled: false }
     }
     session.turns.stop()
@@ -288,7 +287,7 @@ export class PiRpcSessionAdapter implements StructuredAgentSessionAdapter {
       ...[...this.sessions.values()].map((session) => session.drainObservedExit())
     ])
   }
-  private session(id: string, fence: number): PiRpcSession {
+  protected session(id: string, fence: number): PiRpcSession {
     const session = this.sessions.get(id)
     if (
       !session ||
