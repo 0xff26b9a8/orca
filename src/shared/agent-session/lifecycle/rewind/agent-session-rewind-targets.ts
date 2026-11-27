@@ -1,3 +1,4 @@
+import { decodeOmpRewindTarget } from '../../../omp-rewind-target'
 import { AGENT_SESSION_FORKED_FROM_PRESENTATION } from '../records/agent-session-fork'
 import { isAgentSessionRewindTarget, savedRewindKeys } from './agent-session-rewind'
 import { readAgentJournalTurn } from '../records/agent-session-turn-record'
@@ -14,13 +15,23 @@ export function agentSessionRewindTargetIds(
   floor: number
 ): ReadonlySet<string> {
   const opener = turnOpeners(items)
+  const ompOpeners = new Set(
+    items.flatMap((item) => {
+      const turn = readAgentJournalTurn(item.body)
+      return turn?.userItemId && turn.providerTurnId && decodeOmpRewindTarget(turn.providerTurnId)
+        ? [turn.userItemId]
+        : []
+    })
+  )
   const keys = savedRewindKeys(submissions)
   return new Set(
     items
       .filter(
         (item) =>
           item.sequence > floor &&
-          (keys.nativeIdentity(item.itemId) !== null || !keys.hasSubmission(item.itemId)) &&
+          (keys.nativeIdentity(item.itemId) !== null ||
+            !keys.hasSubmission(item.itemId) ||
+            (ompOpeners.has(item.itemId) && !keys.omitted.has(item.itemId))) &&
           isAgentSessionRewindTarget(item, (turn) => opener.get(turn))
       )
       .map((item) => item.itemId)

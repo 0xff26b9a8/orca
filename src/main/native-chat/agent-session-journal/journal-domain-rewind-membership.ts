@@ -6,7 +6,7 @@ export type JournalRewindMembership = {
   floor: number
   boundary: JournalRewindBoundary
   nativeId: string
-  claude: boolean
+  scopedTurns: boolean
 }
 
 export const JOURNAL_REWIND_CONTEXT = `WITH rewind_context(session_id,epoch,floor,sequence,sequence_index,ordinal,native_id)
@@ -34,29 +34,29 @@ const adopted = "send.dispatch_state='accepted' AND send.provider_item_id IS NOT
 export const JOURNAL_REWIND_THREAD = `CASE WHEN ${adopted} THEN send.codex_thread_id ELSE item.codex_thread_id END`
 export const JOURNAL_REWIND_NATIVE_TURN = `CASE WHEN ${adopted} THEN send.codex_turn_id ELSE item.codex_turn_id END`
 
-export function rewindMember(claude: boolean): string {
-  return claude
+export function rewindMember(scopedTurns: boolean): string {
+  return scopedTurns
     ? "CASE WHEN item.turn_scope_kind='turn' THEN item.turn_item_id END"
     : `CASE WHEN (${JOURNAL_REWIND_THREAD})=context.native_id THEN (${JOURNAL_REWIND_NATIVE_TURN})
     WHEN item.turn_scope_kind='turn' THEN owner.provider_turn_id ELSE item.provider_turn_id END`
 }
 
 /** Only prefix membership is needed to keep later output; originals never participate. */
-export function rewindRetainedTurns(claude: boolean): string {
+export function rewindRetainedTurns(scopedTurns: boolean): string {
   return `${JOURNAL_REWIND_CONTEXT}, rewind_kept_turns AS MATERIALIZED (
-    SELECT DISTINCT ${rewindMember(claude)} AS member FROM rewind_context context
+    SELECT DISTINCT ${rewindMember(scopedTurns)} AS member FROM rewind_context context
     CROSS JOIN journal_items item INDEXED BY journal_items_visible_position
     ${JOURNAL_REWIND_JOINS}
     WHERE item.session_id=context.session_id AND item.epoch=context.epoch AND item.hidden=0
       AND item.sequence>context.floor AND ${JOURNAL_REWIND_POSITION}<${JOURNAL_REWIND_BOUNDARY}
-      AND (${rewindMember(claude)}) IS NOT NULL)`
+      AND (${rewindMember(scopedTurns)}) IS NOT NULL)`
 }
 
-export function rewindKept(claude: boolean, table = 'rewind_kept_turns'): string {
+export function rewindKept(scopedTurns: boolean, table = 'rewind_kept_turns'): string {
   return `item.hidden=0 AND item.sequence>context.floor
     AND (send.dispatch_state IS NULL OR (send.dispatch_state<>'rejected' AND send.queued=0))
     AND (${JOURNAL_REWIND_POSITION}<${JOURNAL_REWIND_BOUNDARY}
-      OR EXISTS(SELECT 1 FROM ${table} WHERE member=(${rewindMember(claude)})))`
+      OR EXISTS(SELECT 1 FROM ${table} WHERE member=(${rewindMember(scopedTurns)})))`
 }
 
 export function rewindPosition(row: SqliteRow): JournalRewindBoundary {

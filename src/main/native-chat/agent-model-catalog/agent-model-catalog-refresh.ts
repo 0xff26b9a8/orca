@@ -165,7 +165,7 @@ export function createAgentModelCatalogRefreshes(context: {
       let completion: Promise<AgentModelCatalogEntry | null> | undefined
       if (
         !launch.passive &&
-        (exact || !agentModelCatalogReleasedOwner(scoped)) &&
+        (exact || !agentModelCatalogReleasedOwner(scoped) || probe?.sessionless === true) &&
         probe &&
         probeHome
       ) {

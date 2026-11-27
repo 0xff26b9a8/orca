@@ -74,7 +74,13 @@ type TimelineItemResolution =
     }
   | { kind: 'turn-row'; target: AgentJournalTurnRowTarget; write: AgentJournalTurnRowWrite }
   /** Record the provider's turn on a still-running host command turn. */
-  | { kind: 'turn-claim'; identity: AgentJournalItemIdentity; providerTurnId: string }
+  | {
+      kind: 'turn-claim'
+      identity: AgentJournalItemIdentity
+      providerTurnId: string
+      /** Late native echoes may identify an already settled turn. */
+      onlyIfMissing?: true
+    }
   | {
       kind: 'turn-failure'
       identity: AgentJournalItemIdentity
@@ -183,7 +189,8 @@ function resolveTimelineItem(
       )
     case 'turn-claim': {
       const body = view.itemBody(agentJournalItemKey(resolution.identity))
-      return body?.kind === 'turn' && body.state === 'running'
+      return body?.kind === 'turn' &&
+        (resolution.onlyIfMissing ? !body.providerTurnId : body.state === 'running')
         ? resolved({
             identity: resolution.identity,
             body: { ...body, providerTurnId: resolution.providerTurnId }

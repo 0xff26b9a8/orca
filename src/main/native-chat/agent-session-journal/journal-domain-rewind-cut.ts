@@ -1,5 +1,6 @@
 import { parseAgentJournalItemKey } from '../../../shared/agent-session/journal/agent-session-journal-item-key'
 import type { JournalSqlScope } from './journal-sql-scope'
+import { planOmpJournalRewindCut } from './journal-domain-omp-rewind'
 import {
   JOURNAL_REWIND_CONTEXT,
   JOURNAL_REWIND_JOINS,
@@ -33,7 +34,7 @@ export function planJournalDomainRewindCut(scope: JournalSqlScope, target: Journ
       .get(...prefix)!.sequence ?? 0
   )
   const selected = db
-    .prepare(`SELECT item.sequence,item.sequence_index,item.ordinal,
+    .prepare(`SELECT item.sequence,item.sequence_index,item.ordinal,item.turn_item_id,
     CASE WHEN send.dispatch_state='accepted' THEN COALESCE(send.provider_item_id,item.item_id)
       ELSE item.item_id END AS provider_item_id
     FROM journal_items item ${JOURNAL_REWIND_JOINS}
@@ -43,6 +44,9 @@ export function planJournalDomainRewindCut(scope: JournalSqlScope, target: Journ
     return null
   }
   scope.examined(selected)
+  if (target.provider === 'omp') {
+    return planOmpJournalRewindCut(scope, target, selected, floor)
+  }
   const providerItemId = String(selected.provider_item_id)
   const key = parseAgentJournalItemKey(providerItemId)
   const claude = key?.provider === 'claude' && target.provider === 'claude'
@@ -56,7 +60,7 @@ export function planJournalDomainRewindCut(scope: JournalSqlScope, target: Journ
     floor,
     boundary: rewindPosition(selected),
     nativeId: target.nativeId,
-    claude
+    scopedTurns: claude
   }
   if (claude && key?.provider === 'claude') {
     const cut: JournalRewindCut = {

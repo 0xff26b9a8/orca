@@ -83,7 +83,7 @@ export class OmpRpcRewind {
         }
         const admission = sink?.tryReviseResolvedItemAndPublish?.(
           64 * 1024,
-          { kind: 'turn-claim', identity, providerTurnId },
+          { kind: 'turn-claim', identity, providerTurnId, onlyIfMissing: true },
           { turnScope: AGENT_JOURNAL_THREAD_SCOPE }
         )
         if (!admission?.accepted) {

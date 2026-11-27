@@ -1,3 +1,4 @@
+import { OMP_RPC_RUNTIME_METADATA } from '../../../omp/rpc-runtime-metadata'
 import { agentSessionAccountHome } from '../../../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
 import { applyStructuredCodexWorkspaceTrust } from '../../../agent-launch/trust/agent-workspace-trust-spawn'
 import { ACP_LAUNCH_SPECS } from '../../../acp/launch/acp-launch-registry'
@@ -41,7 +42,7 @@ import type {
 } from './structured-agent-runtime-registration-types'
 
 export type StructuredAgentRuntimeCatalogEntry =
-  | { kind: 'pi' | 'codex' | 'claude'; metadata: StructuredAgentRuntimeMetadata }
+  | { kind: 'pi' | 'omp' | 'codex' | 'claude'; metadata: StructuredAgentRuntimeMetadata }
   | { kind: 'acp'; metadata: StructuredAgentRuntimeMetadata; spec: AcpLaunchSpec }
 
 // Why the host's data folder: a start runs Orca's installed release before PATH.
@@ -158,6 +159,7 @@ async function resolveCodexAccountHomePath(
 // One roster supplies both metadata readers and the host's synchronous adapter factories.
 export const STRUCTURED_AGENT_RUNTIME_CATALOG: readonly StructuredAgentRuntimeCatalogEntry[] = [
   { kind: 'pi', metadata: PI_RPC_RUNTIME_METADATA },
+  { kind: 'omp', metadata: OMP_RPC_RUNTIME_METADATA },
   {
     kind: 'codex',
     metadata: {
@@ -196,11 +198,13 @@ export const STRUCTURED_AGENT_RUNTIME_CATALOG: readonly StructuredAgentRuntimeCa
         )
     }
   },
-  ...ACP_LAUNCH_SPECS.map((spec): StructuredAgentRuntimeCatalogEntry => ({
-    kind: 'acp',
-    metadata: acpMetadata(spec),
-    spec
-  }))
+  ...ACP_LAUNCH_SPECS.filter((spec) => spec.agent !== 'omp').map(
+    (spec): StructuredAgentRuntimeCatalogEntry => ({
+      kind: 'acp',
+      metadata: acpMetadata(spec),
+      spec
+    })
+  )
 ]
 
 export const STRUCTURED_AGENT_RUNTIME_METADATA: readonly StructuredAgentRuntimeMetadata[] =
