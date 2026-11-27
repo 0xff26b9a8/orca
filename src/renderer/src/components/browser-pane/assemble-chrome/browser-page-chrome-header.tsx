@@ -37,7 +37,7 @@ export function BrowserPageChromeHeader({
   markupCancel,
   shareableArtifactFile,
   currentBrowserUrl,
-  externalUrl,
+  onOpenExternal,
   isBlankTab,
   resourceNotice,
   setResourceNotice
@@ -64,7 +64,7 @@ export function BrowserPageChromeHeader({
   markupCancel: () => void
   shareableArtifactFile: ShareableBrowserArtifactFile | null
   currentBrowserUrl: string
-  externalUrl: string | null
+  onOpenExternal: (() => void) | null
   isBlankTab: boolean
   resourceNotice: string | null
   setResourceNotice: Dispatch<SetStateAction<string | null>>
@@ -108,7 +108,7 @@ export function BrowserPageChromeHeader({
         onOpenFind={onOpenFind}
         shareableArtifactFile={shareableArtifactFile}
         currentBrowserUrl={currentBrowserUrl}
-        externalUrl={externalUrl}
+        onOpenExternal={onOpenExternal}
       />
       <BrowserPageDownloadList
         visibleDownloads={nav.visibleDownloads}
@@ -117,6 +117,7 @@ export function BrowserPageChromeHeader({
         onDismissDownload={nav.dismissBrowserDownload}
       />
       <BrowserPageChromeBanners
+        showGrabBanner={false}
         resourceNotice={resourceNotice}
         setResourceNotice={setResourceNotice}
         tools={{ grab, grabAnnotations, annotationSend }}
