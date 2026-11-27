@@ -5,6 +5,7 @@ export const OMP_RPC_AGENT: DirectoryAccountAgentDefinition = {
   handleTransport: 'jsonl-rpc',
   legacyHandleTransports: ['acp'],
   accountHomeVariable: 'PI_CODING_AGENT_DIR',
+  instructionsEachStart: false,
   capabilities: {
     rewind: true,
     compact: true,
