@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { readPiEntries } from '../pi/rpc/history/rpc-history-catch-up'
 import {
   piEntriesAnswerSchema,
@@ -14,12 +15,16 @@ import {
 } from '../usage/source-input/jsonl/jsonl-file-snapshot'
 import { ompRpcUserMessageSchema } from './rpc-user-message'
 
-const titleSlot = z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
-const sessionHeader = z.object({
-  type: z.literal('session'),
-  id: z.string().min(1),
-  version: z.number().int().min(2)
-})
+const titleSlot = lazyZodSchema(() =>
+  z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
+)
+const sessionHeader = lazyZodSchema(() =>
+  z.object({
+    type: z.literal('session'),
+    id: z.string().min(1),
+    version: z.number().int().min(2)
+  })
+)
 
 function rewindEntry(entry: PiSessionEntry): PiSessionEntry {
   const user = ompRpcUserMessageSchema.safeParse(entry.message)

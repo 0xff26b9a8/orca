@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { OmpRpcSubagents } from './rpc-subagents'
 import { OmpRpcBackgroundTasks } from './rpc-background-tasks'
 import { OmpRpcSubagentMessages } from './rpc-subagent-messages'
@@ -10,16 +11,18 @@ import type { PiRpcSession } from '../pi/rpc/rpc-session'
 import type { PiRpcSessionAdapterDeps } from '../pi/rpc/rpc-session-adapter'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 
-export const goalSchema = z.object({
-  id: z.string(),
-  objective: z.string(),
-  status: z.enum(['active', 'paused', 'budget-limited', 'complete', 'dropped']),
-  tokenBudget: z.number().optional(),
-  tokensUsed: z.number(),
-  timeUsedSeconds: z.number(),
-  createdAt: z.number(),
-  updatedAt: z.number()
-})
+export const goalSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.string(),
+    objective: z.string(),
+    status: z.enum(['active', 'paused', 'budget-limited', 'complete', 'dropped']),
+    tokenBudget: z.number().optional(),
+    tokensUsed: z.number(),
+    timeUsedSeconds: z.number(),
+    createdAt: z.number(),
+    updatedAt: z.number()
+  })
+)
 
 const reportedGoals = new WeakMap<
   PiRpcSession,
@@ -55,11 +58,13 @@ export async function refreshOmpSubagents(session: PiRpcSession): Promise<void> 
     session.lane.childWork(evidence)
   }
 }
-const fileMentionSchema = z.looseObject({
-  role: z.literal('fileMention'),
-  files: z.array(z.looseObject({ path: z.string(), content: z.string() })),
-  timestamp: z.number()
-})
+const fileMentionSchema = lazyZodSchema(() =>
+  z.looseObject({
+    role: z.literal('fileMention'),
+    files: z.array(z.looseObject({ path: z.string(), content: z.string() })),
+    timestamp: z.number()
+  })
+)
 
 export function reportGoal(session: PiRpcSession, value: unknown): void {
   const parsed = goalSchema.nullable().safeParse(value)

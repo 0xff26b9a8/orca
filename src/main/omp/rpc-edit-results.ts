@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { boundedDiffPatch } from '../native-chat/bounded-diff-patch'
 import { ompNativeToolResults } from './rpc-tool-results'
 import type { NativeChatBlock } from '../../shared/native-chat/native-chat-types'
@@ -6,14 +7,16 @@ import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { ProviderTimelineEvent } from '../native-chat/agent-session-timeline/provider-timeline-event'
 import { journalPayload } from '../native-chat/agent-session-journal/item-lifecycle/journal-payload-bounds'
 
-const editSchema = z.object({
-  path: z.string().min(1),
-  diff: z.string().min(1),
-  oldText: z.string().optional(),
-  newText: z.string().optional(),
-  op: z.string().optional(),
-  sourcePath: z.string().optional()
-})
+const editSchema = lazyZodSchema(() =>
+  z.object({
+    path: z.string().min(1),
+    diff: z.string().min(1),
+    oldText: z.string().optional(),
+    newText: z.string().optional(),
+    op: z.string().optional(),
+    sourcePath: z.string().optional()
+  })
+)
 
 export function ompResolvedEdits(
   details: unknown,

@@ -1,23 +1,26 @@
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { PiRpcDialogCallbacks } from '../pi/rpc/rpc-dialog-callbacks'
 import type { PiRpcDialogPresentation } from '../pi/rpc/rpc-extension-dialogs'
 import { MAX_JOURNAL_GROUPED_PROMPT_QUESTIONS } from '../native-chat/agent-session-journal/item-lifecycle/journal-prompt-body-bounds'
 import { ompRpcFormPresentation } from './rpc-form-presentation'
 
-const answersSchema = z.object({
-  answers: z.array(
-    z.object({
-      id: z.string(),
-      selectedOptions: z.array(z.string()),
-      customInput: z.string().optional()
-    })
-  )
-})
+const answersSchema = lazyZodSchema(() =>
+  z.object({
+    answers: z.array(
+      z.object({
+        id: z.string(),
+        selectedOptions: z.array(z.string()),
+        customInput: z.string().optional()
+      })
+    )
+  })
+)
 
-const formEntriesSchema = z.array(
-  z.tuple([z.string(), z.union([z.string(), z.number(), z.array(z.string())])])
+const formEntriesSchema = lazyZodSchema(() =>
+  z.array(z.tuple([z.string(), z.union([z.string(), z.number(), z.array(z.string())])]))
 )
 
 function formData(value: unknown): Record<string, unknown> {

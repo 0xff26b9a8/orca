@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { PiRpcDialogCallbacks } from '../pi/rpc/rpc-dialog-callbacks'
 import {
@@ -8,11 +9,13 @@ import {
 } from './rpc-checkbox-presentation'
 export { ompRpcCheckboxDialogPresentation } from './rpc-checkbox-presentation'
 
-const inputSchema = z.object({
-  id: z.union([z.string(), z.number()]),
-  method: z.enum(['input', 'editor']),
-  title: z.string()
-})
+const inputSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.union([z.string(), z.number()]),
+    method: z.enum(['input', 'editor']),
+    title: z.string()
+  })
+)
 
 type Checkbox = NonNullable<ReturnType<typeof ompRpcCheckboxDialog>>
 type Selection = {

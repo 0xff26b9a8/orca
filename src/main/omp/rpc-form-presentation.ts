@@ -1,15 +1,18 @@
 import { runInNewContext } from 'node:vm'
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import type { AgentJournalQuestion } from '../../shared/agent-session/journal/agent-session-journal-types'
 import type { AgentSessionQuestionAnswer } from '../../shared/agent-session/requests/prompts/agent-session-question-answer'
 import type { PiRpcDialogPresentation } from '../pi/rpc/rpc-extension-dialogs'
 import { ompRpcFormFields, type OmpRpcFormField } from './rpc-form-fields'
 
-const formSchema = z.object({
-  id: z.string(),
-  method: z.literal('form'),
-  html: z.string().max(128 * 1024)
-})
+const formSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.string(),
+    method: z.literal('form'),
+    html: z.string().max(128 * 1024)
+  })
+)
 const resolution = {
   state: 'pending',
   selectedOptionId: null,

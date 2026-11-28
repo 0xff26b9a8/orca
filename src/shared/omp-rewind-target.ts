@@ -1,9 +1,12 @@
 import * as z from 'zod'
+import { lazyZodSchema } from './schema/lazy-zod-schema'
 
-const targetSchema = z.union([
-  z.object({ entryId: z.string().min(1) }),
-  z.object({ sessionFile: z.string().min(1), timestamp: z.number().finite() })
-])
+const targetSchema = lazyZodSchema(() =>
+  z.union([
+    z.object({ entryId: z.string().min(1) }),
+    z.object({ sessionFile: z.string().min(1), timestamp: z.number().finite() })
+  ])
+)
 
 export type OmpRewindTarget = z.infer<typeof targetSchema>
 

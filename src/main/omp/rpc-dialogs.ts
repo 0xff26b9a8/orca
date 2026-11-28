@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { PiRpcDialogCallbacks } from '../pi/rpc/rpc-dialog-callbacks'
 import {
   piRpcDialogPresentation,
@@ -11,38 +12,42 @@ import { OmpRpcAskGroups } from './rpc-ask-groups'
 import { ompRpcFormPresentation } from './rpc-form-presentation'
 import { OmpRpcCheckboxDialogs, ompRpcCheckboxDialogPresentation } from './rpc-checkbox-dialogs'
 
-const askSchema = z.object({
-  id: z.string(),
-  method: z.literal('ask'),
-  questions: z
-    .array(
-      z.object({
-        id: z.string().min(1),
-        question: z.string(),
-        header: z.string().optional(),
-        options: z
-          .array(
-            z.object({
-              label: z.string(),
-              description: z.string().optional(),
-              preview: z.string().optional()
-            })
-          )
-          .max(64),
-        multi: z.boolean().optional(),
-        recommended: z.number().optional()
-      })
-    )
-    .min(1)
-    .max(64)
-})
+const askSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.string(),
+    method: z.literal('ask'),
+    questions: z
+      .array(
+        z.object({
+          id: z.string().min(1),
+          question: z.string(),
+          header: z.string().optional(),
+          options: z
+            .array(
+              z.object({
+                label: z.string(),
+                description: z.string().optional(),
+                preview: z.string().optional()
+              })
+            )
+            .max(64),
+          multi: z.boolean().optional(),
+          recommended: z.number().optional()
+        })
+      )
+      .min(1)
+      .max(64)
+  })
+)
 
-const checkboxSchema = z.object({
-  method: z.literal('select'),
-  selectionMarker: z.literal('checkbox'),
-  checkedIndices: z.array(z.number().int().nonnegative()),
-  markableCount: z.number().int().nonnegative().optional()
-})
+const checkboxSchema = lazyZodSchema(() =>
+  z.object({
+    method: z.literal('select'),
+    selectionMarker: z.literal('checkbox'),
+    checkedIndices: z.array(z.number().int().nonnegative()),
+    markableCount: z.number().int().nonnegative().optional()
+  })
+)
 
 function ompRpcPrimitiveDialogPresentation(value: unknown): PiRpcDialogPresentation | null {
   const presentation = piRpcDialogPresentation(value)

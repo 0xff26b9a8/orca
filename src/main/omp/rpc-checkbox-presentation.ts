@@ -1,20 +1,23 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import {
   piRpcDialogPresentation,
   type PiRpcDialogPresentation
 } from '../pi/rpc/rpc-extension-dialogs'
 
 export const OMP_CHECKBOX_OTHER = 'Other (type your own)'
-const checkboxSchema = z.object({
-  id: z.union([z.string(), z.number()]),
-  method: z.literal('select'),
-  title: z.string(),
-  message: z.string().optional(),
-  options: z.array(z.string()).min(1).max(64),
-  selectionMarker: z.literal('checkbox'),
-  checkedIndices: z.array(z.number().int().nonnegative()).max(64),
-  markableCount: z.number().int().positive().max(64)
-})
+const checkboxSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.union([z.string(), z.number()]),
+    method: z.literal('select'),
+    title: z.string(),
+    message: z.string().optional(),
+    options: z.array(z.string()).min(1).max(64),
+    selectionMarker: z.literal('checkbox'),
+    checkedIndices: z.array(z.number().int().nonnegative()).max(64),
+    markableCount: z.number().int().positive().max(64)
+  })
+)
 
 export function ompRpcCheckboxTitle(title: string): string {
   return title.replace(/^\(\d+ selected\) /gm, '')

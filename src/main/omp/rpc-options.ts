@@ -1,22 +1,25 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import type { AgentSessionOptionsResult } from '../../shared/agent-session/options/protocol/agent-session-options-result'
 import type { PiRpcRequester } from '../pi/rpc/options/rpc-model-options'
 import { JsonlRpcResponseError } from '../jsonl-rpc/peer'
 import { waitForPromiseWithSignal } from '../../shared/concurrency/abort-signal-reason'
 
-const stateSchema = z.object({
-  model: z
-    .object({
-      provider: z.string(),
-      id: z.string(),
-      api: z.string().optional(),
-      identity: z.object({ class: z.string() }).optional(),
-      serviceTiers: z.array(z.string()).optional()
-    })
-    .nullish(),
-  fastModeEnabled: z.boolean().optional(),
-  fastModeActive: z.boolean().optional()
-})
+const stateSchema = lazyZodSchema(() =>
+  z.object({
+    model: z
+      .object({
+        provider: z.string(),
+        id: z.string(),
+        api: z.string().optional(),
+        identity: z.object({ class: z.string() }).optional(),
+        serviceTiers: z.array(z.string()).optional()
+      })
+      .nullish(),
+    fastModeEnabled: z.boolean().optional(),
+    fastModeActive: z.boolean().optional()
+  })
+)
 
 // OMP model-controls.setFastMode accepts priority only for its native service-tier families.
 function supportsFastMode(model: NonNullable<z.infer<typeof stateSchema>['model']>): boolean {

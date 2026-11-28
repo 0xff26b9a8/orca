@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { waitForPromiseWithSignal } from '../../shared/concurrency/abort-signal-reason'
 import { decodeOmpRewindTarget, encodeOmpRewindTarget } from '../../shared/omp-rewind-target'
 import { parseAgentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
@@ -11,15 +12,17 @@ import type { PiSessionEntry } from '../pi/rpc/history/rpc-history-import'
 import { JsonlRpcResponseError, type JsonlRpcRecord } from '../jsonl-rpc/peer'
 import { ompRpcUserMessageSchema } from './rpc-user-message'
 
-const stateSchema = z.object({
-  sessionFile: z.string(),
-  isSettled: z.literal(true),
-  queuedMessageCount: z.literal(0),
-  goal: z
-    .object({ goal: z.object({ status: z.string() }) })
-    .nullable()
-    .optional()
-})
+const stateSchema = lazyZodSchema(() =>
+  z.object({
+    sessionFile: z.string(),
+    isSettled: z.literal(true),
+    queuedMessageCount: z.literal(0),
+    goal: z
+      .object({ goal: z.object({ status: z.string() }) })
+      .nullable()
+      .optional()
+  })
+)
 type Result = Awaited<ReturnType<NonNullable<StructuredAgentSessionAdapter['rewind']>>>
 
 function requestTimestamp(entry: PiSessionEntry): number | undefined {

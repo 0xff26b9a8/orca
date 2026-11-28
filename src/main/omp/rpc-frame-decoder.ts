@@ -1,17 +1,20 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 
-const chunkSchema = z.object({
-  type: z.literal('rpc_chunk'),
-  chunkId: z.string().min(1).max(256),
-  index: z.number().int().nonnegative(),
-  count: z.number().int().positive().max(4096),
-  byteLength: z
-    .number()
-    .int()
-    .positive()
-    .max(64 * 1024 * 1024),
-  data: z.string().max(1024 * 1024)
-})
+const chunkSchema = lazyZodSchema(() =>
+  z.object({
+    type: z.literal('rpc_chunk'),
+    chunkId: z.string().min(1).max(256),
+    index: z.number().int().nonnegative(),
+    count: z.number().int().positive().max(4096),
+    byteLength: z
+      .number()
+      .int()
+      .positive()
+      .max(64 * 1024 * 1024),
+    data: z.string().max(1024 * 1024)
+  })
+)
 
 export class OmpRpcFrameDecoder {
   private pending?: {

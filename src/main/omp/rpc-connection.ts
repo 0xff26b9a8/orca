@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import {
   JsonlRpcAgentConnection,
   type JsonlRpcAgentConnectionOptions
@@ -10,11 +11,13 @@ import { OmpRpcFrameDecoder, encodeOmpRpcFrame } from './rpc-frame-decoder'
 import { OmpRpcCommandPolicy } from './rpc-command-policy'
 import { jsonlRpcRequestTimeout } from '../jsonl-rpc/peer-limits'
 
-const stateSchema = z.looseObject({
-  isSettled: z.boolean(),
-  queuedMessageCount: z.number().nonnegative(),
-  sessionFile: z.string().min(1)
-})
+const stateSchema = lazyZodSchema(() =>
+  z.looseObject({
+    isSettled: z.boolean(),
+    queuedMessageCount: z.number().nonnegative(),
+    sessionFile: z.string().min(1)
+  })
+)
 
 /** The existing session lane consumes Pi's common message vocabulary; OMP keeps its own wire protocol. */
 export function openOmpRpcConnection(

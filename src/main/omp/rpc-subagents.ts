@@ -1,26 +1,33 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 
-const childSchema = z.object({
-  id: z.string(),
-  agent: z.string(),
-  status: z.enum(['started', 'pending', 'running', 'completed', 'failed', 'aborted']),
-  description: z.string().optional(),
-  task: z.string().optional(),
-  parentToolCallId: z.string().optional(),
-  detached: z.boolean().optional(),
-  recentOutput: z.array(z.string()).optional(),
-  tokens: z.number().nonnegative().optional(),
-  currentTool: z.string().optional(),
-  currentToolArgs: z.string().optional()
-})
+const childSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.string(),
+    agent: z.string(),
+    status: z.enum(['started', 'pending', 'running', 'completed', 'failed', 'aborted']),
+    description: z.string().optional(),
+    task: z.string().optional(),
+    parentToolCallId: z.string().optional(),
+    detached: z.boolean().optional(),
+    recentOutput: z.array(z.string()).optional(),
+    tokens: z.number().nonnegative().optional(),
+    currentTool: z.string().optional(),
+    currentToolArgs: z.string().optional()
+  })
+)
 
-const progressSchema = z
-  .object({ payload: z.looseObject({ progress: z.record(z.string(), z.unknown()) }) })
-  .transform(({ payload }): unknown => ({ ...payload, ...payload.progress }))
-  .pipe(childSchema)
-const lifecycleSchema = z.object({ payload: childSchema }).transform(({ payload }) => payload)
+const progressSchema = lazyZodSchema(() =>
+  z
+    .object({ payload: z.looseObject({ progress: z.record(z.string(), z.unknown()) }) })
+    .transform(({ payload }): unknown => ({ ...payload, ...payload.progress }))
+    .pipe(childSchema)
+)
+const lifecycleSchema = lazyZodSchema(() =>
+  z.object({ payload: childSchema }).transform(({ payload }) => payload)
+)
 type Child = z.infer<typeof childSchema> & { run: object }
 
 export class OmpRpcSubagents {

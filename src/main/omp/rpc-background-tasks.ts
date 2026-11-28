@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { BoundedMap } from '../../shared/collections/bounded-map'
 import { isRecord } from '../../shared/agent-status/child-work/agent-status-child-work-value-guards'
 import { ompNativeToolResults } from './rpc-tool-results'
@@ -6,29 +7,39 @@ import { OmpRpcBackgroundServices } from './rpc-background-services'
 import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 
-const id = z.string().min(1).max(512)
-const preview = z.string().transform((text) => text.slice(0, 512))
-const jobStatus = z.enum(['pending', 'running', 'completed', 'failed', 'cancelled'])
-const jobSchema = z.object({
-  id,
-  type: z.enum(['bash', 'task', 'eval']),
-  status: jobStatus,
-  label: preview.optional(),
-  widget: z.object({ title: preview.optional(), stage: preview.optional() }).optional()
-})
-const asyncSchema = z.object({ jobId: id, type: jobSchema.shape.type, state: jobStatus })
-const callSchema = z.object({
-  toolCallId: id,
-  toolName: z.string(),
-  args: z.object({ command: preview.optional(), code: preview.optional() }).optional()
-})
-const detailsSchema = z.object({ details: z.record(z.string(), z.unknown()) })
-const messageSchema = z.object({
-  role: z.string(),
-  customType: z.string().optional(),
-  timestamp: z.number().finite().optional(),
-  details: z.record(z.string(), z.unknown()).optional()
-})
+const id = lazyZodSchema(() => z.string().min(1).max(512))
+const preview = lazyZodSchema(() => z.string().transform((text) => text.slice(0, 512)))
+const jobStatus = lazyZodSchema(() =>
+  z.enum(['pending', 'running', 'completed', 'failed', 'cancelled'])
+)
+const jobSchema = lazyZodSchema(() =>
+  z.object({
+    id,
+    type: z.enum(['bash', 'task', 'eval']),
+    status: jobStatus,
+    label: preview.optional(),
+    widget: z.object({ title: preview.optional(), stage: preview.optional() }).optional()
+  })
+)
+const asyncSchema = lazyZodSchema(() =>
+  z.object({ jobId: id, type: jobSchema.shape.type, state: jobStatus })
+)
+const callSchema = lazyZodSchema(() =>
+  z.object({
+    toolCallId: id,
+    toolName: z.string(),
+    args: z.object({ command: preview.optional(), code: preview.optional() }).optional()
+  })
+)
+const detailsSchema = lazyZodSchema(() => z.object({ details: z.record(z.string(), z.unknown()) }))
+const messageSchema = lazyZodSchema(() =>
+  z.object({
+    role: z.string(),
+    customType: z.string().optional(),
+    timestamp: z.number().finite().optional(),
+    details: z.record(z.string(), z.unknown()).optional()
+  })
+)
 
 type Call = { description?: string; nativeAt?: number }
 type Job = z.infer<typeof jobSchema>

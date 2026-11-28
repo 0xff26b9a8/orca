@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { PiRpcMessages } from '../pi/rpc/rpc-messages'
 import { PiRpcContextUsage } from '../pi/rpc/rpc-context-usage'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
@@ -6,13 +7,17 @@ import type { ProviderTimelineEvent } from '../native-chat/agent-session-timelin
 import { ompEditResultEvents } from './rpc-edit-results'
 import { ompTodoEvents } from './rpc-todo'
 
-const lifecycleSchema = z.object({
-  id: z.string(),
-  status: z.string(),
-  parentToolCallId: z.string().optional()
-})
-const eventSchema = z.object({ id: z.string(), event: z.looseObject({ type: z.string() }) })
-const toolSchema = z.object({ toolCallId: z.string(), toolName: z.string() })
+const lifecycleSchema = lazyZodSchema(() =>
+  z.object({
+    id: z.string(),
+    status: z.string(),
+    parentToolCallId: z.string().optional()
+  })
+)
+const eventSchema = lazyZodSchema(() =>
+  z.object({ id: z.string(), event: z.looseObject({ type: z.string() }) })
+)
+const toolSchema = lazyZodSchema(() => z.object({ toolCallId: z.string(), toolName: z.string() }))
 
 type Run = { key: string; messages: PiRpcMessages; parent?: string; tools: Map<string, string> }
 

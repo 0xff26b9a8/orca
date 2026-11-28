@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises'
 import { basename, dirname, extname, join } from 'node:path'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { agentJournalItemKey } from '../../shared/agent-session/journal/agent-session-journal-item-key'
 import { AGENT_JOURNAL_THREAD_SCOPE } from '../../shared/agent-session/journal/agent-session-journal-types'
 import type { AgentJournalItemIdentity } from '../../shared/agent-session/journal/agent-session-journal-identity'
@@ -18,10 +19,12 @@ import { journalLifecycleItemMutation } from '../native-chat/agent-session-journ
 
 const MAX_CHILD_FILES = 64
 const MAX_CHILD_BYTES = 16 * 1024 * 1024
-const sessionHeader = z.object({
-  type: z.literal('session'),
-  parentSession: z.string().optional()
-})
+const sessionHeader = lazyZodSchema(() =>
+  z.object({
+    type: z.literal('session'),
+    parentSession: z.string().optional()
+  })
+)
 
 type ChildRecord = { id: string; line: string; message: ReturnType<typeof decodeOmpTranscriptLine> }
 type ChildFile = { id: string; path: string; records: ChildRecord[] }

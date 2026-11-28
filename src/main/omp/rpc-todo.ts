@@ -1,25 +1,32 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import type { NativeChatBlock } from '../../shared/native-chat/native-chat-types'
 import type { JsonlRpcRecord } from '../jsonl-rpc/peer'
 import type { ProviderTimelineEvent } from '../native-chat/agent-session-timeline/provider-timeline-event'
 import { ompNativeToolResults } from './rpc-tool-results'
 
-const taskSchema = z.object({
-  content: z.string().min(1),
-  status: z.enum(['pending', 'in_progress', 'completed', 'abandoned', 'blocked']),
-  blocker: z.string().optional()
-})
-const phaseSchema = z.object({ name: z.string().min(1), tasks: z.array(taskSchema) })
+const taskSchema = lazyZodSchema(() =>
+  z.object({
+    content: z.string().min(1),
+    status: z.enum(['pending', 'in_progress', 'completed', 'abandoned', 'blocked']),
+    blocker: z.string().optional()
+  })
+)
+const phaseSchema = lazyZodSchema(() =>
+  z.object({ name: z.string().min(1), tasks: z.array(taskSchema) })
+)
 
 type OmpPlan = {
   plan: { step: string; status: 'pending' | 'in_progress' | 'completed' }[]
   explanation?: string
 }
 
-const todoInputEntrySchema = z.object({
-  phase: z.string().optional(),
-  items: z.array(z.string().min(1)).optional()
-})
+const todoInputEntrySchema = lazyZodSchema(() =>
+  z.object({
+    phase: z.string().optional(),
+    items: z.array(z.string().min(1)).optional()
+  })
+)
 
 /** Build the best task snapshot available before OMP commits the tool result. */
 export function ompTodoInputPlan(input: unknown): OmpPlan | null {

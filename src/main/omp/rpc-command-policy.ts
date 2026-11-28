@@ -1,14 +1,17 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 
-const commandsSchema = z.object({
-  commands: z.array(
-    z.looseObject({
-      name: z.string(),
-      source: z.string().optional(),
-      aliases: z.array(z.string()).optional()
-    })
-  )
-})
+const commandsSchema = lazyZodSchema(() =>
+  z.object({
+    commands: z.array(
+      z.looseObject({
+        name: z.string(),
+        source: z.string().optional(),
+        aliases: z.array(z.string()).optional()
+      })
+    )
+  })
+)
 
 export class OmpRpcCommandPolicy {
   private blocked = new Set<string>()

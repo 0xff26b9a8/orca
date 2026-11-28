@@ -3,6 +3,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { isAbsolute, join } from 'node:path'
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { waitForPromiseWithSignal } from '../../shared/concurrency/abort-signal-reason'
 import { requireLegacyAgentSessionAccountHome } from '../../shared/agent-session/lifecycle/accounts/agent-session-account-home'
 import type { AiVaultConversationCopy } from '../../shared/ai-vault/resume/ai-vault-resume-preparation'
@@ -15,7 +16,9 @@ import { buildOmpRpcLaunch } from './rpc-launch'
 import { openOmpRpcConnection } from './rpc-connection'
 
 type CopyInput = Parameters<NonNullable<StructuredAgentSessionAdapter['copyConversation']>>[0]
-const copyStateSchema = z.object({ sessionFile: z.string().min(1), sessionId: z.string().min(1) })
+const copyStateSchema = lazyZodSchema(() =>
+  z.object({ sessionFile: z.string().min(1), sessionId: z.string().min(1) })
+)
 
 /** A separate native fork never switches or reopens the chat's writer. */
 export class OmpRpcConversationCopies {

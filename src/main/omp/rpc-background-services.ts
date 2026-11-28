@@ -1,18 +1,23 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { BoundedMap } from '../../shared/collections/bounded-map'
 import type { AgentChildWorkEvidence } from '../../shared/agent-status/child-work/agent-status-child-work-evidence'
 
-const id = z.string().min(1).max(512)
-const serviceSchema = z.object({
-  name: id,
-  state: z.enum(['starting', 'running', 'ready', 'restarting', 'stopping', 'exited', 'failed']),
-  pid: z.number().int().positive().optional()
-})
-const daemonSchema = serviceSchema.extend({
-  id,
-  startedAt: z.number().finite(),
-  exitCode: z.number().int().optional()
-})
+const id = lazyZodSchema(() => z.string().min(1).max(512))
+const serviceSchema = lazyZodSchema(() =>
+  z.object({
+    name: id,
+    state: z.enum(['starting', 'running', 'ready', 'restarting', 'stopping', 'exited', 'failed']),
+    pid: z.number().int().positive().optional()
+  })
+)
+const daemonSchema = lazyZodSchema(() =>
+  serviceSchema.extend({
+    id,
+    startedAt: z.number().finite(),
+    exitCode: z.number().int().optional()
+  })
+)
 
 type Call = { description?: string; nativeAt?: number }
 type Service = Call & z.infer<typeof serviceSchema> & { callId: string; ambiguous: boolean }
