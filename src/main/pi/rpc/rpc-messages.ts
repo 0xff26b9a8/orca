@@ -1,6 +1,7 @@
 import type { AgentSessionFailureFact } from '../../../shared/agent-session/failures/agent-session-failure'
 import { agentSessionFailureWords } from '../../../shared/agent-session/failures/agent-session-failure-words'
 import { z } from 'zod'
+import { lazyZodSchema } from '../../../shared/schema/lazy-zod-schema'
 import type {
   AgentJournalDiffItem,
   AgentJournalToolCallItem
@@ -17,11 +18,17 @@ import { piRpcMessageEventSchema, piRpcToolEventSchema } from './rpc-protocol'
 import type { PiRpcContextUsage } from './rpc-context-usage'
 import { inlineToolResultImages } from '../../native-chat/transcript-decoding/transcript-record-blocks'
 
-const resultSchema = z.object({
-  content: z.array(z.looseObject({ type: z.string(), text: z.string().optional() }))
-})
-const fileInputSchema = z.object({ path: z.string().min(1), content: z.string().optional() })
-const editResultSchema = z.object({ details: z.object({ patch: z.string().min(1) }) })
+const resultSchema = lazyZodSchema(() =>
+  z.object({
+    content: z.array(z.looseObject({ type: z.string(), text: z.string().optional() }))
+  })
+)
+const fileInputSchema = lazyZodSchema(() =>
+  z.object({ path: z.string().min(1), content: z.string().optional() })
+)
+const editResultSchema = lazyZodSchema(() =>
+  z.object({ details: z.object({ patch: z.string().min(1) }) })
+)
 
 /** Prefixing every line costs per line as well as per char, so a larger write keeps the tool row instead of stalling this process. */
 const MAX_WRITE_DIFF_CHARS = 64 * 1024

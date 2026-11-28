@@ -1,17 +1,25 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../../shared/schema/lazy-zod-schema'
 import {
   DELEGATED_MOBILE_DEVICE_SYNC_METHOD,
   DELEGATED_MOBILE_DEVICE_SYNC_MAX_PHONES,
+  DELEGATED_MOBILE_DEVICE_SYNC_ORIGIN_RUNTIME_CAPABILITY,
   DELEGATED_MOBILE_DEVICES_RUNTIME_CAPABILITY,
   type DelegatedMobileDeviceSyncParams
 } from '../../../shared/remote-runtime/pairing/delegated-mobile-device-contract'
 import { RemoteRuntimeClientError } from '../../../shared/remote-runtime/remote-runtime-client-error'
 import type { MobileDesktopRelayHost, MobileDesktopRelayHosts } from './mobile-desktop-relay-hosts'
+import { getAppEnvironment } from '../../../shared/app-lifecycle/app-environment'
+import { pairedDesktopInstanceId } from '../../ipc/runtime-environments/connections/paired-desktop-instance-id'
 
-const SyncResultSchema = z.object({
-  devices: z.array(z.object({ phoneKey: z.string(), deviceId: z.string(), token: z.string() }))
-})
-const StatusCapabilitiesSchema = z.object({ capabilities: z.array(z.string()).optional() })
+const SyncResultSchema = lazyZodSchema(() =>
+  z.object({
+    devices: z.array(z.object({ phoneKey: z.string(), deviceId: z.string(), token: z.string() }))
+  })
+)
+const StatusCapabilitiesSchema = lazyZodSchema(() =>
+  z.object({ capabilities: z.array(z.string()).optional() })
+)
 
 export type DelegatedPhoneGrant = { deviceId: string; token: string }
 
@@ -42,7 +50,11 @@ export async function syncDelegatedPhoneGrants(
     return { kind: 'update-needed', fence: host.fence }
   }
   const response = await hosts.call(host, DELEGATED_MOBILE_DEVICE_SYNC_METHOD, {
-    phones: phones.slice(0, DELEGATED_MOBILE_DEVICE_SYNC_MAX_PHONES)
+    phones: phones.slice(0, DELEGATED_MOBILE_DEVICE_SYNC_MAX_PHONES),
+    // Names this installation, so the host drops only its phones on a row other desktops share.
+    ...(capabilities.includes(DELEGATED_MOBILE_DEVICE_SYNC_ORIGIN_RUNTIME_CAPABILITY)
+      ? { clientInstanceId: await pairedDesktopInstanceId(getAppEnvironment().getPath('userData')) }
+      : {})
   })
   if (!response.ok) {
     throw new RemoteRuntimeClientError('remote_runtime_unavailable', response.error.message)

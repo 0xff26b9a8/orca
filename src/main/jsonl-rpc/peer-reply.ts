@@ -1,15 +1,18 @@
 import { z } from 'zod'
+import { lazyZodSchema } from '../../shared/schema/lazy-zod-schema'
 import { JsonlRpcResponseError } from './peer-errors'
 export { JsonlRpcResponseError } from './peer-errors'
 
-const responseSchema = z.looseObject({
-  type: z.literal('response'),
-  id: z.string().optional(),
-  command: z.string(),
-  success: z.boolean(),
-  data: z.unknown().optional(),
-  error: z.string().optional()
-})
+const responseSchema = lazyZodSchema(() =>
+  z.looseObject({
+    type: z.literal('response'),
+    id: z.string().optional(),
+    command: z.string(),
+    success: z.boolean(),
+    data: z.unknown().optional(),
+    error: z.string().optional()
+  })
+)
 
 export type JsonlRpcPendingRequest = {
   command: string

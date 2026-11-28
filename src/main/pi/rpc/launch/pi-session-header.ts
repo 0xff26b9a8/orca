@@ -1,13 +1,18 @@
 import { open, realpath } from 'node:fs/promises'
 import { normalize } from 'node:path'
 import { z } from 'zod'
+import { lazyZodSchema } from '../../../../shared/schema/lazy-zod-schema'
 
-const headerSchema = z.object({
-  type: z.literal('session'),
-  cwd: z.string().min(1),
-  id: z.string().optional()
-})
-const titleSlotSchema = z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
+const headerSchema = lazyZodSchema(() =>
+  z.object({
+    type: z.literal('session'),
+    cwd: z.string().min(1),
+    id: z.string().optional()
+  })
+)
+const titleSlotSchema = lazyZodSchema(() =>
+  z.object({ type: z.literal('title'), v: z.literal(1), title: z.string() })
+)
 
 export async function readPiSessionHeader(
   file: string,
